@@ -8,6 +8,7 @@ run database (from greenfield)
 - start/compile the server with `cargo run`
 
 TODO
+- Update to Actix-Web 4
 - add better logging
 
 Stack
@@ -29,3 +30,4 @@ Stack
   - rust-argon2
 - logging
   - tracing
+    - https://crates.io/crates/tracing
