@@ -15,7 +15,7 @@ actix-cors = "0.6.1"
 diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono"] }
 
 # graphql
-async-graphql = "3.0.38"
+async-graphql = {version = "3.0.38", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log"]}
 async-graphql-actix-web = "3.0.38"
 
 # devtools

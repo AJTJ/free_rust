@@ -1,51 +1,44 @@
-use async_graphql::{
-    Context, EmptyMutation, EmptySubscription, Enum, Object, Result, Schema, SimpleObject,
-    Subscription, ID,
-};
-
+use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
 use slab::Slab;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
-pub struct QueryRoot;
-pub struct MutationRoot;
+pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
-pub type DiveQLSchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
-
-#[derive(Clone, SimpleObject)]
+#[derive(Debug, Clone, SimpleObject)]
 pub struct TestObject {
     id: ID,
-    name: String,
+    val: String,
 }
-
-// #[Object]
-// impl TestObject {
-//     async fn get_id(&self) -> &str {
-//         &self.id
-//     }
-// }
 
 pub type Storage = Mutex<Slab<TestObject>>;
 
+pub struct QueryRoot;
+
 #[Object]
 impl QueryRoot {
-    async fn query_hello(&self, ctx: &Context<'_>, sent_int: u32) -> u32 {
-        let mut storage = ctx.data_unchecked::<Storage>().lock();
-        let all_obs = storage
-            .iter()
-            .map(|(_, test_object)| test_object)
-            .cloned()
-            .collect();
-        println!("all obs: {}", all_obs);
+    async fn get_vals(&self, ctx: &Context<'_>) -> Vec<TestObject> {
         println!("query hit");
-        sent_int
+        let storage = ctx.data_unchecked::<Storage>().lock().unwrap();
+        let vals = storage.iter().map(|(_, ob)| ob).cloned().collect();
+        println!("{:?}", vals);
+        vals
     }
 }
 
+pub struct MutationRoot;
+
 #[Object]
 impl MutationRoot {
-    async fn update_value(&self, ctx: &Context<'_>, sent_num: u32) -> u32 {
+    async fn update_value(&self, ctx: &Context<'_>, val: String) -> ID {
         println!("mutation hit");
-        sent_num
+        let mut storage = ctx.data_unchecked::<Storage>().lock().unwrap();
+        let entry = storage.vacant_entry();
+        let id: ID = entry.key().into();
+        let new_ob = TestObject {
+            id: id.clone(),
+            val,
+        };
+        storage.insert(new_ob);
+        id
     }
 }
