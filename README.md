@@ -1,3 +1,7 @@
+TODO
+- Create tag system or some other system for different events
+
+
 run database (from greenfield)
 `docker run --name free-rust-postgres -e POSTGRES_PASSWORD=mysecretpassword -dp 5432:5432 postgres`
 - ensure you have postgres installed on your machine (diesel-cli requires)
@@ -6,6 +10,12 @@ run database (from greenfield)
 - `diesel setup` to set up database
 - run `diesel migration run` while in the repo to build database
 - start/compile the server with `cargo run`
+
+// excellent resource
+https://github.com/lucperkins/rust-graphql-juniper-actix-diesel-postgres/blob/master/src/graphql.rs
+
+// diesel example
+https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-cli/migrations
 
 TODO
 - Update to Actix-Web 4
