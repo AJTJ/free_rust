@@ -1,4 +1,2 @@
 -- This file should undo anything in `up.sql`
-DROP TYPE discipline;
-
-DROP TABLE dives;
+DROP TABLE dives

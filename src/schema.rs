@@ -13,7 +13,7 @@ table! {
 table! {
     dives (id) {
         id -> Int4,
-        discipline_type -> Nullable<Discipline>,
+        discipline_type -> Nullable<Text>,
         depth -> Nullable<Float8>,
         distance -> Nullable<Float8>,
         dive_time -> Nullable<Time>,

@@ -31,6 +31,7 @@ Stack
     - https://docs.rs/bb8/latest/bb8/
     - https://github.com/djc/bb8
 - async-graphql for front-end interaction
+  - https://www.apollographql.com/docs/kotlin/tutorial/03-write-your-first-query/
   - https://github.com/async-graphql/async-graphql
   - https://async-graphql.github.io/async-graphql/en/index.html
   - https://docs.rs/async-graphql-actix-web/3.0.27/async_graphql_actix_web/

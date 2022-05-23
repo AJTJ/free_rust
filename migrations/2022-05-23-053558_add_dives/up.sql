@@ -1,20 +1,7 @@
 -- Your SQL goes here
-CREATE TYPE discipline AS ENUM (
-  'fim',
-  'cwb',
-  'cwt',
-  'cnf',
-  'dyn',
-  'dnf',
-  'se',
-  'sta',
-  'vwt',
-  'nlt'
-);
-
 CREATE TABLE dives (
   id SERIAL PRIMARY KEY,
-  discipline_type discipline,
+  discipline_type TEXT,
   depth FLOAT,
   distance FLOAT,
   dive_time TIME,
