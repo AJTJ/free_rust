@@ -1,5 +1,4 @@
 // use actix_web::{get, post, web, Error, HttpResponse, Responder};
-use 
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
@@ -18,13 +17,7 @@ pub struct TestObject {
 
 pub type Storage = Mutex<Slab<TestObject>>;
 
-type DbPool = Pool<ConnectionManager<PgConnection>>;
-
-// query {
-//     getAllTestObjects {
-//       val
-//     }
-//   }
+// type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
 impl QueryRoot {
@@ -36,14 +29,9 @@ impl QueryRoot {
     }
 
     async fn get_all_users(&self, ctx: &Context<'_>) -> u32 {
-        let el = 
         34
     }
 }
-
-// mutation {
-//     addTestObject(val: "memeggqqs")
-//   }
 
 #[Object]
 impl MutationRoot {

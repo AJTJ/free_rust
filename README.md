@@ -1,6 +1,10 @@
 TODO
 - Create tag system or some other system for different events
+- Update to Actix-Web 4
+- add better logging
 
+NOTES:
+- http://localhost:8080/ for playground
 
 run database (from greenfield)
 `docker run --name free-rust-postgres -e POSTGRES_PASSWORD=mysecretpassword -dp 5432:5432 postgres`
@@ -17,9 +21,6 @@ https://github.com/lucperkins/rust-graphql-juniper-actix-diesel-postgres/blob/ma
 // diesel example
 https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-cli/migrations
 
-TODO
-- Update to Actix-Web 4
-- add better logging
 
 Stack
 - actix-web
