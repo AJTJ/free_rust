@@ -34,6 +34,7 @@ https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-
 Stack
 - actix-web
   - https://actix.rs/docs/
+  - https://github.com/actix/examples/tree/master/graphql/async-graphql
 - user auth
   - JWT
     - libs
