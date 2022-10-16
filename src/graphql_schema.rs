@@ -48,7 +48,6 @@ impl MutationRoot {
     }
 
     async fn add_user(&self) -> u32 {
-        unimplemented!();
         42
     }
 }
