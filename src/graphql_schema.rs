@@ -29,7 +29,7 @@ impl QueryRoot {
     }
 
     async fn get_all_users(&self, ctx: &Context<'_>) -> u32 {
-        34
+        42
     }
 }
 
@@ -45,5 +45,10 @@ impl MutationRoot {
         };
         storage.insert(new_ob);
         id
+    }
+
+    async fn add_user(&self) -> u32 {
+        unimplemented!();
+        42
     }
 }

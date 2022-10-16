@@ -1,5 +1,6 @@
+use actix_web::middleware::Logger;
 use actix_web::web::Data;
-use actix_web::{guard, middleware::Logger, web, App, HttpResponse, HttpServer, Result};
+use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
@@ -27,6 +28,7 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // graphql schema builder
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .data(Storage::default())
         .finish();
@@ -35,8 +37,8 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     // Database
-    let connspec = env::var("DATABASE_URL").expect("no DB URL");
-    let manager = ConnectionManager::<PgConnection>::new(connspec);
+    let db_url = env::var("DATABASE_URL").expect("no DB URL");
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
     let pool: Pool<ConnectionManager<PgConnection>> = Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
@@ -45,7 +47,7 @@ async fn main() -> std::io::Result<()> {
     let subscriber = FmtSubscriber::builder()
         // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
         // will be written to stdout.
-        .with_max_level(Level::ERROR)
+        .with_max_level(Level::INFO)
         .finish();
 
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");

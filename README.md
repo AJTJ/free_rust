@@ -1,3 +1,12 @@
+CURRENT
+- Decided to do auth later, for now.
+  - Become familiar with graphql
+  - implement some basic user creation and get user methods
+  - implement the same for dives and dive sessions
+    - a dive should ALWAYS be in a session
+  - then it should be possible to start linking up the front-end with the backend.
+  - Once we have data going back and forth, local state manatement in react native and so forth, then I can circle back to finishing auth.
+
 TODO
 - Create tag system or some other system for different events
 - Update to Actix-Web 4
@@ -25,6 +34,17 @@ https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-
 Stack
 - actix-web
   - https://actix.rs/docs/
+- user auth
+  - JWT
+    - libs
+      - https://github.com/michaelvanstraten/actix-jwt-auth-middleware
+    - tutorials
+      - https://docs.rs/actix-jwt-auth-middleware/latest/actix_jwt_auth_middleware/
+      - https://formidable.com/blog/2022/authn-and-authz/
+      - https://www.apollographql.com/docs/apollo-server/security/authentication/
+      - https://www.section.io/engineering-education/how-to-build-authentication-api-with-jwt-token-in-nodejs/
+      - https://jwt.io/introduction
+      - https://reactnavigation.org/docs/auth-flow/
 - database postgres
   - diesel
     - https://diesel.rs/
