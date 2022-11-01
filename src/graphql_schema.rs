@@ -1,9 +1,15 @@
 // use actix_web::{get, post, web, Error, HttpResponse, Responder};
+use crate::schema::users::dsl::users;
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
+use chrono::{naive, NaiveDateTime, Utc};
 use diesel::pg::PgConnection;
-use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::r2d2::{ConnectionManager, Error, Pool};
+// use diesel::Connection;
 use slab::Slab;
 use std::sync::Mutex;
+// use uuid::Uuid;
+
+use crate::data::{UserCreationData, UserInputData};
 
 pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;
@@ -17,7 +23,7 @@ pub struct TestObject {
 
 pub type Storage = Mutex<Slab<TestObject>>;
 
-// type DbPool = Pool<ConnectionManager<PgConnection>>;
+type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
 impl QueryRoot {
@@ -47,7 +53,25 @@ impl MutationRoot {
         id
     }
 
-    async fn add_user(&self) -> u32 {
+    async fn add_user(&self, ctx: &Context<'_>, user_data: UserInputData) -> u32 {
+        let db = ctx.data_unchecked::<DbPool>();
+
+        let pool = db.get().unwrap();
+
+        let current_stamp = Utc::now().naive_utc();
+
+        let new_user = UserCreationData {
+            username: user_data.username,
+            hashed_password: user_data.hashed_password,
+            email: user_data.email,
+            created_at: current_stamp,
+            updated_at: current_stamp,
+        };
+
+        let el = pool.build_transaction().run(|| {});
+
+        let inserted = diesel::insert_into(users).values(new_user);
+
         42
     }
 }
