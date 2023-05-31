@@ -1,21 +1,14 @@
-CURRENT
-- Decided to do auth later, for now.
-  - Become familiar with graphql
-  - implement some basic user creation and get user methods
-  - implement the same for dives and dive sessions
-    - a dive should ALWAYS be in a session
-  - then it should be possible to start linking up the front-end with the backend.
-  - Once we have data going back and forth, local state manatement in react native and so forth, then I can circle back to finishing auth.
 
-TODO
-- Create tag system or some other system for different events
-- Update to Actix-Web 4
-- add better logging
+## CURRENT
+- Code -> Free Source
 
-NOTES:
-- http://localhost:8080/ for playground
+## Dev Env
+- Start DB image
+- `cargo run`
+- http://localhost:8080/ for graphql playground
 
-run database (from greenfield)
+
+## how to run database (from greenfield)
 `docker run --name free-rust-postgres -e POSTGRES_PASSWORD=mysecretpassword -dp 5432:5432 postgres`
 - ensure you have postgres installed on your machine (diesel-cli requires)
 - install diesel-cli `cargo install diesel_cli --no-default-features --features postgres`
@@ -31,7 +24,7 @@ https://github.com/lucperkins/rust-graphql-juniper-actix-diesel-postgres/blob/ma
 https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-cli/migrations
 
 
-Stack
+## The Proposed Stack
 - actix-web
   - https://actix.rs/docs/
   - https://github.com/actix/examples/tree/master/graphql/async-graphql

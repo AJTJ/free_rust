@@ -1,13 +1,20 @@
+use crate::actions::add_user::add_user;
 // use actix_web::{get, post, web, Error, HttpResponse, Responder};
 use crate::schema::users::dsl::users;
+use actix_web::error;
+use actix_web::web;
+use actix_web::Responder;
+use async_graphql::FieldResult;
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
-use chrono::{naive, NaiveDateTime, Utc};
+use chrono::Utc;
 use diesel::pg::PgConnection;
-use diesel::r2d2::{ConnectionManager, Error, Pool};
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::RunQueryDsl;
 // use diesel::Connection;
 use slab::Slab;
 use std::sync::Mutex;
-// use uuid::Uuid;
+use tracing::info;
+use uuid::Uuid;
 
 use crate::data::{UserCreationData, UserInputData};
 
@@ -23,7 +30,7 @@ pub struct TestObject {
 
 pub type Storage = Mutex<Slab<TestObject>>;
 
-type DbPool = Pool<ConnectionManager<PgConnection>>;
+pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
 impl QueryRoot {
@@ -41,37 +48,33 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
-    async fn add_test_object(&self, ctx: &Context<'_>, val: String) -> ID {
-        let mut storage = ctx.data_unchecked::<Storage>().lock().unwrap();
-        let entry = storage.vacant_entry();
-        let id: ID = entry.key().into();
-        let new_ob = TestObject {
-            id: id.clone(),
-            val,
-        };
-        storage.insert(new_ob);
-        id
-    }
+    // async fn insert_test_object(&self, ctx: &Context<'_>, val: String) -> ID {
+    //     let mut storage = ctx.data_unchecked::<Storage>().lock().unwrap();
+    //     let entry = storage.vacant_entry();
+    //     let id: ID = entry.key().into();
+    //     let new_ob = TestObject {
+    //         id: id.clone(),
+    //         val,
+    //     };
+    //     storage.insert(new_ob);
+    //     id
+    // }
 
-    async fn add_user(&self, ctx: &Context<'_>, user_data: UserInputData) -> u32 {
-        let db = ctx.data_unchecked::<DbPool>();
+    async fn insert_user(
+        &self,
+        ctx: &Context<'_>,
+        user_data: UserInputData,
+    ) -> FieldResult<UserCreationData> {
+        // NOTE: Should this be called in a "web::block" closure?
+        // https://actix.rs/docs/databases/
+        let user = {
+            let pool_ctx = ctx.data::<DbPool>().unwrap();
+            let mut pool = pool_ctx.get().unwrap();
+            add_user(&mut pool, user_data)
+        }
+        .map_err(error::ErrorInternalServerError)
+        .unwrap();
 
-        let pool = db.get().unwrap();
-
-        let current_stamp = Utc::now().naive_utc();
-
-        let new_user = UserCreationData {
-            username: user_data.username,
-            hashed_password: user_data.hashed_password,
-            email: user_data.email,
-            created_at: current_stamp,
-            updated_at: current_stamp,
-        };
-
-        let el = pool.build_transaction().run(|| {});
-
-        let inserted = diesel::insert_into(users).values(new_user);
-
-        42
+        Ok(user)
     }
 }

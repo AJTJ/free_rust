@@ -4,7 +4,7 @@ use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-// use bb8::Pool;
+use bb8;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
@@ -36,10 +36,16 @@ async fn main() -> std::io::Result<()> {
     println!("Playground: http://localhost:8080");
     dotenv().ok();
 
-    // Database
     let db_url = env::var("DATABASE_URL").expect("no DB URL");
+
+    //BB8 Pool
+    // let manager = bb8_po
+    // let pool = bb8::Pool::builder().build(manager).await.unwrap();
+
+    // R2D2 pool
     let manager = ConnectionManager::<PgConnection>::new(db_url);
-    let pool: Pool<ConnectionManager<PgConnection>> = Pool::builder()
+
+    let pool: DbPool = Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
 
@@ -56,7 +62,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .app_data(pool.clone())
+            .app_data(Data::new(pool.clone()))
             .app_data(Data::new(schema.clone()))
             .wrap(Logger::default())
             .service(web::resource("/").guard(guard::Post()).to(index))
