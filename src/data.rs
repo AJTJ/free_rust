@@ -34,6 +34,10 @@ pub struct UserQueryData {
     pub updated_at: NaiveDateTime,
 }
 
-// impl Todos {
-//   pub fn all_users(conn: &PgConnection) ->
-// }
+// LOGIN STUFF
+
+#[derive(InputObject)]
+pub struct LoginData {
+    pub email: String,
+    pub hashed_password: String,
+}

@@ -8,7 +8,7 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
-use free_rust::graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot, Storage};
+use free_rust::graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
 use std::env;
 
 // tracing
@@ -55,12 +55,9 @@ async fn main() -> std::io::Result<()> {
 
     info!("start of service");
 
-    let my_val: i32 = 45;
-
     // graphql schema builder
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .data(pool.clone())
-        .data(Storage::default())
         .finish();
 
     HttpServer::new(move || {
