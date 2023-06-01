@@ -1,7 +1,7 @@
 // NOTE: a layer between the database schema and the graphql_schema
 
 use crate::schema::users;
-use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
+use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
