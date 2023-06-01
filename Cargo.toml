@@ -17,8 +17,8 @@ actix-jwt-auth-middleware = "0.1.2"
 diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono", "time", "uuid"] }
 
 # graphql
-async-graphql = {version = "3.0.38", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log"]}
-async-graphql-actix-web = "3.0.38"
+async-graphql = {version = "5.0.9", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log", "uuid08"]}
+async-graphql-actix-web = "5.0.9"
 
 # devtools
 dotenv = "0.15.0"

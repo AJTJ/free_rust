@@ -34,3 +34,20 @@ pub fn add_user(
 
     Ok(user)
 }
+
+// let user = web::block(move || {
+//     let pool_ctx = ctx.data::<DbPool>().unwrap();
+//     let conn = pool_ctx.get().unwrap();
+//     diesel::insert_into(users)
+//         .values(&new_user)
+//         .execute(&conn)
+//         .unwrap();
+//     users
+//         .filter(user_id.eq(&uuid))
+//         .first::<UserQueryData>(&conn)
+//         .expect("error loading person that was just inserted")
+// })
+// .await
+// .unwrap();
+
+// Ok(user)

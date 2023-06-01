@@ -4,7 +4,6 @@ use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-// use bb8;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
@@ -28,19 +27,15 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Playground: http://localhost:8080");
     dotenv().ok();
 
     let db_url = env::var("DATABASE_URL").expect("no DB URL");
-
-    //BB8 Pool
-    // let manager = bb8_po
-    // let pool = bb8::Pool::builder().build(manager).await.unwrap();
 
     // R2D2 pool
     let manager = ConnectionManager::<PgConnection>::new(db_url);
 
     let pool: DbPool = Pool::builder()
+        .max_size(1)
         .build(manager)
         .expect("Failed to create pool.");
 
@@ -53,11 +48,11 @@ async fn main() -> std::io::Result<()> {
 
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    info!("start of service");
+    info!("start of service - Playground: http://localhost:8080");
 
     // graphql schema builder
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-        .data(pool.clone())
+        .data(pool)
         .finish();
 
     HttpServer::new(move || {
@@ -67,7 +62,16 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
+    .workers(1)
     .bind("127.0.0.1:8080")?
     .run()
     .await
 }
+
+/*
+   OTHER
+
+   BB8 Pool
+   let manager = bb8_po
+   let pool = bb8::Pool::builder().build(manager).await.unwrap();
+*/
