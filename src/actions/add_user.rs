@@ -1,14 +1,14 @@
-use crate::data::{UserCreationData, UserInputData};
+use crate::data::{UserCreationData, UserInputData, UserQueryData};
 use crate::diesel::ExpressionMethods;
-use crate::diesel::QueryDsl;
+
 use chrono::Utc;
-use diesel::{PgConnection, RunQueryDsl};
+use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 
 pub fn add_user(
     conn: &mut PgConnection,
     user_data: UserInputData,
-) -> diesel::QueryResult<UserCreationData> {
+) -> diesel::QueryResult<UserQueryData> {
     use crate::schema::users::dsl::*;
 
     let current_stamp = Utc::now().naive_utc();
@@ -16,8 +16,8 @@ pub fn add_user(
     let uuid = Uuid::new_v4();
 
     let new_user = UserCreationData {
-        user_id: uuid.clone(),
         username: user_data.username,
+        user_id: uuid.clone(),
         hashed_password: user_data.hashed_password,
         email: user_data.email,
         created_at: current_stamp,
@@ -28,8 +28,8 @@ pub fn add_user(
 
     let user = users
         .filter(user_id.eq(&uuid))
-        .first::<UserCreationData>(conn)
-        .expect("thang");
+        .first::<UserQueryData>(conn)
+        .expect("error loading person that was just inserted");
 
     Ok(user)
 }

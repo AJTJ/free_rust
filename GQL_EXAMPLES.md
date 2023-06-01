@@ -2,12 +2,18 @@
 
 ```
 mutation {
-  addUser(userData: {
-    username:"John", 
-    hashedPassword:"123", 
-    email:"apple@apple.com"
-  })
+  insertUser(
+    userData: {
+      username: "John"
+      hashedPassword: "123"
+      email: "apple@apple.com"
+    }
+  ) {
+    id,
+    userId
+  }
 }
+
 ```
 
 ```

@@ -14,7 +14,7 @@ actix-session = "0.7.2"
 actix-jwt-auth-middleware = "0.1.2"
 
 # ORM
-diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono"] }
+diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono", "time", "uuid"] }
 
 # graphql
 async-graphql = {version = "3.0.38", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log"]}

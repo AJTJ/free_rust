@@ -1,4 +1,5 @@
 use crate::actions::add_user::add_user;
+use crate::data::UserQueryData;
 // use actix_web::{get, post, web, Error, HttpResponse, Responder};
 use crate::schema::users::dsl::users;
 use actix_web::error;
@@ -9,6 +10,7 @@ use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 // use diesel::Connection;
 use slab::Slab;
@@ -41,8 +43,16 @@ impl QueryRoot {
         vals
     }
 
-    async fn get_all_users(&self, ctx: &Context<'_>) -> u32 {
-        42
+    async fn get_all_users(&self, ctx: &Context<'_>) -> FieldResult<Vec<UserQueryData>> {
+        let all_users = {
+            let pool_ctx = ctx.data::<DbPool>().unwrap();
+            let pool = pool_ctx.get().unwrap();
+            use crate::schema::users::dsl::*;
+            users
+                .load::<UserQueryData>(&pool)
+                .expect("loading all users")
+        };
+        Ok(all_users)
     }
 }
 
@@ -64,7 +74,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         user_data: UserInputData,
-    ) -> FieldResult<UserCreationData> {
+    ) -> FieldResult<UserQueryData> {
         // NOTE: Should this be called in a "web::block" closure?
         // https://actix.rs/docs/databases/
         let user = {

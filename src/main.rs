@@ -4,11 +4,11 @@ use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use bb8;
+// use bb8;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
-use free_rust::graphql_schema::{DiveQLSchema, MutationRoot, QueryRoot, Storage};
+use free_rust::graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot, Storage};
 use std::env;
 
 // tracing
@@ -28,11 +28,6 @@ async fn index_playground() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // graphql schema builder
-    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-        .data(Storage::default())
-        .finish();
-
     println!("Playground: http://localhost:8080");
     dotenv().ok();
 
@@ -60,9 +55,16 @@ async fn main() -> std::io::Result<()> {
 
     info!("start of service");
 
+    let my_val: i32 = 45;
+
+    // graphql schema builder
+    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+        .data(pool.clone())
+        .data(Storage::default())
+        .finish();
+
     HttpServer::new(move || {
         App::new()
-            .app_data(Data::new(pool.clone()))
             .app_data(Data::new(schema.clone()))
             .wrap(Logger::default())
             .service(web::resource("/").guard(guard::Post()).to(index))

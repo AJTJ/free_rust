@@ -3,7 +3,6 @@
 use crate::schema::users;
 use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
 use chrono::NaiveDateTime;
-use diesel::Expression;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, InputObject)]
@@ -13,7 +12,7 @@ pub struct UserInputData {
     pub email: String,
 }
 
-#[derive(Insertable, Queryable, SimpleObject)]
+#[derive(Queryable, Insertable, SimpleObject)]
 #[table_name = "users"]
 pub struct UserCreationData {
     pub username: String,
@@ -24,7 +23,16 @@ pub struct UserCreationData {
     pub updated_at: NaiveDateTime,
 }
 
-pub struct UserOutputData {}
+#[derive(Queryable, SimpleObject)]
+pub struct UserQueryData {
+    pub id: i32,
+    pub user_id: Uuid,
+    pub username: String,
+    pub hashed_password: String,
+    pub email: String,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
 
 // impl Todos {
 //   pub fn all_users(conn: &PgConnection) ->
