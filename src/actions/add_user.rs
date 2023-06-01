@@ -17,14 +17,15 @@ pub fn add_user(
 
     let new_user = UserCreationData {
         username: user_data.username,
-        user_id: uuid.clone(),
+        user_id: uuid,
         hashed_password: user_data.hashed_password,
         email: user_data.email,
         created_at: current_stamp,
         updated_at: current_stamp,
     };
 
-    diesel::insert_into(users).values(&new_user).execute(conn);
+    // TODO: need to return a useful error upon failed insert
+    diesel::insert_into(users).values(&new_user).execute(conn)?;
 
     let user = users
         .filter(user_id.eq(&uuid))
