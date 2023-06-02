@@ -1,20 +1,13 @@
-use std::borrow::BorrowMut;
-use std::future::Future;
-use std::time::Duration;
-
 use crate::actions::add_user::add_user;
 use crate::actions::get_user::get_user;
 use crate::actions::login::login;
 use crate::data::LoginData;
-use crate::data::LogoutData;
 use crate::data::UserInputData;
 use crate::data::UserQueryData;
-use actix_identity::Identity;
+use crate::Shared;
 use actix_session::Session;
 use actix_web::error;
 use actix_web::web;
-use actix_web::HttpRequest;
-use async_graphql::FieldError;
 use async_graphql::FieldResult;
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
 use diesel::pg::PgConnection;
@@ -34,6 +27,10 @@ pub struct TestObject {
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
+pub struct Identity {
+    pub id: Option<String>,
+}
+
 #[Object]
 impl QueryRoot {
     async fn get_all_users<'ctx>(
@@ -41,6 +38,7 @@ impl QueryRoot {
         inc_ctx: &Context<'ctx>,
     ) -> FieldResult<Vec<UserQueryData>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
+
         let all_users = web::block(move || {
             let pool = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
@@ -109,27 +107,41 @@ impl MutationRoot {
         Ok(deleted)
     }
 
-    async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<UserQueryData> {
+    async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<i32> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let shared_session = ctx.data_unchecked::<Shared<Session>>().clone();
 
-        // check if the email/pw combo finds a user
-        let user = web::block(move || {
-            let mut pool = pool_ctx.get().unwrap();
-            login(&mut pool, login_data.email, login_data.hashed_password)
-        })
-        .await?
-        .map_err(error::ErrorInternalServerError);
+        shared_session.insert("user_id", "memes").unwrap();
+
+        let uid = shared_session.get::<String>("user_id").unwrap_or(None);
+
+        info!("the id: {:?}", uid);
 
         // return the user if found
-        match user {
-            Err(e) => FieldError(e),
-            Ok(u) => Ok(u),
-        }
+        Ok(42)
 
         // TODO: If user/pw isn't found, then need better server response
-
-        // save user to session
     }
+
+    // async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<UserQueryData> {
+    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    //     let id_ctx = ctx.data_unchecked::<Identity>().clone();
+    //     info!("the id: {:?}", id_ctx.id);
+
+    //     // check if the email/pw combo finds a user
+    //     let user = web::block(move || {
+    //         let mut pool = pool_ctx.get().unwrap();
+    //         login(&mut pool, login_data.email, login_data.hashed_password)
+    //     })
+    //     .await?
+    //     .map_err(error::ErrorInternalServerError)
+    //     .unwrap();
+
+    //     // return the user if found
+    //     Ok(user)
+
+    //     // TODO: If user/pw isn't found, then need better server response
+    // }
 
     // async fn logout(&self, req: HttpRequest) -> FieldResult<i32> {
     //     // user.logout();

@@ -12,8 +12,11 @@ actix-web-actors = "4.1.0"
 actix-cors = "0.6.1"
 # actix-jwt-auth-middleware = "0.1.2"
 
+# work-around for actix-session
+send_wrapper = "0.6.0"
+
 # auth
-actix-identity = "0.5.2"
+# actix-identity = "0.5.2"
 actix-session = {version = "0.7.2", features= ["redis-actor-session"]}
 
 # ORM

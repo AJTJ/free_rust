@@ -106,22 +106,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix-identity"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1224c9f9593dc27c9077b233ce04adedc1d7febcfc35ee9f53ea3c24df180bec"
-dependencies = [
- "actix-service",
- "actix-session",
- "actix-utils",
- "actix-web",
- "anyhow",
- "futures-core",
- "serde",
- "tracing",
-]
-
-[[package]]
 name = "actix-macros"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1054,7 +1038,6 @@ name = "free-rust"
 version = "0.1.0"
 dependencies = [
  "actix-cors",
- "actix-identity",
  "actix-session",
  "actix-web",
  "actix-web-actors",
@@ -1066,6 +1049,7 @@ dependencies = [
  "dotenv",
  "rand",
  "rust-argon2",
+ "send_wrapper",
  "serde",
  "serde_json",
  "slab",
@@ -1833,6 +1817,12 @@ name = "semver"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2333e6df6d6598f2b1974829f853c2b4c5f4a6e503c10af918081aa6f8564e1"
+
+[[package]]
+name = "send_wrapper"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd0b0ec5f1c1ca621c432a25813d8d60c88abe6d3e08a3eb9cf37d97a0fe3d73"
 
 [[package]]
 name = "serde"
