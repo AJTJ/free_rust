@@ -10,8 +10,11 @@ edition = "2021"
 actix-web = "4.0.1"
 actix-web-actors = "4.1.0"
 actix-cors = "0.6.1"
-actix-session = "0.7.2"
-actix-jwt-auth-middleware = "0.1.2"
+# actix-jwt-auth-middleware = "0.1.2"
+
+# auth
+actix-identity = "0.5.2"
+actix-session = {version = "0.7.2", features= ["redis-actor-session"]}
 
 # ORM
 diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono", "time", "uuid"] }

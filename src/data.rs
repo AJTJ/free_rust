@@ -34,10 +34,16 @@ pub struct UserQueryData {
     pub updated_at: NaiveDateTime,
 }
 
-// LOGIN STUFF
+// AUTH STUFF
 
 #[derive(InputObject)]
 pub struct LoginData {
     pub email: String,
     pub hashed_password: String,
+}
+
+#[derive(InputObject)]
+pub struct LogoutData {
+    //TODO: Should be user_id or something else?
+    pub email: String,
 }

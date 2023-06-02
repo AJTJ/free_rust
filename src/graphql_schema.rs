@@ -1,13 +1,20 @@
 use std::borrow::BorrowMut;
+use std::future::Future;
 use std::time::Duration;
 
 use crate::actions::add_user::add_user;
 use crate::actions::get_user::get_user;
+use crate::actions::login::login;
 use crate::data::LoginData;
+use crate::data::LogoutData;
 use crate::data::UserInputData;
 use crate::data::UserQueryData;
+use actix_identity::Identity;
+use actix_session::Session;
 use actix_web::error;
 use actix_web::web;
+use actix_web::HttpRequest;
+use async_graphql::FieldError;
 use async_graphql::FieldResult;
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
 use diesel::pg::PgConnection;
@@ -27,22 +34,21 @@ pub struct TestObject {
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
-pub struct LifetimeWrapper<'a>(&'a UserQueryData);
-
 #[Object]
 impl QueryRoot {
     async fn get_all_users<'ctx>(
         &self,
         inc_ctx: &Context<'ctx>,
     ) -> FieldResult<Vec<UserQueryData>> {
-        let all_users = {
-            let pool_ctx = inc_ctx.data_unchecked::<DbPool>();
+        let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
+        let all_users = web::block(move || {
             let pool = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
             users
                 .load::<UserQueryData>(&pool)
                 .expect("loading all users")
-        };
+        })
+        .await?;
 
         Ok(all_users)
     }
@@ -52,48 +58,16 @@ impl QueryRoot {
         ctx: &Context<'ctx>,
         query_id: uuid::Uuid,
     ) -> FieldResult<UserQueryData> {
-        let user = {
-            let pool_ctx = ctx.data::<DbPool>().unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let user = web::block(move || {
             let mut pool = pool_ctx.get().unwrap();
             get_user(&mut pool, query_id)
-        }
+        })
+        .await?
         .map_err(error::ErrorInternalServerError)
         .unwrap();
         Ok(user)
     }
-
-    // NOT WORKING
-    async fn query_one<'a>(&self, ctx: &Context<'a>) -> FieldResult<i32> {
-        web::block(move || {
-            let pool_ctx = ctx.data::<DbPool>().unwrap();
-            let conn = pool_ctx.get().unwrap();
-            // do something with the conn here
-        })
-        .await?;
-
-        Ok(42)
-    }
-
-    // async fn query_one(&self) -> FieldResult<i32> {
-    //     info!("PRE QUERY ONE, thread: {:?}", std::thread::current().id());
-    //     web::block(|| {
-    //         std::thread::sleep(Duration::from_secs(5));
-    //     })
-    //     .await?;
-    //     info!("POST QUERY ONE, thread: {:?}", std::thread::current().id());
-    //     Ok(42)
-    // }
-
-    // async fn query_two(&self) -> FieldResult<i32> {
-    //     info!("PRE QUERY two, thread: {:?}", std::thread::current().id());
-    //     web::block(|| {
-    //         std::thread::sleep(Duration::from_secs(5));
-    //     })
-    //     .await?;
-
-    //     info!("POST QUERY two, thread: {:?}", std::thread::current().id());
-    //     Ok(42)
-    // }
 
     // DIVE SESSION
 
@@ -110,15 +84,13 @@ impl MutationRoot {
         ctx: &Context<'_>,
         user_data: UserInputData,
     ) -> FieldResult<UserQueryData> {
-        // TODO: Should this be called in a "web::block" closure?
-        // https://actix.rs/docs/databases/
-
-        let user = {
-            let pool_ctx = ctx.data::<DbPool>().unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
+
             add_user(&mut conn, user_data)
-        }
-        // .await
+        })
+        .await?
         .map_err(error::ErrorInternalServerError)
         .unwrap();
 
@@ -126,31 +98,42 @@ impl MutationRoot {
     }
 
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
-        let pool_ctx = ctx.data::<DbPool>().unwrap();
-        let conn = pool_ctx.get().unwrap();
-        use crate::schema::users::dsl::*;
-        let deleted = diesel::delete(users).execute(&conn).unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let deleted = web::block(move || {
+            let conn = pool_ctx.get().unwrap();
+            use crate::schema::users::dsl::*;
+            diesel::delete(users).execute(&conn).unwrap()
+        })
+        .await?;
+
         Ok(deleted)
     }
 
-    // async fn login(&self, login_data: LoginData) -> FieldResult<UserQueryData> {
-    //     /*
-    //        login process
-    //        - check email based on the email
-    //        - do I need to trim whitespace?
-    //        - is this good practice?
-    //        -> return the user if success
-    //     */
-    //     unimplemented!()
-    // }
+    async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<UserQueryData> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    // async fn logout(&self) -> FieldResult<bool> {
-    //     /*
-    //        logout process
-    //        - what information is needed upon logout?
-    //        - confirmation
-    //     */
-    //     unimplemented!()
+        // check if the email/pw combo finds a user
+        let user = web::block(move || {
+            let mut pool = pool_ctx.get().unwrap();
+            login(&mut pool, login_data.email, login_data.hashed_password)
+        })
+        .await?
+        .map_err(error::ErrorInternalServerError);
+
+        // return the user if found
+        match user {
+            Err(e) => FieldError(e),
+            Ok(u) => Ok(u),
+        }
+
+        // TODO: If user/pw isn't found, then need better server response
+
+        // save user to session
+    }
+
+    // async fn logout(&self, req: HttpRequest) -> FieldResult<i32> {
+    //     // user.logout();
+    //     Ok(42)
     // }
 
     // // DIVE SESSION
@@ -161,22 +144,3 @@ impl MutationRoot {
     // async fn add_dive(&self) {}
     // async fn modify_dive(&self) {}
 }
-
-// async fn insert_user(
-//     &self,
-//     ctx: &Context<'_>,
-//     user_data: UserInputData,
-// ) -> FieldResult<UserQueryData> {
-//     // TODO: Should this be called in a "web::block" closure?
-//     // https://actix.rs/docs/databases/
-//     let user = web::block(move || {
-//         let pool_ctx = ctx.data::<DbPool>().unwrap();
-//         let mut pool = pool_ctx.get().unwrap();
-//         add_user(&mut pool, user_data)
-//     })
-//     .await?
-//     .map_err(error::ErrorInternalServerError)
-//     .unwrap();
-
-//     Ok(user)
-// }
