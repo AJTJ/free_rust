@@ -1,17 +1,15 @@
-use crate::diesel::ExpressionMethods;
-use crate::{data::UserQueryData, session_data::SessionData};
+use crate::session_data::SessionData;
+use crate::Shared;
 
+use actix_session::Session;
+use actix_web::web;
 use async_graphql::Context;
-use diesel::{PgConnection, QueryDsl, RunQueryDsl};
-use uuid::Uuid;
 
-pub fn login(
-    ctx: &Context<'_>,
-    user_id: String,
-    session_data: SessionData,
-) -> diesel::QueryResult<UserQueryData> {
+pub async fn add_to_session(ctx: &Context<'_>, user_id: String, session_data: SessionData) {
     let shared_session = ctx.data_unchecked::<Shared<Session>>().clone();
-    shared_session.insert(user_id, SessionData).unwrap();
-
-    Ok(user)
+    web::block(move || {
+        shared_session.insert(user_id, session_data).unwrap();
+    })
+    .await
+    .expect("failure to store in session");
 }

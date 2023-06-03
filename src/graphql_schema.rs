@@ -1,6 +1,6 @@
-use crate::actions::add_user::add_user;
-use crate::actions::get_user::get_user;
-use crate::actions::login::login;
+use crate::actions::add_user;
+use crate::actions::get_user;
+use crate::actions::login;
 use crate::data::LoginData;
 use crate::data::UserInputData;
 use crate::data::UserQueryData;
@@ -76,7 +76,6 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
-    // USER THINGS
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -85,7 +84,6 @@ impl MutationRoot {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-
             add_user(&mut conn, user_data)
         })
         .await?
@@ -107,18 +105,18 @@ impl MutationRoot {
         Ok(deleted)
     }
 
-    async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<i32> {
+    async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<UserQueryData> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let shared_session = ctx.data_unchecked::<Shared<Session>>().clone();
-
-        shared_session.insert("user_id", "memes").unwrap();
-
-        let uid = shared_session.get::<String>("user_id").unwrap_or(None);
-
-        info!("the id: {:?}", uid);
+        let maybe_user = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            login(&mut conn, login_data.email, login_data.hashed_password)
+        })
+        .await
+        .expect("login web:block error")
+        .expect("problem getting login user");
 
         // return the user if found
-        Ok(42)
+        Ok(maybe_user)
 
         // TODO: If user/pw isn't found, then need better server response
     }

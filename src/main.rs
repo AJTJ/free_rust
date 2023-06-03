@@ -18,10 +18,10 @@ use std::ops::Deref;
 #[macro_use]
 extern crate diesel;
 pub mod actions;
+pub mod auth_data;
 pub mod data;
 pub mod graphql_schema;
 pub mod schema;
-pub mod session_data;
 
 use graphql_schema::{DbPool, DiveQLSchema, Identity, MutationRoot, QueryRoot};
 

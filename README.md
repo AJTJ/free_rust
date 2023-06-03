@@ -7,6 +7,11 @@
 - `cargo run`
 - http://localhost:8080/ for graphql playground
 
+## Diesel commands
+- diesel migration revert
+- diesel migration run
+
+
 
 ## how to run database (from greenfield)
 `docker run --name free-rust-postgres -e POSTGRES_PASSWORD=mysecretpassword -dp 5432:5432 postgres`
