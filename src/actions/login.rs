@@ -35,7 +35,7 @@ pub async fn login(
     match maybe_user {
         Ok(user) => {
             // check if pw matches
-            let passwords_match = argon2::verify_encoded(&user.hashed_password, &password).unwrap();
+            let passwords_match = argon2::verify_encoded(&user.hashed_password, password).unwrap();
 
             match passwords_match {
                 true => {

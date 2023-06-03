@@ -116,7 +116,7 @@ impl MutationRoot {
         .expect("problem getting login user");
 
         // return the user if found
-        Ok(maybe_user)
+        match maybe_user
 
         // TODO: If user/pw isn't found, then need better server response
     }
