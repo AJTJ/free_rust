@@ -1,3 +1,13 @@
+// mods
+#[macro_use]
+extern crate diesel;
+pub mod actions;
+pub mod auth_data;
+pub mod data;
+pub mod errors;
+pub mod graphql_schema;
+pub mod schema;
+
 use actix_session::{storage::RedisActorSessionStore, Session, SessionMiddleware};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
@@ -6,42 +16,12 @@ use actix_web::{guard, web, Result};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
+use auth_data::Shared;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
-
-use send_wrapper::SendWrapper;
+use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
 use std::env;
-use std::ops::Deref;
-
-// mods
-#[macro_use]
-extern crate diesel;
-pub mod actions;
-pub mod auth_data;
-pub mod data;
-pub mod graphql_schema;
-pub mod schema;
-
-use graphql_schema::{DbPool, DiveQLSchema, Identity, MutationRoot, QueryRoot};
-
-// TODO: Is this baaad?
-#[derive(Clone, Debug)]
-pub struct Shared<T>(pub Option<SendWrapper<T>>);
-
-impl<T> Shared<T> {
-    pub fn new(v: T) -> Self {
-        Self(Some(SendWrapper::new(v)))
-    }
-}
-
-impl<T> Deref for Shared<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &*self.0.as_deref().clone().unwrap()
-    }
-}
 
 // tracing
 use tracing::{info, Level};
@@ -54,6 +34,7 @@ async fn index_playground() -> Result<HttpResponse> {
         .body(source))
 }
 
+// TODO: Is this bad?
 pub async fn index(
     schema: web::Data<DiveQLSchema>,
     req: GraphQLRequest,

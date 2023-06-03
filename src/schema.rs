@@ -35,15 +35,11 @@ diesel::table! {
         user_id -> Uuid,
         username -> Text,
         hashed_password -> Text,
-        password_salt -> Nullable<Bytea>,
+        password_salt -> Bytea,
         email -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(
-    dive_sessions,
-    dives,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(dive_sessions, dives, users,);

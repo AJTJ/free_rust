@@ -3,7 +3,7 @@
 use crate::schema::users;
 use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
-use diesel::types::Binary;
+
 use uuid::Uuid;
 
 #[derive(Debug, Clone, InputObject)]
@@ -19,7 +19,7 @@ pub struct UserCreationData {
     pub username: String,
     pub user_id: Uuid,
     pub hashed_password: String,
-    pub password_salt: Binary,
+    pub password_salt: Vec<u8>,
     pub email: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -32,7 +32,7 @@ pub struct UserQueryData {
     pub user_id: Uuid,
     pub username: String,
     pub hashed_password: String,
-    pub password_salt: String,
+    pub password_salt: Vec<u8>,
     pub email: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,

@@ -18,8 +18,8 @@ pub fn add_user(
 
     let uuid = Uuid::new_v4();
 
+    // PW + HASHING
     let salt_gen: UniversalIdType = rand::thread_rng().gen::<UniversalIdType>();
-
     let hashed_pw =
         argon2::hash_encoded(user_data.password.as_bytes(), &salt_gen, &Config::default()).unwrap();
 
@@ -27,14 +27,16 @@ pub fn add_user(
         username: user_data.username,
         user_id: uuid,
         hashed_password: hashed_pw,
-        password_salt: salt_gen,
+        password_salt: salt_gen.to_vec(),
         email: user_data.email,
         created_at: current_stamp,
         updated_at: current_stamp,
     };
 
-    // TODO: need to return a useful error upon failed insert
-    diesel::insert_into(users).values(&new_user).execute(conn)?;
+    diesel::insert_into(users)
+        .values(&new_user)
+        .execute(conn)
+        .expect("diesel insert new user error");
 
     let user = users
         .filter(user_id.eq(&uuid))
