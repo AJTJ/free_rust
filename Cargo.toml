@@ -16,9 +16,11 @@ actix-cors = "0.6.1"
 send_wrapper = "0.6.0"
 
 # auth
-actix-session = {version = "0.7.2", features= ["redis-actor-session"]}
+# actix-session = {version = "0.7.2", features= ["redis-actor-session"]}
 rust-argon2 = "1.0"
 base64 = "0.21.2"
+redis = { version = "0.23.0", features = ["tokio-comp"] }
+# redis-derive = "0.1.7"
 # actix-identity = "0.5.2"
 
 # ORM
@@ -38,5 +40,9 @@ bb8 = "0.8.0"
 uuid = { version= "0.8.2 ", features = ["serde", "v4"] } 
 tracing = "0.1.33"
 slab = "0.4.6"
+
+# Errors and bug hunting
 tracing-subscriber = "0.3.11"
 anyhow = "1.0.71"
+snafu = "0.7.4"
+

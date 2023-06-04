@@ -4,7 +4,10 @@ use crate::diesel::ExpressionMethods;
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 
-pub fn get_user(conn: &mut PgConnection, query_id: Uuid) -> diesel::QueryResult<UserQueryData> {
+pub fn get_user_with_id(
+    conn: &mut PgConnection,
+    query_id: Uuid,
+) -> diesel::QueryResult<UserQueryData> {
     use crate::schema::users::dsl::*;
 
     let user = users

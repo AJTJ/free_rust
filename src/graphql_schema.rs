@@ -1,15 +1,19 @@
+use crate::actions::add_to_session;
 use crate::actions::add_user;
-use crate::actions::get_user;
+use crate::actions::get_user_with_email;
 use crate::actions::login;
+use crate::actions::logout;
+use crate::auth_data::SessionData;
 use crate::data::LoginData;
 use crate::data::UserInputData;
 use crate::data::UserQueryData;
-use crate::Shared;
-use actix_session::Session;
+use crate::errors::ErrorEnum;
 use actix_web::error;
 use actix_web::web;
 use async_graphql::FieldResult;
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
+use chrono::Duration;
+use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
@@ -54,12 +58,12 @@ impl QueryRoot {
     async fn get_user<'ctx>(
         &self,
         ctx: &Context<'ctx>,
-        query_id: uuid::Uuid,
+        query_email: String,
     ) -> FieldResult<UserQueryData> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut pool = pool_ctx.get().unwrap();
-            get_user(&mut pool, query_id)
+            get_user_with_email(&mut pool, query_email)
         })
         .await?
         .map_err(error::ErrorInternalServerError)
@@ -105,45 +109,42 @@ impl MutationRoot {
         Ok(deleted)
     }
 
-    async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<UserQueryData> {
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let maybe_user = web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            login(&mut conn, login_data.email, login_data.hashed_password)
-        })
-        .await
-        .expect("login web:block error")
-        .expect("problem getting login user");
+    async fn login(
+        &self,
+        ctx: &Context<'_>,
+        login_data: LoginData,
+    ) -> Result<UserQueryData, ErrorEnum> {
+        let return_user = login(ctx, login_data.email, login_data.hashed_password).await;
 
-        // return the user if found
-        match maybe_user
+        if let Ok(user) = return_user {
+            add_to_session(
+                ctx,
+                SessionData {
+                    user_id: user.user_id,
+                    expiry: Utc::now().naive_utc() + Duration::minutes(10080),
+                },
+                // encoded_session_id.clone(),
+                "123".to_string(),
+            );
+        }
 
-        // TODO: If user/pw isn't found, then need better server response
+        return_user
     }
 
-    // async fn login(&self, ctx: &Context<'_>, login_data: LoginData) -> FieldResult<UserQueryData> {
-    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-    //     let id_ctx = ctx.data_unchecked::<Identity>().clone();
-    //     info!("the id: {:?}", id_ctx.id);
+    async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
+        Ok(logout(ctx))
+    }
 
-    //     // check if the email/pw combo finds a user
-    //     let user = web::block(move || {
-    //         let mut pool = pool_ctx.get().unwrap();
-    //         login(&mut pool, login_data.email, login_data.hashed_password)
-    //     })
-    //     .await?
-    //     .map_err(error::ErrorInternalServerError)
-    //     .unwrap();
-
-    //     // return the user if found
-    //     Ok(user)
-
-    //     // TODO: If user/pw isn't found, then need better server response
-    // }
-
-    // async fn logout(&self, req: HttpRequest) -> FieldResult<i32> {
-    //     // user.logout();
-    //     Ok(42)
+    // if let Ok(user_data) = login_result {
+    //     add_to_session(
+    //         ctx,
+    //         SessionData {
+    //             user_id: user_data.user_id,
+    //             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
+    //         },
+    //         encoded_session_id.clone(),
+    //     )
+    //     .await;
     // }
 
     // // DIVE SESSION

@@ -26,7 +26,7 @@ pub struct UserCreationData {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject)]
+#[derive(Queryable, SimpleObject, Debug)]
 pub struct UserQueryData {
     pub id: i32,
     pub user_id: Uuid,

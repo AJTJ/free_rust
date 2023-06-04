@@ -1,23 +1,41 @@
-use crate::auth_data::{SessionData, UniversalIdType};
-use crate::Shared;
-use actix_session::Session;
+use crate::auth_data::{SessionData, SessionKeyValue, SharedRedisType};
+// use actix_session::Session;
 use actix_web::web;
-use argon2::{self};
 use async_graphql::Context;
-use base64::{engine::general_purpose, Engine as _};
-use rand::Rng;
+use redis::{Commands, Connection};
+use std::sync::Arc;
+use std::time::Duration;
+use tracing::info;
 
-pub async fn add_to_session(ctx: &Context<'_>, session_data: SessionData) {
-    let shared_session = ctx.data_unchecked::<Shared<Session>>().clone();
-
-    let id: UniversalIdType = Rng::gen::<UniversalIdType>(&mut rand::thread_rng());
-    let encoded_session_id = general_purpose::STANDARD.encode(id);
+pub async fn add_to_session(
+    ctx: &Context<'_>,
+    session_data: SessionData,
+    encoded_session_id: String,
+) {
+    info!("pre sesh");
+    let session_arc = ctx.data::<SharedRedisType>().unwrap().clone();
 
     web::block(move || {
-        shared_session
-            .insert(encoded_session_id, session_data)
-            .unwrap();
+        let redis_server = session_arc.lock().unwrap();
+        let mut connection = redis_server.get_connection().unwrap();
+        let update_session_data =
+            connection.set::<&String, SessionData, SessionData>(&encoded_session_id, session_data);
     })
     .await
     .expect("failure to store in session");
+
+    info!("post sesh");
 }
+
+/*
+std::thread::sleep(Duration::from_secs(5));
+    shared_session
+        .insert(encoded_session_id, session_data)
+        .unwrap();
+info!("after session add");
+
+        info!(
+            "got it: {:?}",
+            shared_session.get::<SessionData>(&encoded_session_id)
+        )
+ */
