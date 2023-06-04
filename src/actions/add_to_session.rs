@@ -7,6 +7,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use tracing::info;
 
+// TODO: need to create a universal key to encrypt session data
+
 pub async fn add_to_session(
     ctx: &Context<'_>,
     session_data: SessionData,
@@ -16,10 +18,17 @@ pub async fn add_to_session(
     let session_arc = ctx.data::<SharedRedisType>().unwrap().clone();
 
     web::block(move || {
-        let redis_server = session_arc.lock().unwrap();
-        let mut connection = redis_server.get_connection().unwrap();
+        let redis_server = session_arc.lock().expect("error locking the redis mutex");
+        info!("MEOW1");
+        let mut connection = redis_server
+            .get_connection()
+            .expect("error connecting to redis_server");
+        info!("MEOW2");
         let update_session_data =
             connection.set::<&String, SessionData, SessionData>(&encoded_session_id, session_data);
+        info!("MEOW3");
+
+        info!("the updated sesh: {:?}", update_session_data);
     })
     .await
     .expect("failure to store in session");

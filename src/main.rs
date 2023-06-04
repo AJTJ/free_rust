@@ -21,6 +21,7 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
 use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
+use redis::{Client, Commands};
 use std::env;
 use std::sync::{Arc, Mutex};
 
@@ -84,7 +85,12 @@ async fn main() -> std::io::Result<()> {
     // Session
     // let secret_key = Key::generate();
 
-    let client = redis::Client::open("redis://127.0.0.1/").expect("failure starting redis server");
+    let client = Client::open("redis://127.0.0.1/").expect("failure starting redis server");
+    let mut con = client
+        .get_connection()
+        .expect("failure getting connection in MAIN");
+
+    // Client::open("redis://127.0.0.1:6379/").expect("failure starting redis server");
 
     let shared_client: SharedRedisType = Arc::new(Mutex::new(client));
 

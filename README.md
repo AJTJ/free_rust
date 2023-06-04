@@ -12,6 +12,10 @@
 - diesel migration run
 
 
+## how to set up redis (from greenfield)
+`docker run --name free-redis -d redis redis-server --save 60 1 --loglevel warning`
+
+
 
 ## how to run database (from greenfield)
 `docker run --name free-rust-postgres -e POSTGRES_PASSWORD=mysecretpassword -dp 5432:5432 postgres`

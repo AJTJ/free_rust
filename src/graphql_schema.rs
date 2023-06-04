@@ -114,21 +114,7 @@ impl MutationRoot {
         ctx: &Context<'_>,
         login_data: LoginData,
     ) -> Result<UserQueryData, ErrorEnum> {
-        let return_user = login(ctx, login_data.email, login_data.hashed_password).await;
-
-        if let Ok(user) = return_user {
-            add_to_session(
-                ctx,
-                SessionData {
-                    user_id: user.user_id,
-                    expiry: Utc::now().naive_utc() + Duration::minutes(10080),
-                },
-                // encoded_session_id.clone(),
-                "123".to_string(),
-            );
-        }
-
-        return_user
+        login(ctx, login_data.email, login_data.hashed_password).await
     }
 
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {

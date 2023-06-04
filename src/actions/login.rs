@@ -37,6 +37,16 @@ pub async fn login(
                     let id: UniversalIdType = Rng::gen::<UniversalIdType>(&mut rand::thread_rng());
                     let encoded_session_id = general_purpose::STANDARD.encode(id);
 
+                    add_to_session(
+                        ctx,
+                        SessionData {
+                            user_id: user.user_id,
+                            expiry: Utc::now().naive_utc() + Duration::minutes(10080),
+                        },
+                        encoded_session_id.clone(),
+                    )
+                    .await;
+
                     // if random() {
                     //     info!("positive");
                     //     add_to_session(
