@@ -13,7 +13,7 @@
 
 
 ## how to set up redis (from greenfield)
-`docker run --name free-redis -d redis redis-server --save 60 1 --loglevel warning`
+`docker run --name free-redis -dp 6379:6379 redis redis-server --save 60 1 --loglevel warning`
 
 
 

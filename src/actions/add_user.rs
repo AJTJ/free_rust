@@ -1,6 +1,6 @@
 use crate::auth_data::UniversalIdType;
-use crate::data::{UserCreationData, UserInputData, UserQueryData};
 use crate::diesel::ExpressionMethods;
+use crate::dto::user_auth_dto::{UserCreationData, UserInputData, UserQueryData};
 use argon2::{self, Config};
 
 use chrono::Utc;
@@ -31,6 +31,7 @@ pub fn add_user(
         email: user_data.email,
         created_at: current_stamp,
         updated_at: current_stamp,
+        is_active: true,
     };
 
     diesel::insert_into(users)
@@ -45,20 +46,3 @@ pub fn add_user(
 
     Ok(user)
 }
-
-// let user = web::block(move || {
-//     let pool_ctx = ctx.data::<DbPool>().unwrap();
-//     let conn = pool_ctx.get().unwrap();
-//     diesel::insert_into(users)
-//         .values(&new_user)
-//         .execute(&conn)
-//         .unwrap();
-//     users
-//         .filter(user_id.eq(&uuid))
-//         .first::<UserQueryData>(&conn)
-//         .expect("error loading person that was just inserted")
-// })
-// .await
-// .unwrap();
-
-// Ok(user)

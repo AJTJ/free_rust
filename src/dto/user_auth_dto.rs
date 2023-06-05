@@ -3,7 +3,6 @@
 use crate::schema::users;
 use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
-
 use uuid::Uuid;
 
 #[derive(Debug, Clone, InputObject)]
@@ -23,6 +22,7 @@ pub struct UserCreationData {
     pub email: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+    pub is_active: bool,
 }
 
 // This one needs to match 1:1
@@ -36,6 +36,9 @@ pub struct UserQueryData {
     pub email: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+    pub is_active: bool,
+    pub deleted_at: Option<NaiveDateTime>,
+    pub deleted_by: Option<Uuid>,
 }
 
 // AUTH STUFF

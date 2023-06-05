@@ -1,26 +1,27 @@
-use crate::actions::get_user_with_email;
-use crate::auth_data::{SessionData, COOKIE_NAME};
-use crate::errors::ErrorEnum;
-use crate::graphql_schema::DbPool;
-use crate::{actions::add_to_session::add_to_session, data::UserQueryData};
-use actix_web::web;
+use crate::cookie_helpers::{get_expired_cookie, CookieStruct};
+use crate::token_source::Token;
+use actix_web::cookie::Cookie;
+use actix_web::http::header::SET_COOKIE;
 use async_graphql::Context;
-use chrono::{Duration, Utc};
-use tracing::log::info;
+use tracing::info;
 
-pub fn logout(ctx: &Context<'_>) -> bool {
-    match ctx.http_header_contains(COOKIE_NAME) {
-        true => {
-            info!("it contains cookie name");
-            // TODO: decode the session_id
-            // TODO: remove the session_id from the session
-            // TODO: delete the cookie
-            true
+use super::remove_from_session;
+
+pub async fn logout(ctx: &Context<'_>) {
+    let token = ctx.data::<Token>();
+
+    match token {
+        Ok(token) => {
+            let c = Cookie::parse::<&str>(token.0.as_str()).unwrap();
+            let (_, value) = c.name_value();
+            let cookie_data: CookieStruct =
+                serde_json::from_str(value).expect("parsing cookie error");
+
+            remove_from_session(ctx, cookie_data.encoded_session_id).await;
         }
-        false => {
-            info!("it doesn't contain cookie name");
-            // TODO: insert meaningful error
-            false
-        }
+        Err(e) => info!("No token/cookie: {:?}", e),
     }
+
+    let expired_cookied = get_expired_cookie();
+    ctx.insert_http_header(SET_COOKIE, expired_cookied.to_string());
 }

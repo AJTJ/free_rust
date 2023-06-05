@@ -1,23 +1,23 @@
-use crate::actions::{get_user_with_email, other_add_to_sesh};
+use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
+use crate::cookie_helpers::get_cookie;
 use crate::errors::ErrorEnum;
 use crate::graphql_schema::DbPool;
-use crate::{actions::add_to_session::add_to_session, data::UserQueryData};
+use crate::helpers::get_encoded_id;
+use crate::{actions::add_to_user_session::add_to_user_session, dto::user_auth_dto::UserQueryData};
 use actix_web::http::header::SET_COOKIE;
 use actix_web::web;
 use argon2::{self};
 use async_graphql::Context;
-use base64::{engine::general_purpose, Engine as _};
+
 use chrono::{Duration, Utc};
-use rand::{random, Rng};
-use tracing::info;
+use rand::Rng;
 
 pub async fn login(
     ctx: &Context<'_>,
     inc_email: String,
     password: String,
 ) -> Result<UserQueryData, ErrorEnum> {
-    info!("login hit");
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
@@ -34,10 +34,11 @@ pub async fn login(
 
             match passwords_match {
                 true => {
-                    let id: UniversalIdType = Rng::gen::<UniversalIdType>(&mut rand::thread_rng());
-                    let encoded_session_id = general_purpose::STANDARD.encode(id);
+                    let session_id: UniversalIdType =
+                        Rng::gen::<UniversalIdType>(&mut rand::thread_rng());
+                    let encoded_session_id = get_encoded_id(session_id);
 
-                    add_to_session(
+                    add_to_user_session(
                         ctx,
                         SessionData {
                             user_id: user.user_id,
@@ -47,32 +48,9 @@ pub async fn login(
                     )
                     .await;
 
-                    // if random() {
-                    //     info!("positive");
-                    //     add_to_session(
-                    //         ctx,
-                    //         SessionData {
-                    //             user_id: user.user_id,
-                    //             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
-                    //         },
-                    //         encoded_session_id.clone(),
-                    //     );
-                    // } else {
-                    //     info!("negative");
-                    //     other_add_to_sesh(
-                    //         ctx,
-                    //         SessionData {
-                    //             user_id: user.user_id,
-                    //             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
-                    //         },
-                    //         encoded_session_id.clone(),
-                    //     );
-                    // }
+                    let cookie = get_cookie(encoded_session_id);
+                    ctx.insert_http_header(SET_COOKIE, cookie.to_string());
 
-                    info!("post add to session hit");
-                    // TODO: This cookie needs an expiry
-                    ctx.insert_http_header(SET_COOKIE, "free-rust-cookie");
-                    ctx.append_http_header("set-cookie", encoded_session_id);
                     Ok(user)
                 }
                 false => Err(ErrorEnum::WrongPassword(password)),
@@ -80,7 +58,6 @@ pub async fn login(
         }
         Err(e) => Err(ErrorEnum::UserNotFound(e)),
     };
-    info!("the return user: {:?}", return_user);
     return_user
 }
 
@@ -118,4 +95,26 @@ pub async fn login(
 //         }
 //         Err(e) => Err(ErrorEnum::UserNotFound(e)),
 //     }
+// }
+
+// if random() {
+//     info!("positive");
+//     add_to_session(
+//         ctx,
+//         SessionData {
+//             user_id: user.user_id,
+//             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
+//         },
+//         encoded_session_id.clone(),
+//     );
+// } else {
+//     info!("negative");
+//     other_add_to_sesh(
+//         ctx,
+//         SessionData {
+//             user_id: user.user_id,
+//             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
+//         },
+//         encoded_session_id.clone(),
+//     );
 // }

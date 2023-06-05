@@ -3,13 +3,16 @@
 diesel::table! {
     dive_sessions (id) {
         id -> Int4,
-        session_id -> Nullable<Uuid>,
-        start_time -> Nullable<Timestamp>,
-        end_time -> Nullable<Timestamp>,
+        session_id -> Uuid,
+        start_time -> Timestamp,
+        end_time -> Timestamp,
         session_name -> Nullable<Text>,
         user_id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        is_active -> Bool,
+        deleted_at -> Nullable<Timestamp>,
+        deleted_by -> Nullable<Uuid>,
     }
 }
 
@@ -26,6 +29,9 @@ diesel::table! {
         user_id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        is_active -> Bool,
+        deleted_at -> Nullable<Timestamp>,
+        deleted_by -> Nullable<Uuid>,
     }
 }
 
@@ -39,7 +45,14 @@ diesel::table! {
         email -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        is_active -> Bool,
+        deleted_at -> Nullable<Timestamp>,
+        deleted_by -> Nullable<Uuid>,
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(dive_sessions, dives, users,);
+diesel::allow_tables_to_appear_in_same_query!(
+    dive_sessions,
+    dives,
+    users,
+);

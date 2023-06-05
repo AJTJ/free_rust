@@ -3,20 +3,25 @@
 extern crate diesel;
 pub mod actions;
 pub mod auth_data;
-pub mod data;
+pub mod cookie_helpers;
+pub mod dive_data;
+pub mod dto;
 pub mod errors;
 pub mod graphql_schema;
+pub mod helpers;
 pub mod schema;
+pub mod token_source;
 
+use actix_web::http::header::HeaderMap;
 // use actix_session::{storage::RedisActorSessionStore, Session, SessionMiddleware};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
-use actix_web::{guard, web, Result};
+use actix_web::{guard, web, HttpRequest, Result};
 use actix_web::{App, HttpResponse, HttpServer};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use auth_data::{Shared, SharedRedisType};
+use auth_data::SharedRedisType;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
@@ -24,6 +29,7 @@ use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
 use redis::{Client, Commands};
 use std::env;
 use std::sync::{Arc, Mutex};
+use token_source::Token;
 
 // tracing
 use tracing::{info, Level};
@@ -54,8 +60,24 @@ async fn index_playground() -> Result<HttpResponse> {
 //     schema.execute(req.into_inner().data(session)).await.into()
 // }
 
-async fn index(schema: web::Data<DiveQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
+    headers
+        .get("cookie")
+        .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
+}
+
+async fn index(
+    schema: web::Data<DiveQLSchema>,
+    req: HttpRequest,
+    gql_req: GraphQLRequest,
+) -> GraphQLResponse {
+    let mut request = gql_req.into_inner();
+    // info!("PRE headers: {:?}", req.headers());
+    if let Some(token) = get_token_from_headers(req.headers()) {
+        info!("The token in REQUEST: {:?}", token);
+        request = request.data(token);
+    }
+    schema.execute(request).await.into()
 }
 
 #[actix_web::main]
@@ -110,8 +132,8 @@ async fn main() -> std::io::Result<()> {
             //     secret_key.clone(),
             // ))
             .wrap(Logger::default())
-            .service(web::resource("/").guard(guard::Post()).to(index))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
+            .service(web::resource("/").guard(guard::Post()).to(index))
     })
     .workers(1)
     .bind("127.0.0.1:8080")?

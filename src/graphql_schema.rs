@@ -1,23 +1,20 @@
-use crate::actions::add_to_session;
 use crate::actions::add_user;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
-use crate::auth_data::SessionData;
-use crate::data::LoginData;
-use crate::data::UserInputData;
-use crate::data::UserQueryData;
+use crate::dto::dive_session_dto::DiveSessionQueryData;
+use crate::dto::dive_session_dto::SessionCreationData;
+use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
 use crate::errors::ErrorEnum;
+
+use actix_web::cookie::Cookie;
 use actix_web::error;
 use actix_web::web;
 use async_graphql::FieldResult;
 use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
-use chrono::Duration;
-use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
-use tracing::info;
 
 pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;
@@ -68,7 +65,14 @@ impl QueryRoot {
         .await?
         .map_err(error::ErrorInternalServerError)
         .unwrap();
+
         Ok(user)
+    }
+
+    async fn change_headers(&self, ctx: &Context<'_>) -> bool {
+        let example_cookie = Cookie::build("example", "helloworld").finish();
+        ctx.insert_http_header("Set-Cookie", example_cookie.to_string());
+        ctx.http_header_contains("Custom-header")
     }
 
     // DIVE SESSION
@@ -118,23 +122,21 @@ impl MutationRoot {
     }
 
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
-        Ok(logout(ctx))
+        logout(ctx).await;
+
+        // TODO: This could be a better return val
+        Ok(true)
     }
 
-    // if let Ok(user_data) = login_result {
-    //     add_to_session(
-    //         ctx,
-    //         SessionData {
-    //             user_id: user_data.user_id,
-    //             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
-    //         },
-    //         encoded_session_id.clone(),
-    //     )
-    //     .await;
-    // }
-
-    // // DIVE SESSION
-    // async fn add_session(&self) {}
+    // DIVE SESSION
+    async fn add_session(
+        &self,
+        _session_input: SessionCreationData,
+    ) -> FieldResult<DiveSessionQueryData> {
+        unimplemented!()
+    }
+    // async fn get_session(&self) {}
+    // async fn modify_session(&self) {}
     // async fn modify_session(&self) {}
 
     // // DIVES

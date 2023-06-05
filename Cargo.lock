@@ -944,6 +944,7 @@ dependencies = [
  "chrono",
  "diesel",
  "dotenv",
+ "futures-util",
  "rand",
  "redis",
  "rust-argon2",
