@@ -1,4 +1,5 @@
 use async_graphql::{async_trait::async_trait, Context, Guard, Result};
+use tracing::info;
 
 use crate::{
     actions::get_user_session_data, cookie_helpers::get_cookie_from_token, token_source::Token,
@@ -47,9 +48,13 @@ impl Guard for LoggedInGuard {
 
             match user_session {
                 Ok(u) => Ok(()),
-                Err(e) => Err("Forbidden".into()),
+                Err(e) => Err({
+                    info!("user not in session");
+                    "Forbidden".into()
+                }),
             }
         } else {
+            info!("no cookie");
             Err("Forbidden".into())
         }
     }

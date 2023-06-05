@@ -3,6 +3,7 @@ use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
+#[derive(InputObject)]
 pub struct DiveSessionInputData {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,

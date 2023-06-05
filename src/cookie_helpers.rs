@@ -54,6 +54,8 @@ pub fn get_cookie_from_token(ctx: &Context<'_>) -> Option<CookieStruct> {
             let c = Cookie::parse::<&str>(token.0.as_str()).unwrap();
             let (_, value) = c.name_value();
 
+            info!("the str: {}", value);
+
             Some(serde_json::from_str(value).expect("parsing cookie error"))
         }
         Err(e) => {

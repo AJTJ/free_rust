@@ -83,11 +83,19 @@ impl QueryRoot {
     // async fn get_session(&self) {
     //     unimplemented!()
     // }
+
+    async fn not_guarded(&self) -> bool {
+        true
+    }
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn guarded(&self) -> bool {
+        true
+    }
 }
 
 #[Object]
 impl MutationRoot {
-    #[graphql(guard = "LoggedInGuard {}")]
+    // #[graphql(guard = "LoggedInGuard {}")]
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -140,6 +148,7 @@ impl MutationRoot {
     ) -> FieldResult<DiveSessionQueryData> {
         add_dive_session(ctx, session_input_data).await
     }
+
     // async fn get_session(&self) {}
     // async fn modify_session(&self) {}
     // async fn modify_session(&self) {}

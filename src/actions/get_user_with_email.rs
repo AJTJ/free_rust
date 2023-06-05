@@ -11,7 +11,7 @@ pub fn get_user_with_email(
     let user = users
         .filter(email.eq(&query_email))
         .first::<UserQueryData>(conn)
-        .expect("error loading person that was just inserted");
+        .expect("error loading person with email");
 
     Ok(user)
 }
