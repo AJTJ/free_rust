@@ -1,3 +1,4 @@
+mod add_dive_session;
 mod add_to_user_session;
 mod add_user;
 mod get_user_session_data;
@@ -7,6 +8,7 @@ mod login;
 mod logout;
 mod remove_from_session;
 
+pub use add_dive_session::add_dive_session;
 pub use add_to_user_session::add_to_user_session;
 pub use add_user::add_user;
 pub use get_user_session_data::get_user_session_data;

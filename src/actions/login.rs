@@ -1,6 +1,6 @@
 use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
-use crate::cookie_helpers::get_cookie;
+use crate::cookie_helpers::create_cookie;
 use crate::errors::ErrorEnum;
 use crate::graphql_schema::DbPool;
 use crate::helpers::get_encoded_id;
@@ -48,7 +48,7 @@ pub async fn login(
                     )
                     .await;
 
-                    let cookie = get_cookie(encoded_session_id);
+                    let cookie = create_cookie(encoded_session_id);
                     ctx.insert_http_header(SET_COOKIE, cookie.to_string());
 
                     Ok(user)

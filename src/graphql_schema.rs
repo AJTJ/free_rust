@@ -1,11 +1,14 @@
+use crate::actions::add_dive_session;
 use crate::actions::add_user;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
+use crate::dto::dive_session_dto::DiveSessionCreationData;
+use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
-use crate::dto::dive_session_dto::SessionCreationData;
 use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
 use crate::errors::ErrorEnum;
+use crate::guards::LoggedInGuard;
 
 use actix_web::cookie::Cookie;
 use actix_web::error;
@@ -59,8 +62,8 @@ impl QueryRoot {
     ) -> FieldResult<UserQueryData> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
-            let mut pool = pool_ctx.get().unwrap();
-            get_user_with_email(&mut pool, query_email)
+            let mut conn = pool_ctx.get().unwrap();
+            get_user_with_email(&mut conn, query_email)
         })
         .await?
         .map_err(error::ErrorInternalServerError)
@@ -84,6 +87,7 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
+    #[graphql(guard = "LoggedInGuard {}")]
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -131,9 +135,10 @@ impl MutationRoot {
     // DIVE SESSION
     async fn add_session(
         &self,
-        _session_input: SessionCreationData,
+        ctx: &Context<'_>,
+        session_input_data: DiveSessionInputData,
     ) -> FieldResult<DiveSessionQueryData> {
-        unimplemented!()
+        add_dive_session(ctx, session_input_data).await
     }
     // async fn get_session(&self) {}
     // async fn modify_session(&self) {}

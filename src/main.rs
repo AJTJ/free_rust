@@ -8,6 +8,7 @@ pub mod dive_data;
 pub mod dto;
 pub mod errors;
 pub mod graphql_schema;
+pub mod guards;
 pub mod helpers;
 pub mod schema;
 pub mod token_source;

@@ -42,6 +42,7 @@ uuid = { version= "0.8.2 ", features = ["serde", "v4"] }
 tracing = "0.1.33"
 slab = "0.4.6"
 futures-util = "0.3.0"
+# async-trait = "0.1.68" already included
 # time = "0.2.27"
 
 # Errors and bug hunting
