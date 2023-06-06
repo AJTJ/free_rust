@@ -30,6 +30,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
 impl QueryRoot {
+    // Purely for testing
     async fn get_all_users<'ctx>(
         &self,
         inc_ctx: &Context<'ctx>,
@@ -65,21 +66,11 @@ impl QueryRoot {
         Ok(user)
     }
 
-    async fn change_headers(&self, ctx: &Context<'_>) -> bool {
-        let example_cookie = Cookie::build("example", "helloworld").finish();
-        ctx.insert_http_header("Set-Cookie", example_cookie.to_string());
-        ctx.http_header_contains("Custom-header")
-    }
+    // DIVE THINGS
+    // async fn get_session(&self) {}
+    // async fn get_dive(&self) {}
 
-    // DIVE SESSION
-
-    // async fn get_session(&self) {
-    //     unimplemented!()
-    // }
-
-    async fn not_guarded(&self) -> bool {
-        true
-    }
+    // Purely for testing
     #[graphql(guard = "LoggedInGuard {}")]
     async fn guarded(&self) -> bool {
         true
@@ -106,6 +97,7 @@ impl MutationRoot {
         Ok(user)
     }
 
+    // Purely for testing
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -128,8 +120,7 @@ impl MutationRoot {
 
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
         logout(ctx).await;
-
-        // TODO: This could be a better return val
+        // TODO: This could be a better return val?
         Ok(true)
     }
 
