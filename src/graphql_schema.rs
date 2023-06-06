@@ -3,7 +3,6 @@ use crate::actions::add_user;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
-use crate::dto::dive_session_dto::DiveSessionCreationData;
 use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
@@ -14,7 +13,7 @@ use actix_web::cookie::Cookie;
 use actix_web::error;
 use actix_web::web;
 use async_graphql::FieldResult;
-use async_graphql::{Context, EmptySubscription, Object, Schema, SimpleObject, ID};
+use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
@@ -23,17 +22,11 @@ pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;
 pub struct MutationRoot;
 
-#[derive(Debug, Clone, SimpleObject)]
-pub struct TestObject {
-    id: ID,
-    val: String,
-}
-
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
-pub struct Identity {
-    pub id: Option<String>,
-}
+/*
+   How to make it more GraphQL-y
+*/
 
 #[Object]
 impl QueryRoot {
