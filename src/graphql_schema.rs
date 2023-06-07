@@ -4,7 +4,6 @@ use crate::actions::get_dive_sessions;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
-use crate::dto::db_query_dto;
 use crate::dto::db_query_dto::DBQueryObject;
 use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
@@ -20,7 +19,6 @@ use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
-use uuid::Uuid;
 
 pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;

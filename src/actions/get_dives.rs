@@ -16,7 +16,7 @@ pub fn get_dives(
 
     let dive_sessions_output = dive_sessions
         .filter(user_id.eq(&dive_session_query_input.user_id))
-        .limit(db_query_ob.limit.or(Some(10)).unwrap() as i64)
+        .limit(db_query_ob.limit.unwrap_or(10) as i64)
         .get_results::<DiveSessionQueryData>(conn)
         .expect("error loading dive sessions");
 
