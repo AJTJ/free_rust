@@ -54,15 +54,15 @@ impl UserQueryData {
         &self,
         ctx: &Context<'_>,
         db_query_dto: DBQueryObject,
-        mut dive_query: DiveSessionQueryInput,
+        mut dive_session_query: DiveSessionQueryInput,
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        dive_query.user_id = self.user_id;
+        dive_session_query.user_id = self.user_id;
 
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions(&mut conn, dive_query, db_query_dto)
+            get_dive_sessions(&mut conn, dive_session_query, db_query_dto)
         })
         .await
         .expect("error in dive sessions web::block")

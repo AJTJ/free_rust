@@ -1,7 +1,9 @@
 use crate::schema::dive_sessions;
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
+
+use super::db_query_dto::DBQueryObject;
 
 #[derive(InputObject)]
 pub struct DiveSessionInputData {
@@ -23,8 +25,9 @@ pub struct DiveSessionCreationData {
     pub is_active: bool,
 }
 
-// Matches the database 1:1
+// Matches the database object 1:1
 #[derive(Queryable, SimpleObject)]
+#[graphql(complex)]
 pub struct DiveSessionQueryData {
     pub id: i32,
     pub session_id: Uuid,
@@ -39,9 +42,20 @@ pub struct DiveSessionQueryData {
     pub deleted_by: Option<Uuid>,
 }
 
+#[ComplexObject]
+impl DiveSessionQueryData {
+    async fn dives(
+        &self,
+        ctx: &Context<'_>,
+        db_query_dto: DBQueryObject,
+        mut dive_query: DiveSessionQueryInput,
+    ) -> i32 {
+        42
+    }
+}
+
 #[derive(InputObject)]
 pub struct DiveSessionQueryInput {
-    pub id: Option<i32>,
     pub session_id: Option<Uuid>,
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
@@ -50,6 +64,4 @@ pub struct DiveSessionQueryInput {
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
     pub is_active: Option<bool>,
-    pub deleted_at: Option<NaiveDateTime>,
-    pub deleted_by: Option<Uuid>,
 }
