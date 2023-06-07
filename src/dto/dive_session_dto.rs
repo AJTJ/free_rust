@@ -23,7 +23,7 @@ pub struct DiveSessionCreationData {
     pub is_active: bool,
 }
 
-// This one needs to match 1:1
+// Matches the database 1:1
 #[derive(Queryable, SimpleObject)]
 pub struct DiveSessionQueryData {
     pub id: i32,
@@ -35,6 +35,21 @@ pub struct DiveSessionQueryData {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
+    pub deleted_at: Option<NaiveDateTime>,
+    pub deleted_by: Option<Uuid>,
+}
+
+#[derive(InputObject)]
+pub struct DiveSessionQueryInput {
+    pub id: Option<i32>,
+    pub session_id: Option<Uuid>,
+    pub start_time: Option<NaiveDateTime>,
+    pub end_time: Option<NaiveDateTime>,
+    pub session_name: Option<String>,
+    pub user_id: Uuid,
+    pub created_at: Option<NaiveDateTime>,
+    pub updated_at: Option<NaiveDateTime>,
+    pub is_active: Option<bool>,
     pub deleted_at: Option<NaiveDateTime>,
     pub deleted_by: Option<Uuid>,
 }

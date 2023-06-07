@@ -1,9 +1,15 @@
 // NOTE: a layer between the database schema and the graphql_schema
 
-use crate::schema::users;
-use async_graphql::{InputObject, SimpleObject};
+use crate::{actions::get_dive_sessions, graphql_schema::DbPool, schema::users};
+use actix_web::web;
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
+
+use super::{
+    db_query_dto::{self, DBQueryObject},
+    dive_session_dto::{DiveSessionQueryData, DiveSessionQueryInput},
+};
 
 #[derive(Debug, Clone, InputObject)]
 pub struct UserInputData {
@@ -27,6 +33,7 @@ pub struct UserCreationData {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
+#[graphql(complex)]
 pub struct UserQueryData {
     pub id: i32,
     pub user_id: Uuid,
@@ -39,6 +46,30 @@ pub struct UserQueryData {
     pub is_active: bool,
     pub deleted_at: Option<NaiveDateTime>,
     pub deleted_by: Option<Uuid>,
+}
+
+#[ComplexObject]
+impl UserQueryData {
+    async fn dive_sessions(
+        &self,
+        ctx: &Context<'_>,
+        db_query_dto: DBQueryObject,
+        mut dive_query: DiveSessionQueryInput,
+    ) -> FieldResult<Vec<DiveSessionQueryData>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        dive_query.user_id = self.user_id;
+
+        let dive_sessions = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_dive_sessions(&mut conn, dive_query, db_query_dto)
+        })
+        .await
+        .expect("error in dive sessions web::block")
+        .expect("error in another loading dive sessions");
+
+        Ok(dive_sessions)
+    }
 }
 
 // AUTH STUFF

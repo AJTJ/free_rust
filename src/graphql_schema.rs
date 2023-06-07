@@ -1,15 +1,18 @@
 use crate::actions::add_dive_session;
 use crate::actions::add_user;
+use crate::actions::get_dive_sessions;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
+use crate::dto::db_query_dto;
+use crate::dto::db_query_dto::DBQueryObject;
 use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
+use crate::dto::dive_session_dto::DiveSessionQueryInput;
 use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
 use crate::errors::ErrorEnum;
 use crate::guards::LoggedInGuard;
 
-use actix_web::cookie::Cookie;
 use actix_web::error;
 use actix_web::web;
 use async_graphql::FieldResult;
@@ -17,6 +20,7 @@ use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
+use uuid::Uuid;
 
 pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;
@@ -31,10 +35,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 #[Object]
 impl QueryRoot {
     // Purely for testing
-    async fn get_all_users<'ctx>(
-        &self,
-        inc_ctx: &Context<'ctx>,
-    ) -> FieldResult<Vec<UserQueryData>> {
+    async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
         let all_users = web::block(move || {
@@ -49,7 +50,7 @@ impl QueryRoot {
         Ok(all_users)
     }
 
-    async fn get_user<'ctx>(
+    async fn user<'ctx>(
         &self,
         ctx: &Context<'ctx>,
         query_email: String,
@@ -66,8 +67,26 @@ impl QueryRoot {
         Ok(user)
     }
 
+    async fn dive_sessions<'ctx>(
+        &self,
+        ctx: &Context<'ctx>,
+        dive_session_input: DiveSessionQueryInput,
+        db_query_dto: DBQueryObject,
+    ) -> FieldResult<Vec<DiveSessionQueryData>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let dive_sessions = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_dive_sessions(&mut conn, dive_session_input, db_query_dto)
+        })
+        .await?
+        .map_err(error::ErrorInternalServerError)
+        .unwrap();
+
+        Ok(dive_sessions)
+    }
+
     // DIVE THINGS
-    // async fn get_session(&self) {}
+
     // async fn get_dive(&self) {}
 
     // Purely for testing
