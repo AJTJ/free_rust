@@ -1,9 +1,13 @@
-use crate::schema::dive_sessions;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
+use crate::{actions::get_dives, graphql_schema::DbPool, schema::dive_sessions};
+use actix_web::web;
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use super::db_query_dto::DBQueryObject;
+use super::{
+    db_query_dto::DBQueryObject,
+    dive_dto::{DiveQueryData, DiveQueryInput},
+};
 
 #[derive(InputObject)]
 pub struct DiveSessionInputData {
@@ -49,9 +53,22 @@ impl DiveSessionQueryData {
         &self,
         ctx: &Context<'_>,
         db_query_dto: DBQueryObject,
-        mut dive_query: DiveSessionQueryInput,
-    ) -> i32 {
-        42
+        // this needs to be mut
+        mut dive_query: DiveQueryInput,
+    ) -> FieldResult<Vec<DiveQueryData>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        dive_query.user_id = self.user_id;
+
+        let dives = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_dives(&mut conn, dive_query, db_query_dto)
+        })
+        .await
+        .expect("error in dive sessions web::block")
+        .expect("error in another loading dive sessions");
+
+        Ok(dives)
     }
 }
 

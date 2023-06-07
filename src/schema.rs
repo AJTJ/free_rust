@@ -19,11 +19,11 @@ diesel::table! {
 diesel::table! {
     dives (id) {
         id -> Int4,
-        dive_id -> Nullable<Uuid>,
+        dive_id -> Uuid,
         discipline_type -> Nullable<Text>,
         depth -> Nullable<Float8>,
         distance -> Nullable<Float8>,
-        dive_time -> Nullable<Time>,
+        dive_time -> Nullable<Int8>,
         dive_name -> Nullable<Text>,
         dive_session -> Uuid,
         user_id -> Uuid,
