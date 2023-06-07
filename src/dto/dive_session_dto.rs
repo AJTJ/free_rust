@@ -16,6 +16,13 @@ pub struct DiveSessionInputData {
     pub session_name: Option<String>,
 }
 
+pub struct DiveSessionModificationData {
+    pub session_id: Uuid,
+    pub start_time: Option<NaiveDateTime>,
+    pub end_time: Option<NaiveDateTime>,
+    pub session_name: Option<String>,
+}
+
 #[derive(Insertable, InputObject)]
 #[table_name = "dive_sessions"]
 pub struct DiveSessionCreationData {

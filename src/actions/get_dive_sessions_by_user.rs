@@ -7,7 +7,7 @@ use crate::{
 };
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 
-pub fn get_dive_sessions(
+pub fn get_dive_sessions_by_user(
     conn: &mut PgConnection,
     dive_session_query_input: DiveSessionQueryInput,
     db_query_ob: DBQueryObject,

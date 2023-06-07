@@ -1,11 +1,13 @@
 use crate::actions::add_dive_session;
 use crate::actions::add_user;
-use crate::actions::get_dive_sessions;
+use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
+use crate::actions::modify_dive_session;
 use crate::dto::db_query_dto::DBQueryObject;
 use crate::dto::dive_session_dto::DiveSessionInputData;
+use crate::dto::dive_session_dto::DiveSessionModificationData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::dive_session_dto::DiveSessionQueryInput;
 use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
@@ -74,7 +76,7 @@ impl QueryRoot {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions(&mut conn, dive_session_input, db_query_dto)
+            get_dive_sessions_by_user(&mut conn, dive_session_input, db_query_dto)
         })
         .await?
         .map_err(error::ErrorInternalServerError)
@@ -96,7 +98,6 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
-    // #[graphql(guard = "LoggedInGuard {}")]
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -142,7 +143,8 @@ impl MutationRoot {
     }
 
     // DIVE SESSION
-    async fn add_session(
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn add_dive_session(
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionInputData,
@@ -150,11 +152,19 @@ impl MutationRoot {
         add_dive_session(ctx, session_input_data).await
     }
 
-    // async fn get_session(&self) {}
-    // async fn modify_session(&self) {}
-    // async fn modify_session(&self) {}
+    // #[graphql(guard = "LoggedInGuard {}")]
+    async fn modify_session(
+        &self,
+        ctx: &Context<'_>,
+        session_input_data: DiveSessionModificationData,
+    ) -> FieldResult<DiveSessionQueryData> {
+        modify_dive_session(ctx, session_input_data)
+    }
 
-    // // DIVES
+    // DIVES
+    // #[graphql(guard = "LoggedInGuard {}")]
     // async fn add_dive(&self) {}
+
+    // #[graphql(guard = "LoggedInGuard {}")]
     // async fn modify_dive(&self) {}
 }

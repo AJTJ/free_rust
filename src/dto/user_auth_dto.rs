@@ -1,6 +1,6 @@
 // NOTE: a layer between the database schema and the graphql_schema
 
-use crate::{actions::get_dive_sessions, graphql_schema::DbPool, schema::users};
+use crate::{actions::get_dive_sessions_by_user, graphql_schema::DbPool, schema::users};
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
@@ -62,7 +62,7 @@ impl UserQueryData {
 
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions(&mut conn, dive_session_query, db_query_dto)
+            get_dive_sessions_by_user(&mut conn, dive_session_query, db_query_dto)
         })
         .await
         .expect("error in dive sessions web::block")
