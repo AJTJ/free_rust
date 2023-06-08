@@ -29,6 +29,7 @@ pub fn add_user(
         hashed_password: hashed_pw,
         password_salt: salt_gen.to_vec(),
         email: user_data.email,
+        last_login: current_stamp,
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,

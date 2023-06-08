@@ -13,6 +13,7 @@ use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionModificationData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::dive_session_dto::DiveSessionQueryInput;
+use crate::dto::user_auth_dto::UserQueryDataOutput;
 use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
 use crate::errors::ErrorEnum;
 use crate::guards::LoggedInGuard;
@@ -93,26 +94,26 @@ impl QueryRoot {
 
     // DIVE THINGS
 
-    #[graphql(guard = "LoggedInGuard {}")]
-    async fn dives(
-        &self,
-        ctx: &Context<'_>,
-        dive_input: DiveQueryInput,
-        db_query_dto: Option<DBQueryObject>,
-    ) -> FieldResult<Vec<DiveQueryData>> {
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let dives = web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
+    // #[graphql(guard = "LoggedInGuard {}")]
+    // async fn dives(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     dive_input: DiveQueryInput,
+    //     db_query_dto: Option<DBQueryObject>,
+    // ) -> FieldResult<Vec<DiveQueryData>> {
+    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    //     let dives = web::block(move || {
+    //         let mut conn = pool_ctx.get().unwrap();
 
-            // TODO: need an explicit method to get the user data from the cookie
-            get_dives_by_user(&mut conn, input_user_id, dive_query_input, db_query_ob)
-        })
-        .await?
-        .map_err(error::ErrorInternalServerError)
-        .unwrap();
+    //         // TODO: need an explicit method to get the user data from the cookie
+    //         get_dives_by_user(&mut conn, input_user_id, dive_query_input, db_query_ob)
+    //     })
+    //     .await?
+    //     .map_err(error::ErrorInternalServerError)
+    //     .unwrap();
 
-        Ok(dives)
-    }
+    //     Ok(dives)
+    // }
 
     // Purely for testing
     #[graphql(guard = "LoggedInGuard {}")]
@@ -160,7 +161,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         login_data: LoginData,
-    ) -> Result<UserQueryData, ErrorEnum> {
+    ) -> Result<UserQueryDataOutput, ErrorEnum> {
         login(ctx, login_data.email, login_data.password).await
     }
 

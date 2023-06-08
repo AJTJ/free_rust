@@ -9,9 +9,9 @@ CREATE TABLE dives (
   dive_name TEXT,
   session_id uuid NOT NULL REFERENCES dive_sessions (session_id),
   user_id uuid NOT NULL REFERENCES users (user_id),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP,
   deleted_by uuid
 );

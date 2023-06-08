@@ -1,10 +1,11 @@
+use crate::actions::add_to_user_session::add_to_user_session;
 use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
 use crate::cookie_helpers::create_cookie;
+use crate::dto::user_auth_dto::UserQueryDataOutput;
 use crate::errors::ErrorEnum;
 use crate::graphql_schema::DbPool;
 use crate::helpers::get_encoded_id;
-use crate::{actions::add_to_user_session::add_to_user_session, dto::user_auth_dto::UserQueryData};
 use actix_web::http::header::SET_COOKIE;
 use actix_web::web;
 use argon2::{self};
@@ -13,11 +14,12 @@ use async_graphql::Context;
 use chrono::{Duration, Utc};
 use rand::Rng;
 
+// TODO: Update the last_login db row
 pub async fn login(
     ctx: &Context<'_>,
     inc_email: String,
     password: String,
-) -> Result<UserQueryData, ErrorEnum> {
+) -> Result<UserQueryDataOutput, ErrorEnum> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
@@ -51,7 +53,9 @@ pub async fn login(
                     let cookie = create_cookie(encoded_session_id);
                     ctx.insert_http_header(SET_COOKIE, cookie.to_string());
 
-                    Ok(user)
+                    let user_out: UserQueryDataOutput = user.into();
+
+                    Ok(user_out)
                 }
                 false => Err(ErrorEnum::WrongPassword(password)),
             }

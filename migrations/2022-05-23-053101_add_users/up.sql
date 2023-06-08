@@ -6,9 +6,10 @@ CREATE TABLE users (
   hashed_password TEXT NOT NULL,
   password_salt bytea NOT NULL,
   email TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP,
   deleted_by uuid
 );

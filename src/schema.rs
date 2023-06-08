@@ -43,6 +43,7 @@ diesel::table! {
         hashed_password -> Text,
         password_salt -> Bytea,
         email -> Text,
+        last_login -> Timestamp,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,

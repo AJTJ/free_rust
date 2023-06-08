@@ -18,7 +18,7 @@ pub struct UserInputData {
     pub email: String,
 }
 
-#[derive(Queryable, Insertable, SimpleObject)]
+#[derive(Insertable)]
 #[table_name = "users"]
 pub struct UserCreationData {
     pub username: String,
@@ -26,6 +26,7 @@ pub struct UserCreationData {
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
+    pub last_login: NaiveDateTime,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -41,11 +42,37 @@ pub struct UserQueryData {
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
+    pub last_login: NaiveDateTime,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
     pub deleted_at: Option<NaiveDateTime>,
     pub deleted_by: Option<Uuid>,
+}
+
+impl From<UserQueryData> for UserQueryDataOutput {
+    fn from(val: UserQueryData) -> Self {
+        UserQueryDataOutput {
+            user_id: val.user_id,
+            username: val.username,
+            email: val.email,
+            last_login: val.last_login,
+            created_at: val.created_at,
+            updated_at: val.updated_at,
+            is_active: val.is_active,
+        }
+    }
+}
+
+#[derive(SimpleObject)]
+pub struct UserQueryDataOutput {
+    pub user_id: Uuid,
+    pub username: String,
+    pub email: String,
+    pub last_login: NaiveDateTime,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+    pub is_active: bool,
 }
 
 #[ComplexObject]
