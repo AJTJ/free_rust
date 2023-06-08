@@ -7,8 +7,8 @@ use uuid::Uuid;
 
 pub fn get_dive_session_by_id(
     conn: &mut PgConnection,
-    input_session_id: Uuid,
-    db_query_ob: DBQueryObject,
+    input_session_id: &Uuid,
+    db_query_ob: Option<DBQueryObject>,
 ) -> diesel::QueryResult<DiveSessionQueryData> {
     use crate::schema::dive_sessions::dsl::*;
 

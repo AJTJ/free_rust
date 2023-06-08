@@ -163,11 +163,9 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
-        // ) -> FieldResult<DiveSessionQueryData> {
-    ) -> i32 {
-        modify_dive_session(ctx, session_input_data).await;
-
-        42
+    ) -> FieldResult<DiveSessionQueryData> {
+        let dive_session = modify_dive_session(ctx, session_input_data).await;
+        Ok(dive_session)
     }
 
     // DIVES

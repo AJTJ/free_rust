@@ -16,7 +16,7 @@ pub struct DiveSessionInputData {
     pub session_name: Option<String>,
 }
 
-#[derive(AsChangeset, InputObject)]
+#[derive(AsChangeset, InputObject, Clone)]
 #[table_name = "dive_sessions"]
 pub struct DiveSessionModificationData {
     pub session_id: Uuid,
