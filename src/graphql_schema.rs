@@ -21,6 +21,7 @@ use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
+use tracing::info;
 
 pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;
@@ -140,8 +141,10 @@ impl MutationRoot {
     }
 
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
+        info!("MEMES");
         logout(ctx).await;
         // TODO: This could be a better return val?
+        info!("logout done");
         Ok(true)
     }
 

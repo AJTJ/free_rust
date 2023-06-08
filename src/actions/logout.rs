@@ -1,17 +1,15 @@
-use crate::cookie_helpers::{create_expired_cookie, get_cookie_from_token, CookieStruct};
-use crate::token_source::Token;
-use actix_web::cookie::Cookie;
+use crate::cookie_helpers::{create_expired_cookie, get_cookie_from_token};
 use actix_web::http::header::SET_COOKIE;
 use async_graphql::Context;
 use tracing::info;
 
-use super::remove_from_session;
+use super::remove_from_user_session;
 
 pub async fn logout(ctx: &Context<'_>) {
     if let Some(cookie_data) = get_cookie_from_token(ctx) {
-        remove_from_session(ctx, cookie_data.encoded_session_id).await;
+        remove_from_user_session(ctx, cookie_data.encoded_session_id).await;
     }
-
+    info!("after remove from sesh");
     let expired_cookied = create_expired_cookie();
     ctx.insert_http_header(SET_COOKIE, expired_cookied.to_string());
 }

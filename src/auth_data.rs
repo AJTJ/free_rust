@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use redis::{from_redis_value, Client, FromRedisValue, RedisResult, ToRedisArgs};
 use serde::{Deserialize, Serialize};
+use std::string::String;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
@@ -10,10 +11,22 @@ pub type UniversalIdType = [u8; 32];
 pub type SharedRedisType = Arc<Mutex<Client>>;
 
 #[derive(Serialize, Deserialize)]
+pub struct RedisKeyType(String);
+
+impl ToRedisArgs for RedisKeyType {
+    fn write_redis_args<W>(&self, out: &mut W)
+    where
+        W: ?Sized + redis::RedisWrite,
+    {
+        out.write_arg_fmt(serde_json::to_string(self).expect("can't serialize the RedisKeyType"))
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct SessionKeyValue {
     // currently using an ENCODED UniversalIdType
     // why? Why not.
-    key: String,
+    key: RedisKeyType,
     value: SessionData,
 }
 

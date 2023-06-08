@@ -10,7 +10,7 @@ mod get_user_with_id;
 mod login;
 mod logout;
 mod modify_dive_session;
-mod remove_from_session;
+mod remove_from_user_session;
 
 pub use add_dive_session::add_dive_session;
 pub use add_to_user_session::add_to_user_session;
@@ -24,4 +24,4 @@ pub use get_user_with_id::get_user_with_id;
 pub use login::login;
 pub use logout::logout;
 pub use modify_dive_session::modify_dive_session;
-pub use remove_from_session::remove_from_session;
+pub use remove_from_user_session::remove_from_user_session;
