@@ -121,13 +121,16 @@ impl MutationRoot {
         let deleted = web::block(move || {
             let conn = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
-            diesel::delete(users).execute(&conn).unwrap()
+            diesel::delete(users)
+                .execute(&conn)
+                .expect("problem deleting users")
         })
         .await?;
 
         Ok(deleted)
     }
 
+    // AUTH
     async fn login(
         &self,
         ctx: &Context<'_>,

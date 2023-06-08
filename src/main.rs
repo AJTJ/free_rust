@@ -75,7 +75,7 @@ async fn index(
     let mut request = gql_req.into_inner();
     // info!("PRE headers: {:?}", req.headers());
     if let Some(token) = get_token_from_headers(req.headers()) {
-        info!("The token in REQUEST: {:?}", token);
+        // info!("The token in REQUEST: {:?}", token);
         request = request.data(token);
     }
     schema.execute(request).await.into()

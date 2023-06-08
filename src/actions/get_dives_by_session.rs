@@ -6,17 +6,19 @@ use crate::{
     },
 };
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use uuid::Uuid;
 
-pub fn get_dives(
+pub fn get_dives_by_session(
     conn: &mut PgConnection,
-    dive_query_input: DiveQueryInput,
-    db_query_ob: DBQueryObject,
+    input_session_id: Uuid,
+    dive_query_input: Option<DiveQueryInput>,
+    db_query_ob: Option<DBQueryObject>,
 ) -> diesel::QueryResult<Vec<DiveQueryData>> {
     use crate::schema::dives::dsl::*;
 
     let dive_sessions_output = dives
-        .filter(user_id.eq(&dive_query_input.user_id))
-        .limit(db_query_ob.limit.unwrap_or(10) as i64)
+        .filter(user_id.eq(&input_session_id))
+        .limit(db_query_ob.and_then(|q| q.limit).unwrap_or(10) as i64)
         .get_results::<DiveQueryData>(conn)
         .expect("error loading dive sessions");
 

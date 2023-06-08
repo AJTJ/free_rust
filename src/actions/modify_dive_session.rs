@@ -24,9 +24,8 @@ pub async fn modify_dive_session(ctx: &Context<'_>, session_mod_data: DiveSessio
         use crate::schema::dive_sessions::dsl::*;
         diesel::update(dive_sessions)
             .filter(session_id.eq(&session_mod_data.session_id))
-            .set(&session_mod_data)
+            .set((&session_mod_data, updated_at.eq(current_stamp)))
             .execute(&conn)
-        // .get_result(&conn);
     })
     .await
     .expect("web::block error here?");

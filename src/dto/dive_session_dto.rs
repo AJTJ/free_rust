@@ -1,4 +1,4 @@
-use crate::{actions::get_dives, graphql_schema::DbPool, schema::dive_sessions};
+use crate::{actions::get_dives_by_session, graphql_schema::DbPool, schema::dive_sessions};
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
@@ -15,10 +15,6 @@ pub struct DiveSessionInputData {
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
 }
-
-// #[derive(AsChangeset)]
-// #[table_name = dive_sessions]
-// struct DiveSessionUpdate {}
 
 #[derive(AsChangeset, InputObject)]
 #[table_name = "dive_sessions"]
@@ -65,17 +61,17 @@ impl DiveSessionQueryData {
     async fn dives(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: DBQueryObject,
+        db_query_dto: Option<DBQueryObject>,
         // this needs to be mut
-        mut dive_query: DiveQueryInput,
+        mut dive_query: Option<DiveQueryInput>,
     ) -> FieldResult<Vec<DiveQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        dive_query.user_id = self.user_id;
+        let my_id = self.user_id;
 
         let dives = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dives(&mut conn, dive_query, db_query_dto)
+            get_dives_by_session(&mut conn, my_id, dive_query, db_query_dto)
         })
         .await
         .expect("error in dive sessions web::block")

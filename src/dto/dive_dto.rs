@@ -30,7 +30,7 @@ pub struct DiveQueryInput {
     pub dive_time: Option<NaiveTime>,
     pub dive_name: Option<String>,
     pub dive_session: Option<Uuid>,
-    pub user_id: Uuid,
+    pub user_id: Option<Uuid>,
 
     pub is_active: Option<bool>,
     pub created_at: Option<NaiveDateTime>,
