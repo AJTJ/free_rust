@@ -13,12 +13,12 @@ pub async fn remove_from_session(ctx: &Context<'_>, encoded_session_id: String) 
         let redis_server = session_arc.lock().unwrap();
         let mut connection = redis_server.get_connection().unwrap();
 
-        let update_session_data: String = connection
-            .del(encoded_session_id)
+        let update_session_data = connection
+            .del::<String, String>(encoded_session_id)
             .expect("expecting redis logout to produce a String");
 
         info!("the removed sesh: {:?}", update_session_data);
     })
     .await
-    .expect("failure to store in session");
+    .expect("failure to remove from session");
 }

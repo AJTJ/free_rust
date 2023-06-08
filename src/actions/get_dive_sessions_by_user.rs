@@ -10,13 +10,13 @@ use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 pub fn get_dive_sessions_by_user(
     conn: &mut PgConnection,
     dive_session_query_input: DiveSessionQueryInput,
-    db_query_ob: DBQueryObject,
+    db_query_ob: Option<DBQueryObject>,
 ) -> diesel::QueryResult<Vec<DiveSessionQueryData>> {
     use crate::schema::dive_sessions::dsl::*;
 
     let dive_sessions_output = dive_sessions
         .filter(user_id.eq(&dive_session_query_input.user_id))
-        .limit(db_query_ob.limit.or(Some(10)).unwrap() as i64)
+        .limit(db_query_ob.and_then(|q| q.limit).unwrap_or(10) as i64)
         .get_results::<DiveSessionQueryData>(conn)
         .expect("error loading dive sessions");
 

@@ -71,7 +71,7 @@ impl QueryRoot {
         &self,
         ctx: &Context<'ctx>,
         dive_session_input: DiveSessionQueryInput,
-        db_query_dto: DBQueryObject,
+        db_query_dto: Option<DBQueryObject>,
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let dive_sessions = web::block(move || {
@@ -133,7 +133,7 @@ impl MutationRoot {
         ctx: &Context<'_>,
         login_data: LoginData,
     ) -> Result<UserQueryData, ErrorEnum> {
-        login(ctx, login_data.email, login_data.hashed_password).await
+        login(ctx, login_data.email, login_data.password).await
     }
 
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
@@ -157,8 +157,11 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
-    ) -> FieldResult<DiveSessionQueryData> {
-        modify_dive_session(ctx, session_input_data)
+        // ) -> FieldResult<DiveSessionQueryData> {
+    ) -> i32 {
+        modify_dive_session(ctx, session_input_data).await;
+
+        42
     }
 
     // DIVES

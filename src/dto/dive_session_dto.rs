@@ -16,6 +16,12 @@ pub struct DiveSessionInputData {
     pub session_name: Option<String>,
 }
 
+// #[derive(AsChangeset)]
+// #[table_name = dive_sessions]
+// struct DiveSessionUpdate {}
+
+#[derive(AsChangeset, InputObject)]
+#[table_name = "dive_sessions"]
 pub struct DiveSessionModificationData {
     pub session_id: Uuid,
     pub start_time: Option<NaiveDateTime>,

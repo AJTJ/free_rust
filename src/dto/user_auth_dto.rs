@@ -53,8 +53,8 @@ impl UserQueryData {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: DBQueryObject,
         mut dive_session_query: DiveSessionQueryInput,
+        db_query_dto: Option<DBQueryObject>,
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -77,7 +77,7 @@ impl UserQueryData {
 #[derive(InputObject)]
 pub struct LoginData {
     pub email: String,
-    pub hashed_password: String,
+    pub password: String,
 }
 
 #[derive(InputObject)]
