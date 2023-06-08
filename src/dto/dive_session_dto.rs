@@ -23,6 +23,7 @@ pub struct DiveSessionModificationData {
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
+    pub is_active: Option<bool>,
 }
 
 #[derive(Insertable, InputObject)]

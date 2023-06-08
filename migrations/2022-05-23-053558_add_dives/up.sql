@@ -7,7 +7,7 @@ CREATE TABLE dives (
   distance FLOAT,
   dive_time BIGINT,
   dive_name TEXT,
-  dive_session uuid NOT NULL REFERENCES dive_sessions (session_id),
+  session_id uuid NOT NULL REFERENCES dive_sessions (session_id),
   user_id uuid NOT NULL REFERENCES users (user_id),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -12,7 +12,7 @@ pub struct DiveQueryData {
     pub distance: Option<f64>,
     pub dive_time: Option<i64>,
     pub dive_name: Option<String>,
-    pub dive_session: Uuid,
+    pub session_id: Uuid,
     pub user_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,

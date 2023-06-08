@@ -1,11 +1,14 @@
 use crate::actions::add_dive_session;
 use crate::actions::add_user;
 use crate::actions::get_dive_sessions_by_user;
+use crate::actions::get_dives_by_user;
 use crate::actions::get_user_with_email;
 use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::modify_dive_session;
 use crate::dto::db_query_dto::DBQueryObject;
+use crate::dto::dive_dto::DiveQueryData;
+use crate::dto::dive_dto::DiveQueryInput;
 use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionModificationData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
@@ -68,9 +71,11 @@ impl QueryRoot {
         Ok(user)
     }
 
-    async fn dive_sessions<'ctx>(
+    // TODO: Explicitly get the user id from the cookie, this is protected
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn dive_sessions(
         &self,
-        ctx: &Context<'ctx>,
+        ctx: &Context<'_>,
         dive_session_input: DiveSessionQueryInput,
         db_query_dto: Option<DBQueryObject>,
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
@@ -88,7 +93,26 @@ impl QueryRoot {
 
     // DIVE THINGS
 
-    // async fn get_dive(&self) {}
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn dives(
+        &self,
+        ctx: &Context<'_>,
+        dive_input: DiveQueryInput,
+        db_query_dto: Option<DBQueryObject>,
+    ) -> FieldResult<Vec<DiveQueryData>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let dives = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+
+            // TODO: need an explicit method to get the user data from the cookie
+            get_dives_by_user(&mut conn, input_user_id, dive_query_input, db_query_ob)
+        })
+        .await?
+        .map_err(error::ErrorInternalServerError)
+        .unwrap();
+
+        Ok(dives)
+    }
 
     // Purely for testing
     #[graphql(guard = "LoggedInGuard {}")]
@@ -159,13 +183,27 @@ impl MutationRoot {
     }
 
     // #[graphql(guard = "LoggedInGuard {}")]
-    async fn modify_session(
+    async fn modify_dive_session(
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
     ) -> FieldResult<DiveSessionQueryData> {
         let dive_session = modify_dive_session(ctx, session_input_data).await;
         Ok(dive_session)
+    }
+
+    async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let deleted = web::block(move || {
+            let conn = pool_ctx.get().unwrap();
+            use crate::schema::dive_sessions::dsl::*;
+            diesel::delete(dive_sessions)
+                .execute(&conn)
+                .expect("problem deleting dive sessions")
+        })
+        .await?;
+
+        Ok(deleted)
     }
 
     // DIVES

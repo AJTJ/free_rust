@@ -25,7 +25,7 @@ diesel::table! {
         distance -> Nullable<Float8>,
         dive_time -> Nullable<Int8>,
         dive_name -> Nullable<Text>,
-        dive_session -> Uuid,
+        session_id -> Uuid,
         user_id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
