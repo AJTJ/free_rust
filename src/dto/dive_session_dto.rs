@@ -19,10 +19,11 @@ pub struct DiveSessionInputData {
 #[derive(AsChangeset, InputObject, Clone)]
 #[table_name = "dive_sessions"]
 pub struct DiveSessionModificationData {
-    pub session_id: Uuid,
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
+
+    pub session_id: Uuid,
     pub is_active: Option<bool>,
 }
 

@@ -1,6 +1,7 @@
 use crate::actions::get_user_session_data;
 use crate::cookie_helpers::get_cookie_from_token;
 use crate::diesel::ExpressionMethods;
+use crate::dto::dive_dto::{DiveCreationData, DiveInputData, DiveQueryData};
 use crate::dto::dive_session_dto::{
     DiveSessionCreationData, DiveSessionInputData, DiveSessionQueryData,
 };
@@ -12,12 +13,11 @@ use chrono::Utc;
 use diesel::{QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 
-pub async fn add_dive_session(
+pub async fn add_dive(
     ctx: &Context<'_>,
-    session_data: DiveSessionInputData,
-) -> Result<DiveSessionQueryData, Error> {
-    use crate::schema::dive_sessions::dsl::*;
-
+    dive_session_id: Uuid,
+    dive_data: DiveInputData,
+) -> Result<DiveQueryData, Error> {
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
 
@@ -28,11 +28,14 @@ pub async fn add_dive_session(
         .await
         .expect("expecting session to be there");
 
-    let new_session = DiveSessionCreationData {
-        session_id: uuid,
-        start_time: session_data.start_time,
-        end_time: session_data.end_time,
-        session_name: session_data.session_name,
+    let new_dive = DiveCreationData {
+        dive_id: uuid,
+        discipline_type: dive_data.discipline_type,
+        depth: dive_data.depth,
+        distance: dive_data.distance,
+        dive_time: dive_data.dive_time,
+        dive_name: dive_data.dive_name,
+        session_id: dive_session_id,
         user_id: user_session.user_id,
         created_at: current_stamp,
         updated_at: current_stamp,
@@ -41,17 +44,19 @@ pub async fn add_dive_session(
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
+    use crate::schema::dives::dsl::*;
+
     let dive_session = web::block(move || {
         let conn = pool_ctx.get().unwrap();
-        diesel::insert_into(dive_sessions)
-            .values(&new_session)
+        diesel::insert_into(dives)
+            .values(&new_dive)
             .execute(&conn)
-            .expect("diesel insert new dive_session error");
+            .expect("diesel insert new dive error");
 
-        dive_sessions
-            .filter(session_id.eq(&uuid))
-            .first::<DiveSessionQueryData>(&conn)
-            .expect("error loading dive_session that was just inserted")
+        dives
+            .filter(dive_id.eq(&uuid))
+            .first::<DiveQueryData>(&conn)
+            .expect("error loading dive that was just inserted")
     })
     .await
     .expect("web::block error here?");

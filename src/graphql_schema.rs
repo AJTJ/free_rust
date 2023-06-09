@@ -1,3 +1,4 @@
+use crate::actions::add_dive;
 use crate::actions::add_dive_session;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
@@ -6,9 +7,12 @@ use crate::actions::get_user_with_email;
 use crate::actions::insert_user;
 use crate::actions::login;
 use crate::actions::logout;
+use crate::actions::update_dive;
 use crate::actions::update_dive_session;
 use crate::cookie_helpers::get_cookie_from_token;
 use crate::dto::db_query_dto::DBQueryObject;
+use crate::dto::dive_dto::DiveInputData;
+use crate::dto::dive_dto::DiveModificationData;
 use crate::dto::dive_dto::DiveQueryData;
 use crate::dto::dive_dto::DiveQueryInput;
 use crate::dto::dive_session_dto::DiveSessionInputData;
@@ -28,6 +32,7 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
 use tracing::info;
+use uuid::Uuid;
 
 pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub struct QueryRoot;
@@ -183,7 +188,7 @@ impl MutationRoot {
     }
 
     #[graphql(guard = "LoggedInGuard {}")]
-    async fn modify_dive_session(
+    async fn update_dive_session(
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
@@ -209,9 +214,39 @@ impl MutationRoot {
     }
 
     // DIVES
-    // #[graphql(guard = "LoggedInGuard {}")]
-    // async fn add_dive(&self) {}
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn add_dive(
+        &self,
+        ctx: &Context<'_>,
+        dive_session_id: Uuid,
+        dive_data: DiveInputData,
+    ) -> FieldResult<DiveQueryData> {
+        add_dive(ctx, dive_session_id, dive_data).await
+    }
 
-    // #[graphql(guard = "LoggedInGuard {}")]
-    // async fn modify_dive(&self) {}
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn update_dive(
+        &self,
+        ctx: &Context<'_>,
+        dive_mod_data: DiveModificationData,
+    ) -> FieldResult<DiveQueryData> {
+        let updated_dive = update_dive(ctx, dive_mod_data).await;
+        Ok(updated_dive)
+    }
+
+    // FOR TESTING
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let deleted = web::block(move || {
+            let conn = pool_ctx.get().unwrap();
+            use crate::schema::dives::dsl::*;
+            diesel::delete(dives)
+                .execute(&conn)
+                .expect("problem deleting dives")
+        })
+        .await?;
+
+        Ok(deleted)
+    }
 }

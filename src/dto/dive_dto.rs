@@ -2,6 +2,46 @@ use async_graphql::{InputObject, SimpleObject};
 use chrono::{NaiveDateTime, NaiveTime};
 use uuid::Uuid;
 
+use crate::schema::dives;
+
+#[derive(InputObject)]
+pub struct DiveInputData {
+    pub discipline_type: Option<String>,
+    pub depth: Option<f64>,
+    pub distance: Option<f64>,
+    pub dive_time: Option<i64>,
+    pub dive_name: Option<String>,
+}
+
+#[derive(AsChangeset, InputObject, Clone)]
+#[table_name = "dives"]
+pub struct DiveModificationData {
+    pub discipline_type: Option<String>,
+    pub depth: Option<f64>,
+    pub distance: Option<f64>,
+    pub dive_time: Option<i64>,
+    pub dive_name: Option<String>,
+
+    pub dive_id: Uuid,
+    pub is_active: Option<bool>,
+}
+
+#[derive(Insertable, InputObject)]
+#[table_name = "dives"]
+pub struct DiveCreationData {
+    pub dive_id: Uuid,
+    pub discipline_type: Option<String>,
+    pub depth: Option<f64>,
+    pub distance: Option<f64>,
+    pub dive_time: Option<i64>,
+    pub dive_name: Option<String>,
+    pub session_id: Uuid,
+    pub user_id: Uuid,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+    pub is_active: bool,
+}
+
 // Matches the database object order 1:1
 #[derive(Queryable, SimpleObject)]
 pub struct DiveQueryData {

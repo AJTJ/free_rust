@@ -1,5 +1,6 @@
-// mods
+#![feature(async_closure)]
 #[macro_use]
+// mods
 extern crate diesel;
 pub mod actions;
 pub mod auth_data;
@@ -14,7 +15,6 @@ pub mod schema;
 pub mod token_source;
 
 use actix_web::http::header::HeaderMap;
-// use actix_session::{storage::RedisActorSessionStore, Session, SessionMiddleware};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use actix_web::{guard, web, HttpRequest, Result};
@@ -27,7 +27,7 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
 use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
-use redis::{Client, Commands};
+use redis::Client;
 use std::env;
 use std::sync::{Arc, Mutex};
 use token_source::Token;
@@ -116,8 +116,11 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
             .service(web::resource("/").guard(guard::Post()).to(index))
     })
-    .workers(10)
-    .bind("127.0.0.1:8080")?
+    // Limit workers for testing
+    // .workers(1)
+    // This would ONLY be available on the local machine
+    // .bind("127.0.0.1:8080")?
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }
