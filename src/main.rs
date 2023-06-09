@@ -43,24 +43,6 @@ async fn index_playground() -> Result<HttpResponse> {
         .body(source))
 }
 
-// pub async fn index(
-//     schema: web::Data<DiveQLSchema>,
-//     req: GraphQLRequest,
-//     session: Session,
-// ) -> GraphQLResponse {
-//     // TODO: get the session_id from the request
-
-//     // get the session data from the request
-//     // let uid = session.get::<String>("user_id").unwrap_or(None);
-
-//     // build the session data
-//     // let id = Identity { id: uid };
-
-//     // send the session data through to the gql schema
-//     let session = Shared::new(session);
-//     schema.execute(req.into_inner().data(session)).await.into()
-// }
-
 fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
     headers
         .get("cookie")
@@ -73,9 +55,7 @@ async fn index(
     gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
     let mut request = gql_req.into_inner();
-    // info!("PRE headers: {:?}", req.headers());
     if let Some(token) = get_token_from_headers(req.headers()) {
-        // info!("The token in REQUEST: {:?}", token);
         request = request.data(token);
     }
     schema.execute(request).await.into()
@@ -155,3 +135,21 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             )
 */
+
+// pub async fn index(
+//     schema: web::Data<DiveQLSchema>,
+//     req: GraphQLRequest,
+//     session: Session,
+// ) -> GraphQLResponse {
+//     // TODO: get the session_id from the request
+
+//     // get the session data from the request
+//     // let uid = session.get::<String>("user_id").unwrap_or(None);
+
+//     // build the session data
+//     // let id = Identity { id: uid };
+
+//     // send the session data through to the gql schema
+//     let session = Shared::new(session);
+//     schema.execute(req.into_inner().data(session)).await.into()
+// }

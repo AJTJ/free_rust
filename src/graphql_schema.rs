@@ -37,8 +37,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
 impl QueryRoot {
-    // Purely for testing
-    // keep unguarded for now
+    // UNGUARDED - for testing
     async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
@@ -91,7 +90,6 @@ impl QueryRoot {
         Ok(dive_sessions)
     }
 
-    // DIVE THINGS
     #[graphql(guard = "LoggedInGuard {}")]
     async fn dives(
         &self,
@@ -119,7 +117,7 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
-    // this needs to be unguarded
+    // UNGUARDED
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -154,24 +152,26 @@ impl MutationRoot {
     }
 
     // AUTH
+
     async fn login(
         &self,
         ctx: &Context<'_>,
         login_data: LoginData,
     ) -> Result<UserQueryDataOutput, ErrorEnum> {
+        info!("login with data: {:?}", login_data);
         login(ctx, login_data.email, login_data.password).await
     }
 
     #[graphql(guard = "LoggedInGuard {}")]
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
-        info!("MEMES");
-        let el = logout(ctx).await;
+        logout(ctx).await;
         // TODO: This could be a better return val?
         info!("logout done");
         Ok(true)
     }
 
     // DIVE SESSION
+
     #[graphql(guard = "LoggedInGuard {}")]
     async fn add_dive_session(
         &self,

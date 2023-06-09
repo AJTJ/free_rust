@@ -110,7 +110,7 @@ impl UserQueryData {
 
 // AUTH STUFF
 
-#[derive(InputObject)]
+#[derive(InputObject, Debug)]
 pub struct LoginData {
     pub email: String,
     pub password: String,
