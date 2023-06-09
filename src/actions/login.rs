@@ -2,7 +2,7 @@ use crate::actions::add_to_user_session::add_to_user_session;
 use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
 use crate::cookie_helpers::create_cookie;
-use crate::dto::user_auth_dto::UserQueryDataOutput;
+use crate::dto::user_auth_dto::{UserModificationData, UserQueryDataOutput};
 use crate::errors::ErrorEnum;
 use crate::graphql_schema::DbPool;
 use crate::helpers::get_encoded_id;
@@ -13,6 +13,8 @@ use async_graphql::Context;
 
 use chrono::{Duration, Utc};
 use rand::Rng;
+
+use super::update_user;
 
 // TODO: Update the last_login db row
 pub async fn login(
@@ -53,7 +55,16 @@ pub async fn login(
                     let cookie = create_cookie(encoded_session_id);
                     ctx.insert_http_header(SET_COOKIE, cookie.to_string());
 
-                    let user_out: UserQueryDataOutput = user.into();
+                    let updated_user = UserModificationData {
+                        last_login: Some(Utc::now().naive_utc()),
+                        username: None,
+                        email: None,
+                        is_active: None,
+                    };
+
+                    let updated_user = update_user(ctx, None, updated_user).await;
+
+                    let user_out: UserQueryDataOutput = updated_user.into();
 
                     Ok(user_out)
                 }

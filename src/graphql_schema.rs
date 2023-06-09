@@ -35,13 +35,10 @@ pub struct MutationRoot;
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
-/*
-   How to make it more GraphQL-y
-*/
-
 #[Object]
 impl QueryRoot {
     // Purely for testing
+    // keep unguarded for now
     async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
@@ -57,6 +54,7 @@ impl QueryRoot {
         Ok(all_users)
     }
 
+    #[graphql(guard = "LoggedInGuard {}")]
     async fn user<'ctx>(
         &self,
         ctx: &Context<'ctx>,
@@ -121,6 +119,7 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
+    // this needs to be unguarded
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -139,6 +138,7 @@ impl MutationRoot {
     }
 
     // Purely for testing
+    #[graphql(guard = "LoggedInGuard {}")]
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -162,6 +162,7 @@ impl MutationRoot {
         login(ctx, login_data.email, login_data.password).await
     }
 
+    #[graphql(guard = "LoggedInGuard {}")]
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
         info!("MEMES");
         let el = logout(ctx).await;
@@ -180,7 +181,7 @@ impl MutationRoot {
         add_dive_session(ctx, session_input_data).await
     }
 
-    // #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard {}")]
     async fn modify_dive_session(
         &self,
         ctx: &Context<'_>,
@@ -190,6 +191,8 @@ impl MutationRoot {
         Ok(dive_session)
     }
 
+    // FOR TESTING
+    #[graphql(guard = "LoggedInGuard {}")]
     async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {

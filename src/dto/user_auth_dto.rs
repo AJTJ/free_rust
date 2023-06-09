@@ -18,6 +18,15 @@ pub struct UserInputData {
     pub email: String,
 }
 
+#[derive(AsChangeset, InputObject, Clone)]
+#[table_name = "users"]
+pub struct UserModificationData {
+    pub username: Option<String>,
+    pub email: Option<String>,
+    pub last_login: Option<NaiveDateTime>,
+    pub is_active: Option<bool>,
+}
+
 #[derive(Insertable)]
 #[table_name = "users"]
 pub struct UserCreationData {

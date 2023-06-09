@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 pub fn get_user_with_id(
     conn: &mut PgConnection,
-    query_id: Uuid,
+    query_id: &Uuid,
 ) -> diesel::QueryResult<UserQueryData> {
     use crate::schema::users::dsl::*;
 
