@@ -8,7 +8,7 @@ use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use rand::Rng;
 use uuid::Uuid;
 
-pub fn add_user(
+pub fn insert_user(
     conn: &mut PgConnection,
     user_data: UserInputData,
 ) -> diesel::QueryResult<UserQueryData> {

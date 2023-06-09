@@ -4,8 +4,6 @@ use actix_web::web;
 use async_graphql::Context;
 use redis::Commands;
 
-// TODO: need to create a universal key to encrypt session data
-
 pub async fn add_to_user_session(
     ctx: &Context<'_>,
     session_data: SessionData,

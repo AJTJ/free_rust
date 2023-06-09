@@ -1,11 +1,13 @@
 use crate::actions::add_dive_session;
-use crate::actions::add_user;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
+use crate::actions::get_user_session_data;
 use crate::actions::get_user_with_email;
+use crate::actions::insert_user;
 use crate::actions::login;
 use crate::actions::logout;
-use crate::actions::modify_dive_session;
+use crate::actions::update_dive_session;
+use crate::cookie_helpers::get_cookie_from_token;
 use crate::dto::db_query_dto::DBQueryObject;
 use crate::dto::dive_dto::DiveQueryData;
 use crate::dto::dive_dto::DiveQueryInput;
@@ -72,7 +74,6 @@ impl QueryRoot {
         Ok(user)
     }
 
-    // TODO: Explicitly get the user id from the cookie, this is protected
     #[graphql(guard = "LoggedInGuard {}")]
     async fn dive_sessions(
         &self,
@@ -93,32 +94,28 @@ impl QueryRoot {
     }
 
     // DIVE THINGS
-
-    // #[graphql(guard = "LoggedInGuard {}")]
-    // async fn dives(
-    //     &self,
-    //     ctx: &Context<'_>,
-    //     dive_input: DiveQueryInput,
-    //     db_query_dto: Option<DBQueryObject>,
-    // ) -> FieldResult<Vec<DiveQueryData>> {
-    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-    //     let dives = web::block(move || {
-    //         let mut conn = pool_ctx.get().unwrap();
-
-    //         // TODO: need an explicit method to get the user data from the cookie
-    //         get_dives_by_user(&mut conn, input_user_id, dive_query_input, db_query_ob)
-    //     })
-    //     .await?
-    //     .map_err(error::ErrorInternalServerError)
-    //     .unwrap();
-
-    //     Ok(dives)
-    // }
-
-    // Purely for testing
     #[graphql(guard = "LoggedInGuard {}")]
-    async fn guarded(&self) -> bool {
-        true
+    async fn dives(
+        &self,
+        ctx: &Context<'_>,
+        dive_input: Option<DiveQueryInput>,
+        db_query_dto: Option<DBQueryObject>,
+    ) -> FieldResult<Vec<DiveQueryData>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let cookie = get_cookie_from_token(ctx)
+            .expect("there should be cookie data, as this route is guarded");
+
+        let user_session = get_user_session_data(ctx, cookie.encoded_session_id).await?;
+
+        let dives = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_dives_by_user(&mut conn, user_session.user_id, dive_input, db_query_dto)
+        })
+        .await?
+        .map_err(error::ErrorInternalServerError)
+        .unwrap();
+        Ok(dives)
     }
 }
 
@@ -132,7 +129,7 @@ impl MutationRoot {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            add_user(&mut conn, user_data)
+            insert_user(&mut conn, user_data)
         })
         .await?
         .map_err(error::ErrorInternalServerError)
@@ -167,7 +164,7 @@ impl MutationRoot {
 
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
         info!("MEMES");
-        logout(ctx).await;
+        let el = logout(ctx).await;
         // TODO: This could be a better return val?
         info!("logout done");
         Ok(true)
@@ -189,7 +186,7 @@ impl MutationRoot {
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
     ) -> FieldResult<DiveSessionQueryData> {
-        let dive_session = modify_dive_session(ctx, session_input_data).await;
+        let dive_session = update_dive_session(ctx, session_input_data).await;
         Ok(dive_session)
     }
 

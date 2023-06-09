@@ -8,7 +8,7 @@ use chrono::Utc;
 use diesel::{result::Error, RunQueryDsl};
 use tracing::info;
 
-pub async fn modify_dive_session(
+pub async fn update_dive_session(
     ctx: &Context<'_>,
     session_mod_data: DiveSessionModificationData,
 ) -> DiveSessionQueryData {

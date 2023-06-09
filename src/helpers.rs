@@ -1,7 +1,7 @@
 use crate::auth_data::UniversalIdType;
 use base64::{engine::general_purpose, Engine as _};
-use send_wrapper::SendWrapper;
-use std::ops::Deref;
+// use send_wrapper::SendWrapper;
+// use std::ops::Deref;
 
 pub fn get_encoded_id(id: UniversalIdType) -> String {
     general_purpose::STANDARD.encode(id)
@@ -19,20 +19,20 @@ pub fn decode_id(encoded_universal_id: String) -> UniversalIdType {
     decoded_id
 }
 
-// TODO: Is this baaad?
-#[derive(Clone, Debug)]
-pub struct Shared<T>(pub Option<SendWrapper<T>>);
+// UNUSED
+// #[derive(Clone, Debug)]
+// pub struct Shared<T>(pub Option<SendWrapper<T>>);
 
-impl<T> Shared<T> {
-    pub fn new(v: T) -> Self {
-        Self(Some(SendWrapper::new(v)))
-    }
-}
+// impl<T> Shared<T> {
+//     pub fn new(v: T) -> Self {
+//         Self(Some(SendWrapper::new(v)))
+//     }
+// }
 
-impl<T> Deref for Shared<T> {
-    type Target = T;
+// impl<T> Deref for Shared<T> {
+//     type Target = T;
 
-    fn deref(&self) -> &Self::Target {
-        &*self.0.as_deref().clone().unwrap()
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         &*self.0.as_deref().clone().unwrap()
+//     }
+// }

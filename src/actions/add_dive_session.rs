@@ -21,12 +21,6 @@ pub async fn add_dive_session(
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
 
-    // TODO
-    /*
-     Ensure that a guard is in place that checks the user logged in status
-     then take the user id out of the session data??
-    */
-
     let cookie_data =
         get_cookie_from_token(ctx).expect("there should be cookie data, as this route is guarded");
 

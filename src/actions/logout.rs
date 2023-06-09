@@ -9,7 +9,6 @@ pub async fn logout(ctx: &Context<'_>) {
     if let Some(cookie_data) = get_cookie_from_token(ctx) {
         remove_from_user_session(ctx, cookie_data.encoded_session_id).await;
     }
-    info!("after remove from sesh");
     let expired_cookied = create_expired_cookie();
     ctx.insert_http_header(SET_COOKIE, expired_cookied.to_string());
 }

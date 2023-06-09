@@ -47,7 +47,10 @@ impl Guard for LoggedInGuard {
             let user_session = get_user_session_data(ctx, cookie_data.encoded_session_id).await;
 
             match user_session {
-                Ok(u) => Ok(()),
+                Ok(s) => {
+                    // TODO: Would it be possible to pass data into the object from the guard?
+                    Ok(())
+                }
                 Err(e) => Err({
                     info!("user not in session");
                     "Forbidden".into()
