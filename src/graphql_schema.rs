@@ -123,7 +123,7 @@ impl QueryRoot {
 
 #[Object]
 impl MutationRoot {
-    // UNGUARDED
+    // Must be UNGUARDED
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -141,8 +141,7 @@ impl MutationRoot {
         Ok(user)
     }
 
-    // Purely for testing
-    #[graphql(guard = "LoggedInGuard {}")]
+    // For TESTING
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -198,7 +197,6 @@ impl MutationRoot {
     }
 
     // FOR TESTING
-    #[graphql(guard = "LoggedInGuard {}")]
     async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -235,7 +233,6 @@ impl MutationRoot {
     }
 
     // FOR TESTING
-    #[graphql(guard = "LoggedInGuard {}")]
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
