@@ -43,7 +43,7 @@ pub struct UserCreationData {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
-// #[graphql(complex)]
+#[graphql(complex)]
 pub struct UserQueryData {
     pub id: i32,
     pub user_id: Uuid,
@@ -73,7 +73,32 @@ impl From<UserQueryData> for UserQueryDataOutput {
     }
 }
 
+#[ComplexObject]
+impl UserQueryData {
+    async fn dive_sessions(
+        &self,
+        ctx: &Context<'_>,
+        // this needs to be mut
+        mut dive_session_query: Option<DiveSessionQueryInput>,
+        db_query_dto: Option<DBQueryObject>,
+    ) -> FieldResult<Vec<DiveSessionQueryData>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let user_id = self.user_id;
+
+        let dive_sessions = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
+        })
+        .await
+        .expect("error in dive sessions web::block")
+        .expect("error in another loading dive sessions");
+
+        Ok(dive_sessions)
+    }
+}
 #[derive(SimpleObject)]
+#[graphql(complex)]
 pub struct UserQueryDataOutput {
     pub user_id: Uuid,
     pub username: String,
@@ -85,20 +110,20 @@ pub struct UserQueryDataOutput {
 }
 
 #[ComplexObject]
-impl UserQueryData {
+impl UserQueryDataOutput {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
-        mut dive_session_query: DiveSessionQueryInput,
+        // this needs to be mut
+        dive_session_query: Option<DiveSessionQueryInput>,
         db_query_dto: Option<DBQueryObject>,
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        dive_session_query.user_id = self.user_id;
-
+        let user_id = self.user_id;
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions_by_user(&mut conn, dive_session_query, db_query_dto)
+            get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
         })
         .await
         .expect("error in dive sessions web::block")

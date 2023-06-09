@@ -81,13 +81,24 @@ impl QueryRoot {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
-        dive_session_input: DiveSessionQueryInput,
+        dive_session_input: Option<DiveSessionQueryInput>,
         db_query_dto: Option<DBQueryObject>,
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let cookie = get_cookie_from_token(ctx)
+            .expect("there should be cookie data, as this route is guarded");
+
+        let user_session = get_user_session_data(ctx, cookie.encoded_session_id).await?;
+
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions_by_user(&mut conn, dive_session_input, db_query_dto)
+            get_dive_sessions_by_user(
+                &mut conn,
+                &user_session.user_id,
+                dive_session_input,
+                db_query_dto,
+            )
         })
         .await?
         .map_err(error::ErrorInternalServerError)

@@ -89,7 +89,6 @@ pub struct DiveSessionQueryInput {
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
-    pub user_id: Uuid,
     pub is_active: Option<bool>,
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
