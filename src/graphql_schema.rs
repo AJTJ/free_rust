@@ -39,6 +39,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 impl QueryRoot {
     // UNGUARDED - for testing
     async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
+        info!("ALL_USERS HIT");
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
         let all_users = web::block(move || {

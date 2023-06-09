@@ -72,7 +72,7 @@ async fn main() -> std::io::Result<()> {
     let manager = ConnectionManager::<PgConnection>::new(db_url);
 
     let pool: DbPool = Pool::builder()
-        .max_size(1)
+        // .max_size(1)
         .build(manager)
         .expect("Failed to create pool.");
 
@@ -116,7 +116,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
             .service(web::resource("/").guard(guard::Post()).to(index))
     })
-    .workers(1)
+    .workers(10)
     .bind("127.0.0.1:8080")?
     .run()
     .await
