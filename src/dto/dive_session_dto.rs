@@ -9,6 +9,41 @@ use super::{
     dive_dto::{DiveQueryData, DiveQueryInput},
 };
 
+/*
+NOTES
+- People are often looking for specific things and thus they will be trying to solve specific issues by recording data.
+- It is very important to be able to record everything in a shorthand, since people don't necessarily want to input all the data all the time.
+
+- shorthand recording
+- max numbers per discipline
+- food
+    - food time
+    - coffee
+    - what eaten
+- previous day
+    - eaten
+    - drank
+    - etc
+- general feeling
+- health
+    - congestion, headache
+- sleep
+    - time
+    - quality
+    - when to when
+- dive buddy
+    - level of qualification
+- last_exertion
+    - type of exertion
+- environment
+    - water environment
+    - people
+- Data sharing
+    - environment data sharing
+    - user profile sharing
+    - sharing through QR codes
+ */
+
 #[derive(InputObject)]
 pub struct DiveSessionInputData {
     pub start_time: NaiveDateTime,
@@ -44,13 +79,14 @@ pub struct DiveSessionCreationData {
 #[derive(Queryable, SimpleObject)]
 #[graphql(complex)]
 pub struct DiveSessionQueryData {
-    pub id: i32,
-    pub session_id: Uuid,
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
+
     pub user_id: Uuid,
 
+    pub id: i32,
+    pub session_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,

@@ -45,15 +45,17 @@ pub struct DiveCreationData {
 // Matches the database object order 1:1
 #[derive(Queryable, SimpleObject)]
 pub struct DiveQueryData {
-    pub id: i32,
-    pub dive_id: Uuid,
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,
     pub dive_time: Option<i64>,
     pub dive_name: Option<String>,
+
     pub session_id: Uuid,
     pub user_id: Uuid,
+
+    pub id: i32,
+    pub dive_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,

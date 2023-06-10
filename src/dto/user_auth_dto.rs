@@ -45,13 +45,14 @@ pub struct UserCreationData {
 #[derive(Queryable, SimpleObject, Debug)]
 #[graphql(complex)]
 pub struct UserQueryData {
-    pub id: i32,
-    pub user_id: Uuid,
     pub username: String,
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
     pub last_login: NaiveDateTime,
+
+    pub id: i32,
+    pub user_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
