@@ -31,7 +31,7 @@ pub struct UserModificationData {
 #[table_name = "users"]
 pub struct UserCreationData {
     pub username: String,
-    pub user_id: Uuid,
+    pub unique_id: Uuid,
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
@@ -52,7 +52,7 @@ pub struct UserQueryData {
     pub last_login: NaiveDateTime,
 
     pub id: i32,
-    pub user_id: Uuid,
+    pub unique_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -63,7 +63,7 @@ pub struct UserQueryData {
 impl From<UserQueryData> for UserQueryDataOutput {
     fn from(val: UserQueryData) -> Self {
         UserQueryDataOutput {
-            user_id: val.user_id,
+            user_id: val.unique_id,
             username: val.username,
             email: val.email,
             last_login: val.last_login,
@@ -85,7 +85,7 @@ impl UserQueryData {
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let user_id = self.user_id;
+        let user_id = self.unique_id;
 
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();

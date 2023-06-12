@@ -58,14 +58,14 @@ pub struct DiveSessionModificationData {
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
 
-    pub session_id: Uuid,
+    pub unique_id: Uuid,
     pub is_active: Option<bool>,
 }
 
 #[derive(Insertable, InputObject)]
 #[table_name = "dive_sessions"]
 pub struct DiveSessionCreationData {
-    pub session_id: Uuid,
+    pub unique_id: Uuid,
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
@@ -86,7 +86,7 @@ pub struct DiveSessionQueryData {
     pub user_id: Uuid,
 
     pub id: i32,
-    pub session_id: Uuid,
+    pub unique_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,

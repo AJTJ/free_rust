@@ -1,14 +1,10 @@
 -- Your SQL goes here
-CREATE TABLE dives (
-  -- dive specific information
-  discipline_type TEXT,
-  depth FLOAT,
-  distance FLOAT,
-  dive_time BIGINT,
-  dive_name TEXT,
+CREATE TABLE all_logs (
   -- relationship data
-  session_id uuid NOT NULL REFERENCES dive_sessions (unique_id),
+  session_id uuid REFERENCES dive_sessions (unique_id),
+  dive_id uuid REFERENCES dives (unique_id),
   user_id uuid NOT NULL REFERENCES users (unique_id),
+  logger_used uuid NOT NULL REFERENCES loggers (unique_id),
   -- default data
   id SERIAL PRIMARY KEY,
   unique_id uuid UNIQUE NOT NULL,
@@ -17,4 +13,4 @@ CREATE TABLE dives (
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
   deleted_by uuid
-);
+)

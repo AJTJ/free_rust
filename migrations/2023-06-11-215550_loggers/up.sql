@@ -1,6 +1,8 @@
 -- Your SQL goes here
-CREATE TABLE air_weather_types (
-  type_name TEXT,
+CREATE TABLE loggers (
+  logger_name TEXT NOT NULL,
+  -- relationships
+  user_id uuid NOT NULL REFERENCES users (unique_id),
   -- default data
   id SERIAL PRIMARY KEY,
   unique_id uuid UNIQUE NOT NULL,

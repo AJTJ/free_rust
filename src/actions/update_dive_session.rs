@@ -17,9 +17,11 @@ pub async fn update_dive_session(
     let my_session_mod_data = session_mod_data.clone();
     let output_dive_session = web::block(move || {
         let conn = pool_ctx.get().unwrap();
-        use crate::schema::dive_sessions::dsl::*;
+        use crate::schema::dive_sessions::dsl::{
+            dive_sessions, unique_id as session_id, updated_at,
+        };
         diesel::update(dive_sessions)
-            .filter(session_id.eq(&my_session_mod_data.session_id))
+            .filter(session_id.eq(&my_session_mod_data.unique_id))
             .set((&my_session_mod_data, updated_at.eq(Utc::now().naive_utc())))
             .execute(&conn)
     })
@@ -30,7 +32,7 @@ pub async fn update_dive_session(
 
     let updated_session = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        get_dive_session_by_id(&mut conn, &session_mod_data.session_id, None)
+        get_dive_session_by_id(&mut conn, &session_mod_data.unique_id, None)
     })
     .await
     .expect("web::block error here?")

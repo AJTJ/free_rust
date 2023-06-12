@@ -44,7 +44,7 @@ pub async fn login(
                     add_to_user_session(
                         ctx,
                         SessionData {
-                            user_id: user.user_id,
+                            user_id: user.unique_id,
                             expiry: Utc::now().naive_utc() + Duration::minutes(10080),
                         },
                         encoded_session_id.clone(),
@@ -62,7 +62,7 @@ pub async fn login(
                     };
 
                     let updated_user =
-                        update_user(ctx, None, Some(user.user_id), updated_user).await;
+                        update_user(ctx, None, Some(user.unique_id), updated_user).await;
 
                     let user_out: UserQueryDataOutput = updated_user.into();
 

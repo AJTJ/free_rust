@@ -7,7 +7,7 @@ CREATE TABLE users (
   last_login TIMESTAMP NOT NULL,
   -- default data
   id SERIAL PRIMARY KEY,
-  user_id uuid UNIQUE NOT NULL,
+  unique_id uuid UNIQUE NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,

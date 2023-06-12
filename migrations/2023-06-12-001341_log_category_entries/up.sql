@@ -1,13 +1,11 @@
 -- Your SQL goes here
-CREATE TABLE dives (
-  -- dive specific information
-  discipline_type TEXT,
-  depth FLOAT,
-  distance FLOAT,
-  dive_time BIGINT,
-  dive_name TEXT,
+CREATE TABLE log_category_entries (
+  -- entry_specific_data
+  -- NOTE: Is this table even necessary?
+  item_order INTEGER,
   -- relationship data
-  session_id uuid NOT NULL REFERENCES dive_sessions (unique_id),
+  -- For getting the category info
+  logger_category_type_id uuid NOT NULL REFERENCES logger_category_types (unique_id),
   user_id uuid NOT NULL REFERENCES users (unique_id),
   -- default data
   id SERIAL PRIMARY KEY,
@@ -17,4 +15,4 @@ CREATE TABLE dives (
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
   deleted_by uuid
-);
+)
