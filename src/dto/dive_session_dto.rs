@@ -93,7 +93,6 @@ pub struct DiveSessionQueryData {
     pub deleted_at: Option<NaiveDateTime>,
     pub deleted_by: Option<Uuid>,
 }
-
 #[ComplexObject]
 impl DiveSessionQueryData {
     async fn dives(
@@ -101,7 +100,7 @@ impl DiveSessionQueryData {
         ctx: &Context<'_>,
         db_query_dto: Option<DBQueryObject>,
         // this needs to be mut
-        mut dive_query: Option<DiveQueryInput>,
+        dive_query: Option<DiveQueryInput>,
     ) -> FieldResult<Vec<DiveQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 

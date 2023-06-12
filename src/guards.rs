@@ -1,36 +1,34 @@
 use async_graphql::{async_trait::async_trait, Context, Guard, Result};
 use tracing::info;
 
-use crate::{
-    actions::get_user_session_data, cookie_helpers::get_cookie_from_token, token_source::Token,
-};
+use crate::{actions::get_user_session_data, cookie_helpers::get_cookie_from_token};
 
 #[derive(Eq, PartialEq, Copy, Clone)]
-enum Role {
-    Admin,
-    Guest,
-}
+// enum Role {
+//     Admin,
+//     Guest,
+// }
 
-struct RoleGuard {
-    role: Role,
-}
+// struct RoleGuard {
+//     role: Role,
+// }
 
-impl RoleGuard {
-    fn new(role: Role) -> Self {
-        Self { role }
-    }
-}
+// impl RoleGuard {
+//     fn new(role: Role) -> Self {
+//         Self { role }
+//     }
+// }
 
-#[async_trait]
-impl Guard for RoleGuard {
-    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        if ctx.data_opt::<Role>() == Some(&self.role) {
-            Ok(())
-        } else {
-            Err("Forbidden".into())
-        }
-    }
-}
+// #[async_trait]
+// impl Guard for RoleGuard {
+//     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+//         if ctx.data_opt::<Role>() == Some(&self.role) {
+//             Ok(())
+//         } else {
+//             Err("Forbidden".into())
+//         }
+//     }
+// }
 
 pub struct LoggedInGuard {}
 

@@ -2,7 +2,6 @@
 #[macro_use]
 // mods
 extern crate diesel;
-pub use diesel::sql_types;
 pub mod actions;
 pub mod auth_data;
 pub mod cookie_helpers;
@@ -86,15 +85,7 @@ async fn main() -> std::io::Result<()> {
 
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    // Session
-    // let secret_key = Key::generate();
-
-    let client = Client::open("redis://127.0.0.1/").expect("failure starting redis server");
-    let mut con = client
-        .get_connection()
-        .expect("failure getting connection in MAIN");
-
-    // Client::open("redis://127.0.0.1:6379/").expect("failure starting redis server");
+    let client = Client::open(redis_url).expect("failure starting redis server");
 
     let shared_client: SharedRedisType = Arc::new(Mutex::new(client));
 

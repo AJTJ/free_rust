@@ -14,7 +14,7 @@ pub struct DiveInputData {
 }
 
 #[derive(AsChangeset, InputObject, Clone)]
-#[table_name = "dives"]
+#[diesel(table_name = dives)]
 pub struct DiveModificationData {
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
@@ -27,7 +27,7 @@ pub struct DiveModificationData {
 }
 
 #[derive(Insertable, InputObject)]
-#[table_name = "dives"]
+#[diesel(table_name = dives)]
 pub struct DiveCreationData {
     pub unique_id: Uuid,
     pub discipline_type: Option<String>,

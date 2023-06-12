@@ -1,7 +1,7 @@
 use std::fmt::{self, Display};
 
 use diesel::result::Error;
-use snafu::prelude::*;
+// use snafu::prelude::*;
 
 // #[derive(Debug, Snafu)]
 // pub enum CustomError {
@@ -73,7 +73,7 @@ impl Display for ErrorEnum {
         match self {
             ErrorEnum::WrongPassword(pw) => write!(f, "incorrect password: {}", pw),
             ErrorEnum::UserNotFound(e) => write!(f, "user not found, error: {e}"),
-            e => write!(f, "This error needs a description: {}", e),
+            // e => write!(f, "This error needs a description: {}", e),
             // EXAMPLE: ErrorEnum::IoError(io_error) => write!(f, "{}", io_error),
             // ErrorEnum::ParseError(parse_int_error) => write!(f, "{}", parse_int_error),
         }

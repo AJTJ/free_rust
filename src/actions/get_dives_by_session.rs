@@ -11,7 +11,7 @@ use uuid::Uuid;
 pub fn get_dives_by_session(
     conn: &mut PgConnection,
     input_session_id: Uuid,
-    dive_query_input: Option<DiveQueryInput>,
+    _dive_query_input: Option<DiveQueryInput>,
     db_query_ob: Option<DBQueryObject>,
 ) -> diesel::QueryResult<Vec<DiveQueryData>> {
     use crate::schema::dives::dsl::*;
