@@ -63,21 +63,35 @@ use diesel::result::Error;
 // }
 
 #[derive(Debug)]
-pub enum ErrorEnum {
+pub enum LoginErrorEnum {
     WrongPassword(String),
     UserNotFound(Error),
 }
 
-impl Display for ErrorEnum {
+impl Display for LoginErrorEnum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorEnum::WrongPassword(pw) => write!(f, "incorrect password: {}", pw),
-            ErrorEnum::UserNotFound(e) => write!(f, "user not found, error: {e}"),
-            // e => write!(f, "This error needs a description: {}", e),
-            // EXAMPLE: ErrorEnum::IoError(io_error) => write!(f, "{}", io_error),
-            // ErrorEnum::ParseError(parse_int_error) => write!(f, "{}", parse_int_error),
+            LoginErrorEnum::WrongPassword(pw) => write!(f, "incorrect password"),
+            LoginErrorEnum::UserNotFound(e) => write!(f, "login error: {e}"),
         }
     }
 }
 
-impl std::error::Error for ErrorEnum {}
+impl std::error::Error for LoginErrorEnum {}
+
+#[derive(Debug)]
+pub enum DBErrors {
+    QueryError(Error),
+    UpdateError(Error),
+}
+
+impl Display for DBErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DBErrors::QueryError(e) => write!(f, "Query error: {e}"),
+            DBErrors::UpdateError(e) => write!(f, "Update error: {e}"),
+        }
+    }
+}
+
+impl std::error::Error for DBErrors {}

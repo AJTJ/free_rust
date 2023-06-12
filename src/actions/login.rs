@@ -3,7 +3,7 @@ use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
 use crate::cookie_helpers::create_cookie;
 use crate::dto::user_auth_dto::{UserModificationData, UserQueryDataOutput};
-use crate::errors::ErrorEnum;
+use crate::errors::LoginErrorEnum;
 use crate::graphql_schema::DbPool;
 use crate::helpers::get_encoded_id;
 use actix_web::http::header::SET_COOKIE;
@@ -20,14 +20,14 @@ pub async fn login(
     ctx: &Context<'_>,
     inc_email: String,
     password: String,
-) -> Result<UserQueryDataOutput, ErrorEnum> {
+) -> Result<UserQueryDataOutput, LoginErrorEnum> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
         get_user_with_email(&mut conn, inc_email)
     })
     .await
-    .expect("maybe_user error in login");
+    .expect("web block error get user");
 
     let return_user = match maybe_user {
         Ok(user) => {
@@ -68,10 +68,10 @@ pub async fn login(
 
                     Ok(user_out)
                 }
-                false => Err(ErrorEnum::WrongPassword(password)),
+                false => Err(LoginErrorEnum::WrongPassword(password)),
             }
         }
-        Err(e) => Err(ErrorEnum::UserNotFound(e)),
+        Err(e) => Err(LoginErrorEnum::UserNotFound(e)),
     };
     return_user
 }

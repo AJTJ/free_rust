@@ -19,7 +19,7 @@ pub struct UserInputData {
 }
 
 #[derive(AsChangeset, InputObject, Clone)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct UserModificationData {
     pub username: Option<String>,
     pub email: Option<String>,
@@ -28,7 +28,7 @@ pub struct UserModificationData {
 }
 
 #[derive(Insertable)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct UserCreationData {
     pub username: String,
     pub unique_id: Uuid,

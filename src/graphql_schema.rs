@@ -21,7 +21,8 @@ use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::dive_session_dto::DiveSessionQueryInput;
 use crate::dto::user_auth_dto::UserQueryDataOutput;
 use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
-use crate::errors::ErrorEnum;
+use crate::errors::DBErrors;
+use crate::errors::LoginErrorEnum;
 use crate::guards::LoggedInGuard;
 
 use actix_web::error;
@@ -173,8 +174,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         login_data: LoginData,
-    ) -> Result<UserQueryDataOutput, ErrorEnum> {
-        info!("login with data: {:?}", login_data);
+    ) -> Result<UserQueryDataOutput, LoginErrorEnum> {
         login(ctx, login_data.email, login_data.password).await
     }
 
@@ -202,9 +202,8 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
-    ) -> FieldResult<DiveSessionQueryData> {
-        let dive_session = update_dive_session(ctx, session_input_data).await;
-        Ok(dive_session)
+    ) -> Result<DiveSessionQueryData, DBErrors> {
+        update_dive_session(ctx, session_input_data).await
     }
 
     // FOR TESTING

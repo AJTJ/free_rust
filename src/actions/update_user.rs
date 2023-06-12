@@ -21,6 +21,7 @@ pub async fn update_user(
 ) -> UserQueryData {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
+    // get user_id from cookie/session
     let user_id = match user_id {
         Some(uuid) => uuid,
         None => {

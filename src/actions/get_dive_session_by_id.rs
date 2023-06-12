@@ -12,11 +12,8 @@ pub fn get_dive_session_by_id(
 ) -> diesel::QueryResult<DiveSessionQueryData> {
     use crate::schema::dive_sessions::dsl::{dive_sessions, unique_id as session_id};
 
-    let dive_sessions_output = dive_sessions
+    dive_sessions
         .filter(session_id.eq(&input_session_id))
         .limit(1)
         .get_result::<DiveSessionQueryData>(conn)
-        .expect("error loading dive sessions");
-
-    Ok(dive_sessions_output)
 }

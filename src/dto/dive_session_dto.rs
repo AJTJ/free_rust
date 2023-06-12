@@ -52,7 +52,7 @@ pub struct DiveSessionInputData {
 }
 
 #[derive(AsChangeset, InputObject, Clone)]
-#[table_name = "dive_sessions"]
+#[diesel(table_name = dive_sessions)]
 pub struct DiveSessionModificationData {
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
@@ -63,7 +63,7 @@ pub struct DiveSessionModificationData {
 }
 
 #[derive(Insertable, InputObject)]
-#[table_name = "dive_sessions"]
+#[diesel(table_name = dive_sessions)]
 pub struct DiveSessionCreationData {
     pub unique_id: Uuid,
     pub start_time: NaiveDateTime,

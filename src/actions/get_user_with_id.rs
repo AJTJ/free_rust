@@ -9,10 +9,7 @@ pub fn get_user_with_id(
 ) -> diesel::QueryResult<UserQueryData> {
     use crate::schema::users::dsl::{unique_id as user_id, users};
 
-    let user = users
+    users
         .filter(user_id.eq(&query_id))
         .first::<UserQueryData>(conn)
-        .expect("error loading person that was just inserted");
-
-    Ok(user)
 }

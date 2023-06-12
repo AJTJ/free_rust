@@ -8,10 +8,7 @@ pub fn get_user_with_email(
 ) -> diesel::QueryResult<UserQueryData> {
     use crate::schema::users::dsl::*;
 
-    let user = users
+    users
         .filter(email.eq(&query_email))
         .first::<UserQueryData>(conn)
-        .expect("error loading person with email");
-
-    Ok(user)
 }

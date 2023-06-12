@@ -8,6 +8,7 @@ use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use rand::Rng;
 use uuid::Uuid;
 
+// TODO: improve error handling
 pub fn insert_user(
     conn: &mut PgConnection,
     user_data: UserInputData,
@@ -40,10 +41,6 @@ pub fn insert_user(
         .execute(conn)
         .expect("diesel insert new user error");
 
-    let user = users
-        .filter(user_id.eq(&uuid))
-        .first::<UserQueryData>(conn)
-        .expect("error loading person that was just inserted");
-
-    Ok(user)
+    // implicit return of user that was just inserted
+    users.filter(user_id.eq(&uuid)).first::<UserQueryData>(conn)
 }
