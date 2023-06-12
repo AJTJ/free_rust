@@ -48,10 +48,10 @@ impl QueryRoot {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
         let all_users = web::block(move || {
-            let pool = pool_ctx.get().unwrap();
+            let mut pool = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
             users
-                .load::<UserQueryData>(&pool)
+                .load::<UserQueryData>(&mut pool)
                 .expect("loading all users")
         })
         .await?;
@@ -156,10 +156,10 @@ impl MutationRoot {
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
-            let conn = pool_ctx.get().unwrap();
-            use crate::schema::users::dsl::*;
+            let mut conn = pool_ctx.get().unwrap();
+            use crate::schema::users::dsl::users;
             diesel::delete(users)
-                .execute(&conn)
+                .execute(&mut conn)
                 .expect("problem deleting users")
         })
         .await?;
@@ -211,10 +211,10 @@ impl MutationRoot {
     async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
-            let conn = pool_ctx.get().unwrap();
-            use crate::schema::dive_sessions::dsl::*;
+            let mut conn = pool_ctx.get().unwrap();
+            use crate::schema::dive_sessions::dsl::dive_sessions;
             diesel::delete(dive_sessions)
-                .execute(&conn)
+                .execute(&mut conn)
                 .expect("problem deleting dive sessions")
         })
         .await?;
@@ -247,10 +247,10 @@ impl MutationRoot {
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
-            let conn = pool_ctx.get().unwrap();
-            use crate::schema::dives::dsl::*;
+            let mut conn = pool_ctx.get().unwrap();
+            use crate::schema::dives::dsl::dives;
             diesel::delete(dives)
-                .execute(&conn)
+                .execute(&mut conn)
                 .expect("problem deleting dives")
         })
         .await?;

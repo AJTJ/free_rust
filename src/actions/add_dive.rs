@@ -47,15 +47,15 @@ pub async fn add_dive(
     use crate::schema::dives::dsl::{dives, unique_id as dive_id};
 
     let dive_session = web::block(move || {
-        let conn = pool_ctx.get().unwrap();
+        let mut conn = pool_ctx.get().unwrap();
         diesel::insert_into(dives)
             .values(&new_dive)
-            .execute(&conn)
+            .execute(&mut conn)
             .expect("diesel insert new dive error");
 
         dives
             .filter(dive_id.eq(&uuid))
-            .first::<DiveQueryData>(&conn)
+            .first::<DiveQueryData>(&mut conn)
             .expect("error loading dive that was just inserted")
     })
     .await

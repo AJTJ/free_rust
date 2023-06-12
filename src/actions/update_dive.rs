@@ -15,12 +15,12 @@ pub async fn update_dive(ctx: &Context<'_>, dive_mod_data: DiveModificationData)
 
     let my_dive_mod_data = dive_mod_data.clone();
     let output_dive = web::block(move || {
-        let conn = pool_ctx.get().unwrap();
+        let mut conn = pool_ctx.get().unwrap();
         use crate::schema::dives::dsl::{dives, unique_id as dive_id, updated_at};
         diesel::update(dives)
             .filter(dive_id.eq(&my_dive_mod_data.unique_id))
             .set((&my_dive_mod_data, updated_at.eq(Utc::now().naive_utc())))
-            .execute(&conn)
+            .execute(&mut conn)
     })
     .await
     .expect("web::block error here?");

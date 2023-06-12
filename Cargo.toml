@@ -25,7 +25,8 @@ redis = { version = "0.23.0", features = ["tokio-comp"] }
 # actix-identity = "0.5.2"
 
 # ORM
-diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono", "time", "uuid"] }
+# diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono", "time", "uuid"] }
+diesel = { version = "2.1.0", features = ["postgres", "r2d2", "numeric", "chrono", "time", "uuid"] }
 
 # graphql
 async-graphql = {version = "5.0.9", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log", "uuid08"]}
@@ -38,7 +39,7 @@ rand = "0.8.5"
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
 bb8 = "0.8.0"
-uuid = { version= "0.8.2 ", features = ["serde", "v4"] } 
+uuid = { version= "1.3.3 ", features = ["serde", "v4"] } 
 tracing = "0.1.33"
 slab = "0.4.6"
 futures-util = "0.3.0"

@@ -42,15 +42,15 @@ pub async fn add_dive_session(
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     let dive_session = web::block(move || {
-        let conn = pool_ctx.get().unwrap();
+        let mut conn = pool_ctx.get().unwrap();
         diesel::insert_into(dive_sessions)
             .values(&new_session)
-            .execute(&conn)
+            .execute(&mut conn)
             .expect("diesel insert new dive_session error");
 
         dive_sessions
             .filter(schema_session_id.eq(&uuid))
-            .first::<DiveSessionQueryData>(&conn)
+            .first::<DiveSessionQueryData>(&mut conn)
             .expect("error loading dive_session that was just inserted")
     })
     .await

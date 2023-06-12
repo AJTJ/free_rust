@@ -2,6 +2,7 @@
 #[macro_use]
 // mods
 extern crate diesel;
+pub use diesel::sql_types;
 pub mod actions;
 pub mod auth_data;
 pub mod cookie_helpers;
