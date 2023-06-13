@@ -5,7 +5,7 @@ CREATE TABLE logger_category_entries (
   -- relationship data
   -- NOTE: An entry refers to its type
   logger_category_type_id uuid NOT NULL REFERENCES logger_category_types (unique_id),
-  -- NOTE: An entry exists in a list
+  -- NOTE: An entry ALWAYS exists in a list
   logger_id uuid NOT NULL REFERENCES loggers (unique_id),
   user_id uuid NOT NULL REFERENCES users (unique_id),
   -- default data
