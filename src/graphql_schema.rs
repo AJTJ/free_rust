@@ -242,11 +242,11 @@ impl MutationRoot {
 
     // LOGGER STUFF
     // add logger(input_data: An array of inputs) {
-        // map the inputs 
-        // say they want SLEEP_START, SLEEP_END and GENERAL_FEELING
-        // that should store a logger and then also store some category_entries and also some field_entries related to that logger.
-        // as the app scales, there will be many category_entries and many field_entries. Is this necessary?
-    }
+    // map the inputs
+    // say they want SLEEP_START, SLEEP_END and GENERAL_FEELING
+    // that should store a logger and then also store some category_entries and also some field_entries related to that logger.
+    // as the app scales, there will be many category_entries and many field_entries. Is this necw
+    // }
 
     //for testing
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
