@@ -169,7 +169,6 @@ impl MutationRoot {
     }
 
     // AUTH
-
     async fn login(
         &self,
         ctx: &Context<'_>,
@@ -187,7 +186,6 @@ impl MutationRoot {
     }
 
     // DIVE SESSION
-
     #[graphql(guard = "LoggedInGuard {}")]
     async fn add_dive_session(
         &self,
@@ -206,7 +204,7 @@ impl MutationRoot {
         update_dive_session(ctx, session_input_data).await
     }
 
-    // FOR TESTING
+    // for testing
     async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -242,7 +240,15 @@ impl MutationRoot {
         Ok(updated_dive)
     }
 
-    // FOR TESTING
+    // LOGGER STUFF
+    // add logger(input_data: An array of inputs) {
+        // map the inputs 
+        // say they want SLEEP_START, SLEEP_END and GENERAL_FEELING
+        // that should store a logger and then also store some category_entries and also some field_entries related to that logger.
+        // as the app scales, there will be many category_entries and many field_entries. Is this necessary?
+    }
+
+    //for testing
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
