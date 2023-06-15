@@ -5,14 +5,14 @@ CREATE TABLE log_category_entries (
   item_order INTEGER,
   -- relationship data
   -- For getting the category info
-  logger_category_type_id uuid NOT NULL REFERENCES logger_category_types (unique_id),
-  user_id uuid NOT NULL REFERENCES users (unique_id),
+  logger_category_type_id uuid NOT NULL REFERENCES logger_category_types (id),
+  user_id uuid NOT NULL REFERENCES users (id),
   -- default data
-  id SERIAL PRIMARY KEY,
-  unique_id uuid UNIQUE NOT NULL,
+  id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
-  deleted_by uuid
+  deleted_by uuid,
+  PRIMARY KEY (id)
 )

@@ -6,20 +6,20 @@ CREATE TABLE log_input_entries (
   input_float FLOAT,
   input_integer INTEGER,
   -- type relationships
-  custom_enum_category_id uuid REFERENCES custom_enum_categories (unique_id),
-  custom_enum_variant_id uuid REFERENCES custom_enum_variants (unique_id),
+  custom_enum_category_id uuid REFERENCES custom_enum_categories (id),
+  custom_enum_variant_id uuid REFERENCES custom_enum_variants (id),
   -- relationship data
   -- For getting the category
-  log_category_entry_id uuid NOT NULL REFERENCES log_category_entries (unique_id),
+  log_category_entry_id uuid NOT NULL REFERENCES log_category_entries (id),
   -- For getting all the other input data
-  logger_input_type_id uuid NOT NULL REFERENCES logger_input_types (unique_id),
-  user_id uuid NOT NULL REFERENCES users (unique_id),
+  logger_input_type_id uuid NOT NULL REFERENCES logger_input_types (id),
+  user_id uuid NOT NULL REFERENCES users (id),
   -- default data
-  id SERIAL PRIMARY KEY,
-  unique_id uuid UNIQUE NOT NULL,
+  id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
-  deleted_by uuid
+  deleted_by uuid,
+  PRIMARY KEY (id)
 )

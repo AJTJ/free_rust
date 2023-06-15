@@ -19,8 +19,7 @@ diesel::table! {
         session_id -> Nullable<Uuid>,
         user_id -> Uuid,
         logger_used -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -35,8 +34,7 @@ diesel::table! {
         end_time -> Timestamp,
         session_name -> Nullable<Text>,
         user_id -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -54,8 +52,7 @@ diesel::table! {
         dive_name -> Nullable<Text>,
         session_id -> Uuid,
         user_id -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -80,8 +77,7 @@ diesel::table! {
         input_text -> Nullable<Text>,
         log_id -> Uuid,
         user_id -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -99,8 +95,7 @@ diesel::table! {
         logger_category_type -> PredefinedSessionCategories,
         logger_id -> Uuid,
         user_id -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -122,8 +117,7 @@ diesel::table! {
         input_type -> PredefinedInputTypes,
         logger_id -> Uuid,
         user_id -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -136,8 +130,8 @@ diesel::table! {
     loggers (id) {
         logger_name -> Text,
         user_id -> Uuid,
-        id -> Int4,
-        unique_id -> Uuid,
+        user_defs -> Nullable<Jsonb>,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -153,8 +147,7 @@ diesel::table! {
         password_salt -> Bytea,
         email -> Text,
         last_login -> Timestamp,
-        id -> Int4,
-        unique_id -> Uuid,
+        id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
@@ -169,7 +162,20 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(all_logs -> dive_sessions (session_id));
+diesel::joinable!(all_logs -> loggers (logger_used));
+diesel::joinable!(all_logs -> users (user_id));
+diesel::joinable!(dive_sessions -> users (user_id));
+diesel::joinable!(dives -> dive_sessions (session_id));
+diesel::joinable!(dives -> users (user_id));
+diesel::joinable!(log_input_entries -> all_logs (log_id));
+diesel::joinable!(log_input_entries -> users (user_id));
 diesel::joinable!(log_input_entries -> valid_enum_inputs (input_enum));
+diesel::joinable!(logger_category_entries -> loggers (logger_id));
+diesel::joinable!(logger_category_entries -> users (user_id));
+diesel::joinable!(logger_input_entries -> loggers (logger_id));
+diesel::joinable!(logger_input_entries -> users (user_id));
+diesel::joinable!(loggers -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     all_logs,

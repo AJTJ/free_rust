@@ -6,7 +6,7 @@ pub fn get_dive_by_id(
     conn: &mut PgConnection,
     input_dive_id: Uuid,
 ) -> diesel::QueryResult<DiveQueryData> {
-    use crate::schema::dives::dsl::{dives, unique_id as dive_id};
+    use crate::schema::dives::dsl::{dives, id as dive_id};
 
     dives
         .filter(dive_id.eq(&input_dive_id))

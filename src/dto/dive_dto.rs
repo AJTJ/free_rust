@@ -22,14 +22,14 @@ pub struct DiveModificationData {
     pub dive_time: Option<i64>,
     pub dive_name: Option<String>,
 
-    pub unique_id: Uuid,
+    pub id: Uuid,
     pub is_active: Option<bool>,
 }
 
 #[derive(Insertable, InputObject)]
 #[diesel(table_name = dives)]
 pub struct DiveCreationData {
-    pub unique_id: Uuid,
+    pub id: Uuid,
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,
@@ -54,8 +54,7 @@ pub struct DiveQueryData {
     pub session_id: Uuid,
     pub user_id: Uuid,
 
-    pub id: i32,
-    pub unique_id: Uuid,
+    pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,

@@ -10,7 +10,7 @@ pub fn get_dive_session_by_id(
     input_session_id: &Uuid,
     db_query_ob: Option<DBQueryObject>,
 ) -> diesel::QueryResult<DiveSessionQueryData> {
-    use crate::schema::dive_sessions::dsl::{dive_sessions, unique_id as session_id};
+    use crate::schema::dive_sessions::dsl::{dive_sessions, id as session_id};
 
     dive_sessions
         .filter(session_id.eq(&input_session_id))

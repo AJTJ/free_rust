@@ -1,17 +1,27 @@
 -- -- Your SQL goes here
+/*
+ -
+ *FUTURE THOUGHTS
+ It seems unnecessary and hard to enforce the enum types in the database, with something like this:
+ -- CREATE TABLE valid_enum_inputs (input_name TEXT PRIMARY KEY);
+ -- INSERT INTO
+ --   valid_enum_inputs (input_name)
+ -- VALUES
+ --   ('OILY'),
+ --   ('LIGHT');
+ That being said, it seems possible to enforce it here at a later date, if necessary.
+ But realistically. I should only have one server interacting with the database at any given time, anyways.
+ So it's fair to assume that this everything will ALWAYS go through a portal to the database.
+ -
+ */
 CREATE TABLE valid_enum_inputs (input_name TEXT PRIMARY KEY);
 
 INSERT INTO
   valid_enum_inputs (input_name)
 VALUES
-  -- food
   ('OILY'),
   ('LIGHT'),
-  ('FISH'),
-  ('SORT OF GREASY'),
-  ('ACIDIC - MILD'),
-  ('ACIDIC - MODERATE'),
-  ('ACIDIC - HEAVY');
+  ('HEAVY');
 
 CREATE TABLE log_input_entries (
   item_order INTEGER,
@@ -34,14 +44,14 @@ CREATE TABLE log_input_entries (
   input_text TEXT,
   -- NOTE: This data is a string, but it will be defined elsewhere
   -- relationship data
-  log_id uuid NOT NULL REFERENCES all_logs (unique_id),
-  user_id uuid NOT NULL REFERENCES users (unique_id),
+  log_id uuid NOT NULL REFERENCES all_logs (id),
+  user_id uuid NOT NULL REFERENCES users (id),
   -- default data
-  id SERIAL PRIMARY KEY,
-  unique_id uuid UNIQUE NOT NULL,
+  id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
-  deleted_by uuid
+  deleted_by uuid,
+  PRIMARY KEY (id)
 );

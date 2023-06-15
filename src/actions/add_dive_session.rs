@@ -16,7 +16,7 @@ pub async fn add_dive_session(
     ctx: &Context<'_>,
     session_data: DiveSessionInputData,
 ) -> Result<DiveSessionQueryData, Error> {
-    use crate::schema::dive_sessions::dsl::{dive_sessions, unique_id as schema_session_id};
+    use crate::schema::dive_sessions::dsl::{dive_sessions, id as schema_session_id};
 
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
@@ -29,7 +29,7 @@ pub async fn add_dive_session(
         .expect("expecting session to be there");
 
     let new_session = DiveSessionCreationData {
-        unique_id: uuid,
+        id: uuid,
         start_time: session_data.start_time,
         end_time: session_data.end_time,
         session_name: session_data.session_name,

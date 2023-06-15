@@ -39,7 +39,7 @@ pub async fn update_user(
     let my_user_mod_data = user_mod_data.clone();
     let output_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        use crate::schema::users::dsl::{unique_id as user_id, updated_at, users};
+        use crate::schema::users::dsl::{id as user_id, updated_at, users};
         diesel::update(users)
             .filter(user_id.eq(&user_id))
             .set((&my_user_mod_data, updated_at.eq(Utc::now().naive_utc())))

@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Your SQL goes here
 CREATE TABLE users (
   username TEXT NOT NULL,
@@ -6,11 +8,12 @@ CREATE TABLE users (
   email TEXT NOT NULL,
   last_login TIMESTAMP NOT NULL,
   -- default data
-  id SERIAL PRIMARY KEY,
-  unique_id uuid UNIQUE NOT NULL,
+  -- id SERIAL PRIMARY KEY,
+  id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
-  deleted_by uuid
+  deleted_by uuid,
+  PRIMARY KEY (id)
 );

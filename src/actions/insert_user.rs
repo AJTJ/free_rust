@@ -13,7 +13,7 @@ pub fn insert_user(
     conn: &mut PgConnection,
     user_data: UserInputData,
 ) -> diesel::QueryResult<UserQueryData> {
-    use crate::schema::users::dsl::{unique_id as user_id, users};
+    use crate::schema::users::dsl::{id as user_id, users};
 
     let current_stamp = Utc::now().naive_utc();
 
@@ -26,7 +26,7 @@ pub fn insert_user(
 
     let new_user = UserCreationData {
         username: user_data.username,
-        unique_id: uuid,
+        id: uuid,
         hashed_password: hashed_pw,
         password_salt: salt_gen.to_vec(),
         email: user_data.email,

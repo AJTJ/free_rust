@@ -29,7 +29,7 @@ pub async fn add_dive(
         .expect("expecting session to be there");
 
     let new_dive = DiveCreationData {
-        unique_id: uuid,
+        id: uuid,
         discipline_type: dive_data.discipline_type,
         depth: dive_data.depth,
         distance: dive_data.distance,
@@ -44,7 +44,7 @@ pub async fn add_dive(
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    use crate::schema::dives::dsl::{dives, unique_id as dive_id};
+    use crate::schema::dives::dsl::{dives, id as dive_id};
 
     let dive_session = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();

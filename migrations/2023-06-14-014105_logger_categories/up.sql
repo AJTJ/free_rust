@@ -17,16 +17,16 @@ CREATE TABLE logger_category_entries (
   -- NOTE: An entry refers to its type
   logger_category_type PREDEFINED_SESSION_CATEGORIES NOT NULL,
   -- TODO: for the future?
-  -- custom_logger_category_type_id REFERENCES custom_logger_category_types (unique_id),
+  -- custom_logger_category_type_id REFERENCES custom_logger_category_types (id),
   -- NOTE: An entry ALWAYS exists in a list
-  logger_id uuid NOT NULL REFERENCES loggers (unique_id),
-  user_id uuid NOT NULL REFERENCES users (unique_id),
+  logger_id uuid NOT NULL REFERENCES loggers (id),
+  user_id uuid NOT NULL REFERENCES users (id),
   -- default data
-  id SERIAL PRIMARY KEY,
-  unique_id uuid UNIQUE NOT NULL,
+  id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
   deleted_at TIMESTAMP,
-  deleted_by uuid
+  deleted_by uuid,
+  PRIMARY KEY (id)
 )
