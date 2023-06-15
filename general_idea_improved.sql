@@ -78,7 +78,7 @@ CREATE TABLE logger_input_entries (
   item_order INTEGER,
   field_name PREDEFINED_FIELD_NAMES NOT NULL,
   category_type PREDEFINED_SESSION_CATEGORIES NOT NULL,
-  input_type PREDEFINED_INPUT_TYPES NOT NULL,
+  -- input_type PREDEFINED_INPUT_TYPES NOT NULL,
   -- relationships
   logger_id uuid NOT NULL REFERENCES loggers (id),
   user_id uuid NOT NULL REFERENCES users (id),
