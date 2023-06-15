@@ -1,71 +1,15 @@
 use std::fmt::{self, Display};
 
-use diesel::result::Error;
-// use snafu::prelude::*;
-
-// #[derive(Debug, Snafu)]
-// pub enum CustomError {
-//     #[snafu(display("Wrong password: {pw}"))]
-//     WrongPassword { pw: String },
-// }
-
-// type Result<T, E = CustomError> = std::result::Result<T, E>;
-// fn example(pw: String) -> Result<()> {
-//     ensure!(pw == "dog".to_string(), WrongPasswordSnafu { pw });
-//     Ok(())
-// }
-
-// #[derive(Debug)]
-// pub struct WrongPassword;
-
-// impl Error for WrongPassword {}
-
-// impl fmt::Display for WrongPassword {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "Wrong password used.")
-//     }
-// }
-
-// // error1.rs
-
-// #[derive(Debug)]
-// pub struct MyError {
-//     details: String,
-// }
-
-// impl MyError {
-//     fn new(msg: &str) -> MyError {
-//         MyError {
-//             details: msg.to_string(),
-//         }
-//     }
-// }
-
-// impl fmt::Display for MyError {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{}", self.details)
-//     }
-// }
-
-// impl Error for MyError {
-//     fn description(&self) -> &str {
-//         &self.details
-//     }
-// }
-
-// // a test function that returns our error result
-// fn raises_my_error(yes: bool) -> Result<(), MyError> {
-//     if yes {
-//         Err(MyError::new("borked"))
-//     } else {
-//         Ok(())
-//     }
-// }
+use actix_web::cookie::ParseError;
+use async_graphql::Error as AsyncError;
+use diesel::result::Error as DieselError;
+use redis::RedisError;
+use serde_json::Error as SerdeError;
 
 #[derive(Debug)]
 pub enum LoginErrorEnum {
     WrongPassword(String),
-    UserNotFound(Error),
+    UserNotFound(DieselError),
 }
 
 impl Display for LoginErrorEnum {
@@ -81,8 +25,8 @@ impl std::error::Error for LoginErrorEnum {}
 
 #[derive(Debug)]
 pub enum DBErrors {
-    QueryError(Error),
-    UpdateError(Error),
+    QueryError(DieselError),
+    UpdateError(DieselError),
 }
 
 impl Display for DBErrors {
@@ -95,3 +39,51 @@ impl Display for DBErrors {
 }
 
 impl std::error::Error for DBErrors {}
+
+#[derive(Debug)]
+pub enum SessionCookieErrors {
+    CookieError(CookieError),
+    SessionError(RedisError),
+}
+
+impl Display for SessionCookieErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SessionCookieErrors::CookieError(e) => write!(f, "CookieError: {e}"),
+            SessionCookieErrors::SessionError(e) => write!(f, "SessionError: {e}"),
+        }
+    }
+}
+
+impl std::error::Error for SessionCookieErrors {}
+
+// TEMPLATE
+// #[derive(Debug)]
+// pub enum E {}
+
+// impl Display for E {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         match self {}
+//     }
+// }
+
+// impl std::error::Error for E {}
+
+#[derive(Debug)]
+pub enum CookieError {
+    WrongCookieString(ParseError),
+    NoCookie(AsyncError),
+    ParsingCookieVal(SerdeError),
+}
+
+impl Display for CookieError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CookieError::WrongCookieString(e) => write!(f, "Parsed cookie doesn't match: {e}"),
+            CookieError::NoCookie(e) => write!(f, "No Cookie present: {}", e.message),
+            CookieError::ParsingCookieVal(e) => write!(f, "Error parsing cookie val: {e}"),
+        }
+    }
+}
+
+impl std::error::Error for CookieError {}

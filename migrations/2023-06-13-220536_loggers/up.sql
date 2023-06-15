@@ -3,8 +3,6 @@ CREATE TABLE loggers (
   logger_name TEXT NOT NULL,
   -- relationships
   user_id uuid NOT NULL REFERENCES users (id),
-  -- user_defs will contain things like order of the logger fields
-  user_defs jsonb,
   -- default data
   id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
@@ -13,4 +11,4 @@ CREATE TABLE loggers (
   deleted_at TIMESTAMP,
   deleted_by uuid,
   PRIMARY KEY (id)
-)
+);

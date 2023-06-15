@@ -2,6 +2,7 @@ use crate::actions::add_dive;
 use crate::actions::add_dive_session;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
+use crate::actions::get_user_id_from_cookie_session;
 use crate::actions::get_user_session_data;
 use crate::actions::get_user_with_email;
 use crate::actions::insert_user;
@@ -130,6 +131,13 @@ impl QueryRoot {
         .map_err(error::ErrorInternalServerError)
         .unwrap();
         Ok(dives)
+    }
+
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<LoggersOutputData>> {
+        let user_id = get_user_id_from_cookie_session(ctx).await;
+
+        match user_id {}
     }
 }
 

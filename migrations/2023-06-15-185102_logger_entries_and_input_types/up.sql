@@ -1,18 +1,4 @@
 -- Your SQL goes here
-CREATE TYPE PREDEFINED_FIELD_NAMES AS ENUM (
-  -- general
-  'GENERAL_FEELING',
-  -- sleep
-  'SLEEP_START',
-  'SLEEP_END',
-  'AMOUNT_OF_SLEEP',
-  -- food
-  'LAST_MEAL',
-  'LAST_MEAL_TIME',
-  'COFFEE_QUANTITY',
-  'QUALITY_LAST_MEAL',
-);
-
 CREATE TYPE PREDEFINED_INPUT_TYPES AS ENUM (
   'INTEGER',
   'ENUM',
@@ -21,13 +7,11 @@ CREATE TYPE PREDEFINED_INPUT_TYPES AS ENUM (
   'TEXT'
 );
 
-CREATE TABLE logger_input_entries (
+CREATE TABLE logger_entries (
   item_order INTEGER,
-  -- limited by database, enforced by server
-  field_name PREDEFINED_FIELD_NAMES NOT NULL,
-  -- limited by database, enforced by server
-  category_type PREDEFINED_SESSION_CATEGORIES NOT NULL,
-  -- limited by database, enforced by server
+  -- to be decided by the server?
+  field_name TEXT NOT NULL,
+  category_name TEXT NOT NULL,
   input_type PREDEFINED_INPUT_TYPES NOT NULL,
   -- relationships
   logger_id uuid NOT NULL REFERENCES loggers (id),

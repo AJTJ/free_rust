@@ -2,23 +2,16 @@
 
 pub mod sql_types {
     #[derive(diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "predefined_field_names"))]
-    pub struct PredefinedFieldNames;
-
-    #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "predefined_input_types"))]
     pub struct PredefinedInputTypes;
-
-    #[derive(diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "predefined_session_categories"))]
-    pub struct PredefinedSessionCategories;
 }
 
 diesel::table! {
     all_logs (id) {
+        log_name -> Nullable<Text>,
         session_id -> Nullable<Uuid>,
-        user_id -> Uuid,
         logger_used -> Uuid,
+        user_id -> Uuid,
         id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -64,17 +57,12 @@ diesel::table! {
 diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::PredefinedInputTypes;
-    use super::sql_types::PredefinedSessionCategories;
 
-    log_input_entries (id) {
+    log_entries (id) {
         item_order -> Nullable<Int4>,
-        input_value_type -> PredefinedInputTypes,
-        category_type -> PredefinedSessionCategories,
-        input_enum -> Nullable<Text>,
-        input_integer -> Nullable<Int4>,
-        input_interval -> Nullable<Interval>,
-        input_timestamp -> Nullable<Timestamp>,
-        input_text -> Nullable<Text>,
+        category_type -> Text,
+        input_type -> PredefinedInputTypes,
+        input_value -> Nullable<Text>,
         log_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
@@ -88,32 +76,12 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::PredefinedSessionCategories;
-
-    logger_category_entries (id) {
-        item_order -> Nullable<Int4>,
-        logger_category_type -> PredefinedSessionCategories,
-        logger_id -> Uuid,
-        user_id -> Uuid,
-        id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-        is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
-    }
-}
-
-diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::PredefinedFieldNames;
-    use super::sql_types::PredefinedSessionCategories;
     use super::sql_types::PredefinedInputTypes;
 
-    logger_input_entries (id) {
+    logger_entries (id) {
         item_order -> Nullable<Int4>,
-        field_name -> PredefinedFieldNames,
-        category_type -> PredefinedSessionCategories,
+        field_name -> Text,
+        category_name -> Text,
         input_type -> PredefinedInputTypes,
         logger_id -> Uuid,
         user_id -> Uuid,
@@ -130,7 +98,6 @@ diesel::table! {
     loggers (id) {
         logger_name -> Text,
         user_id -> Uuid,
-        user_defs -> Nullable<Jsonb>,
         id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -156,35 +123,24 @@ diesel::table! {
     }
 }
 
-diesel::table! {
-    valid_enum_inputs (input_name) {
-        input_name -> Text,
-    }
-}
-
 diesel::joinable!(all_logs -> dive_sessions (session_id));
 diesel::joinable!(all_logs -> loggers (logger_used));
 diesel::joinable!(all_logs -> users (user_id));
 diesel::joinable!(dive_sessions -> users (user_id));
 diesel::joinable!(dives -> dive_sessions (session_id));
 diesel::joinable!(dives -> users (user_id));
-diesel::joinable!(log_input_entries -> all_logs (log_id));
-diesel::joinable!(log_input_entries -> users (user_id));
-diesel::joinable!(log_input_entries -> valid_enum_inputs (input_enum));
-diesel::joinable!(logger_category_entries -> loggers (logger_id));
-diesel::joinable!(logger_category_entries -> users (user_id));
-diesel::joinable!(logger_input_entries -> loggers (logger_id));
-diesel::joinable!(logger_input_entries -> users (user_id));
+diesel::joinable!(log_entries -> all_logs (log_id));
+diesel::joinable!(log_entries -> users (user_id));
+diesel::joinable!(logger_entries -> loggers (logger_id));
+diesel::joinable!(logger_entries -> users (user_id));
 diesel::joinable!(loggers -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     all_logs,
     dive_sessions,
     dives,
-    log_input_entries,
-    logger_category_entries,
-    logger_input_entries,
+    log_entries,
+    logger_entries,
     loggers,
     users,
-    valid_enum_inputs,
 );

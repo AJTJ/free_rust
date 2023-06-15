@@ -13,7 +13,15 @@ CREATE TABLE loggers (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE logger_input_entries (
+CREATE TYPE PREDEFINED_INPUT_TYPES AS ENUM (
+  'INTEGER',
+  'ENUM',
+  'INTERVAL',
+  'TIMESTAMP',
+  'TEXT'
+);
+
+CREATE TABLE logger_entries (
   item_order INTEGER,
   -- to be decided by the server?
   field_name TEXT NOT NULL,
@@ -48,7 +56,7 @@ CREATE TABLE all_logs (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE log_input_entries (
+CREATE TABLE log_entries (
   item_order INTEGER,
   -- Should this eventually be decided by the database?
   category_type TEXT NOT NULL,

@@ -9,6 +9,7 @@ use std::{
 };
 use tracing::info;
 
+use crate::errors::CookieError;
 use crate::token_source::Token;
 
 // COOKIE THINGS
@@ -46,18 +47,17 @@ pub fn create_expired_cookie<'c>() -> Cookie<'c> {
     cookie
 }
 
-pub fn get_cookie_from_token(ctx: &Context<'_>) -> Option<CookieStruct> {
+pub fn get_cookie_from_token(ctx: &Context<'_>) -> Result<CookieStruct, CookieError> {
     let token = ctx.data::<Token>();
 
     match token {
         Ok(token) => {
-            let c = Cookie::parse::<&str>(token.0.as_str()).unwrap();
+            let c = Cookie::parse::<&str>(token.0.as_str())
+                .map_err(|e| CookieError::WrongCookieString(e))
+                .unwrap();
             let (_, value) = c.name_value();
-            Some(serde_json::from_str(value).expect("parsing cookie error"))
+            serde_json::from_str(value).map_err(|e| CookieError::ParsingCookieVal(e))
         }
-        Err(e) => {
-            info!("No token/cookie: {:?}", e);
-            None
-        }
+        Err(e) => Err(CookieError::NoCookie(e)),
     }
 }
