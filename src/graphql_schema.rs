@@ -133,7 +133,7 @@ impl QueryRoot {
     }
 
     #[graphql(guard = "LoggedInGuard {}")]
-    async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<LoggersOutputData>> {
+    async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<Loggers>> {
         let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
