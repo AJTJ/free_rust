@@ -1,11 +1,11 @@
 use crate::actions::add_to_user_session::add_to_user_session;
 use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
-use crate::cookie_helpers::create_cookie;
 use crate::dto::user_dto::{UserModificationData, UserQueryDataOutput};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::get_encoded_id;
+use crate::helpers::cookie_helpers::create_cookie;
+use crate::helpers::encoding_helpers::get_encoded_id;
 use actix_web::http::header::SET_COOKIE;
 use actix_web::web;
 use argon2::{self};

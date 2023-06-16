@@ -1,4 +1,4 @@
-use crate::cookie_helpers::{create_expired_cookie, get_cookie_from_token};
+use crate::helpers::cookie_helpers::{create_expired_cookie, get_cookie_from_token};
 use actix_web::http::header::SET_COOKIE;
 use async_graphql::Context;
 use tracing::info;

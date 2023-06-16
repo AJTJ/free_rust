@@ -4,8 +4,6 @@
 extern crate diesel;
 pub mod actions;
 pub mod auth_data;
-pub mod cookie_helpers;
-pub mod dive_data;
 pub mod dto;
 pub mod errors;
 pub mod graphql_schema;

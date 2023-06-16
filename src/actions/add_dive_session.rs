@@ -1,10 +1,10 @@
 use crate::actions::get_user_session_data;
-use crate::cookie_helpers::get_cookie_from_token;
 use crate::diesel::ExpressionMethods;
 use crate::dto::dive_session_dto::{
     DiveSessionCreationData, DiveSessionInputData, DiveSessionQueryData,
 };
 use crate::graphql_schema::DbPool;
+use crate::helpers::cookie_helpers::get_cookie_from_token;
 
 use actix_web::web;
 use async_graphql::{Context, Error};

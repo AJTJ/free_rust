@@ -1,7 +1,7 @@
 use async_graphql::{async_trait::async_trait, Context, Guard, Result};
 use tracing::info;
 
-use crate::{actions::get_user_session_data, cookie_helpers::get_cookie_from_token};
+use crate::{actions::get_user_session_data, helpers::cookie_helpers::get_cookie_from_token};
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 // enum Role {

@@ -1,4 +1,4 @@
-use crate::{cookie_helpers::get_cookie_from_token, errors::BigError};
+use crate::{errors::BigError, helpers::cookie_helpers::get_cookie_from_token};
 // use actix_session::Session;
 use super::get_user_session_data;
 use async_graphql::Context;

@@ -10,7 +10,6 @@ use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
-use crate::cookie_helpers::get_cookie_from_token;
 use crate::dto::auth_dto::LoginData;
 use crate::dto::db_query_dto::DBQueryObject;
 use crate::dto::dive_dto::DiveInputData;
@@ -25,6 +24,7 @@ use crate::dto::user_dto::UserQueryDataOutput;
 use crate::dto::user_dto::{UserInputData, UserQueryData};
 use crate::errors::BigError;
 use crate::guards::LoggedInGuard;
+use crate::helpers::cookie_helpers::get_cookie_from_token;
 
 use actix_web::error;
 use actix_web::web;
