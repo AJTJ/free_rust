@@ -1,5 +1,5 @@
 use crate::diesel::ExpressionMethods;
-use crate::dto::user_auth_dto::UserQueryData;
+use crate::dto::user_dto::UserQueryData;
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn get_user_with_email(

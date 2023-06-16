@@ -2,7 +2,7 @@ use crate::actions::add_to_user_session::add_to_user_session;
 use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
 use crate::cookie_helpers::create_cookie;
-use crate::dto::user_auth_dto::{UserModificationData, UserQueryDataOutput};
+use crate::dto::user_dto::{UserModificationData, UserQueryDataOutput};
 use crate::errors::LoginErrorEnum;
 use crate::graphql_schema::DbPool;
 use crate::helpers::get_encoded_id;
@@ -61,8 +61,7 @@ pub async fn login(
                         is_active: None,
                     };
 
-                    let updated_user =
-                        update_user(ctx, None, Some(user.id), updated_user).await;
+                    let updated_user = update_user(ctx, None, Some(user.id), updated_user).await;
 
                     let user_out: UserQueryDataOutput = updated_user.into();
 

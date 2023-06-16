@@ -6,7 +6,7 @@ use tracing::info;
 use super::remove_from_user_session;
 
 pub async fn logout(ctx: &Context<'_>) {
-    if let Some(cookie_data) = get_cookie_from_token(ctx) {
+    if let Ok(cookie_data) = get_cookie_from_token(ctx) {
         remove_from_user_session(ctx, cookie_data.encoded_session_id).await;
     }
     let expired_cookied = create_expired_cookie();

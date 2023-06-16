@@ -1,4 +1,4 @@
-use crate::{diesel::ExpressionMethods, dto::user_auth_dto::UserQueryData};
+use crate::{diesel::ExpressionMethods, dto::user_dto::UserQueryData};
 
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;

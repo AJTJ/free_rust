@@ -3,3 +3,5 @@
 
 [print_schema]
 file = "src/schema.rs"
+# The following is essential for diesel-derive-enum
+custom_type_derives = ["diesel::query_builder::QueryId"]

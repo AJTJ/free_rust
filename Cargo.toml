@@ -27,6 +27,7 @@ redis = { version = "0.23.0", features = ["tokio-comp"] }
 # ORM
 # diesel = { version = "1.4.8", features = ["postgres", "r2d2", "numeric", "uuidv07", "chrono", "time", "uuid"] }
 diesel = { version = "2.1.0", features = ["postgres", "r2d2", "numeric", "chrono", "time", "uuid"] }
+diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 
 # graphql
 async-graphql = {version = "5.0.9", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log", "uuid08"]}

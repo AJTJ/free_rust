@@ -41,7 +41,7 @@ pub struct LoggedInGuard {}
 #[async_trait]
 impl Guard for LoggedInGuard {
     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        if let Some(cookie_data) = get_cookie_from_token(ctx) {
+        if let Ok(cookie_data) = get_cookie_from_token(ctx) {
             let user_session = get_user_session_data(ctx, cookie_data.encoded_session_id).await;
 
             match user_session {

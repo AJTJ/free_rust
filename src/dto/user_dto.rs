@@ -1,5 +1,3 @@
-// NOTE: a layer between the database schema and the graphql_schema
-
 use crate::{actions::get_dive_sessions_by_user, graphql_schema::DbPool, schema::users};
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
@@ -131,18 +129,4 @@ impl UserQueryDataOutput {
 
         Ok(dive_sessions)
     }
-}
-
-// AUTH STUFF
-
-#[derive(InputObject, Debug)]
-pub struct LoginData {
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(InputObject)]
-pub struct LogoutData {
-    //TODO: Should be user_id or something else?
-    pub email: String,
 }

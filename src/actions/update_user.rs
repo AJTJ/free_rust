@@ -1,14 +1,13 @@
 use crate::actions::{get_user_session_data, get_user_with_id};
 use crate::cookie_helpers::get_cookie_from_token;
-use crate::dto::dive_session_dto::{DiveSessionModificationData, DiveSessionQueryData};
-use crate::dto::user_auth_dto::{UserModificationData, UserQueryData};
+use crate::diesel::ExpressionMethods;
+use crate::dto::user_dto::{UserModificationData, UserQueryData};
 use crate::graphql_schema::DbPool;
-use crate::{actions::get_dive_session_by_id, diesel::ExpressionMethods};
 
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
-use diesel::{result::Error, RunQueryDsl};
+use diesel::RunQueryDsl;
 use tracing::info;
 use uuid::Uuid;
 

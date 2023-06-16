@@ -1,4 +1,4 @@
--- NOTE: Loggers are the loggers assembled by the user from a seletion of pre-defined categories and pre-defined fields.
+-- NOTE: Loggers are the loggers assembled by the user from a seletion of pre-defined categories and pre-defined fields. The user creates a logger(s) and then uses those created loggers to log dive data.
 CREATE TABLE loggers (
   logger_name TEXT NOT NULL,
   -- relationships
@@ -13,6 +13,7 @@ CREATE TABLE loggers (
   PRIMARY KEY (id)
 );
 
+-- I'm keeping this one type validation in the database. I could probably drop it.
 CREATE TYPE PREDEFINED_INPUT_TYPES AS ENUM (
   'INTEGER',
   'ENUM',
@@ -21,6 +22,7 @@ CREATE TYPE PREDEFINED_INPUT_TYPES AS ENUM (
   'TEXT'
 );
 
+-- Rather than having separate tables for the logger categories and the logger input types (that were very confusing)... I figured I can hold all the logger entry data (the fields that make up the logger form) in one spot.
 CREATE TABLE logger_entries (
   item_order INTEGER,
   -- to be decided by the server?
@@ -40,6 +42,7 @@ CREATE TABLE logger_entries (
   PRIMARY KEY (id)
 );
 
+-- The logs are the logs created BY the loggers.
 CREATE TABLE all_logs (
   log_name TEXT,
   -- relationships
@@ -56,6 +59,7 @@ CREATE TABLE all_logs (
   PRIMARY KEY (id)
 );
 
+-- again like the logger_entries, it seems like all the log entries only really need to be in one table. I can enforce all the types etc... server-side.
 CREATE TABLE log_entries (
   item_order INTEGER,
   -- Should this eventually be decided by the database?

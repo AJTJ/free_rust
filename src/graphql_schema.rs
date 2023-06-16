@@ -2,6 +2,7 @@ use crate::actions::add_dive;
 use crate::actions::add_dive_session;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
+use crate::actions::get_loggers_from_id;
 use crate::actions::get_user_id_from_cookie_session;
 use crate::actions::get_user_session_data;
 use crate::actions::get_user_with_email;
@@ -11,6 +12,7 @@ use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
 use crate::cookie_helpers::get_cookie_from_token;
+use crate::dto::auth_dto::LoginData;
 use crate::dto::db_query_dto::DBQueryObject;
 use crate::dto::dive_dto::DiveInputData;
 use crate::dto::dive_dto::DiveModificationData;
@@ -20,8 +22,8 @@ use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionModificationData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::dive_session_dto::DiveSessionQueryInput;
-use crate::dto::user_auth_dto::UserQueryDataOutput;
-use crate::dto::user_auth_dto::{LoginData, UserInputData, UserQueryData};
+use crate::dto::user_dto::UserQueryDataOutput;
+use crate::dto::user_dto::{UserInputData, UserQueryData};
 use crate::errors::DBErrors;
 use crate::errors::LoginErrorEnum;
 use crate::guards::LoggedInGuard;
@@ -118,14 +120,11 @@ impl QueryRoot {
     ) -> FieldResult<Vec<DiveQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let cookie = get_cookie_from_token(ctx)
-            .expect("there should be cookie data, as this route is guarded");
-
-        let user_session = get_user_session_data(ctx, cookie.encoded_session_id).await?;
+        let user_id = get_user_id_from_cookie_session(ctx).await?;
 
         let dives = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dives_by_user(&mut conn, user_session.user_id, dive_input, db_query_dto)
+            get_dives_by_user(&mut conn, user_id, dive_input, db_query_dto)
         })
         .await?
         .map_err(error::ErrorInternalServerError)
@@ -135,9 +134,14 @@ impl QueryRoot {
 
     #[graphql(guard = "LoggedInGuard {}")]
     async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<LoggersOutputData>> {
-        let user_id = get_user_id_from_cookie_session(ctx).await;
-
-        match user_id {}
+        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_loggers_from_id(&mut conn, user_id, None)
+        })
+        .await
+        .unwrap()
     }
 }
 
