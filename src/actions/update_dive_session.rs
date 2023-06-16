@@ -1,5 +1,6 @@
 use crate::dto::dive_session_dto::{DiveSessionModificationData, DiveSessionQueryData};
-use crate::errors::DBErrors;
+
+use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 use crate::{actions::get_dive_session_by_id, diesel::ExpressionMethods};
 
@@ -14,15 +15,13 @@ use tracing::info;
 pub async fn update_dive_session(
     ctx: &Context<'_>,
     session_mod_data: DiveSessionModificationData,
-) -> Result<DiveSessionQueryData, DBErrors> {
+) -> Result<DiveSessionQueryData, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     let my_session_mod_data = session_mod_data.clone();
     let output_dive_session = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        use crate::schema::dive_sessions::dsl::{
-            dive_sessions, id as session_id, updated_at,
-        };
+        use crate::schema::dive_sessions::dsl::{dive_sessions, id as session_id, updated_at};
         let update_statement = diesel::update(dive_sessions)
             .filter(session_id.eq(&my_session_mod_data.id))
             .set((&my_session_mod_data, updated_at.eq(Utc::now().naive_utc())))
@@ -32,7 +31,7 @@ pub async fn update_dive_session(
     })
     .await
     .expect("web::block error here?")
-    .map_err(|e| DBErrors::UpdateError(e));
+    .map_err(|e| BigError::UpdateError { source: e });
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -42,7 +41,7 @@ pub async fn update_dive_session(
     })
     .await
     .expect("web::block error here?")
-    .map_err(|e| DBErrors::QueryError(e));
+    .map_err(|e| BigError::QueryError { source: e });
 
     updated_session
 }

@@ -2,7 +2,6 @@ use crate::actions::add_dive;
 use crate::actions::add_dive_session;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
-use crate::actions::get_loggers_from_id;
 use crate::actions::get_user_id_from_cookie_session;
 use crate::actions::get_user_session_data;
 use crate::actions::get_user_with_email;
@@ -24,8 +23,7 @@ use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::dive_session_dto::DiveSessionQueryInput;
 use crate::dto::user_dto::UserQueryDataOutput;
 use crate::dto::user_dto::{UserInputData, UserQueryData};
-use crate::errors::DBErrors;
-use crate::errors::LoginErrorEnum;
+use crate::errors::BigError;
 use crate::guards::LoggedInGuard;
 
 use actix_web::error;
@@ -132,17 +130,17 @@ impl QueryRoot {
         Ok(dives)
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
-    async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<Loggers>> {
-        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            get_loggers_from_id(&mut conn, user_id, None)
-        })
-        .await
-        .unwrap()
-    }
+    // #[graphql(guard = "LoggedInGuard {}")]
+    // async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<Logger>> {
+    //     let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    //     web::block(move || {
+    //         let mut conn = pool_ctx.get().unwrap();
+    //         get_loggers_from_id(&mut conn, user_id, None)
+    //     })
+    //     .await
+    //     .unwrap()
+    // }
 }
 
 #[Object]
@@ -185,7 +183,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         login_data: LoginData,
-    ) -> Result<UserQueryDataOutput, LoginErrorEnum> {
+    ) -> Result<UserQueryDataOutput, BigError> {
         login(ctx, login_data.email, login_data.password).await
     }
 
@@ -212,7 +210,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionModificationData,
-    ) -> Result<DiveSessionQueryData, DBErrors> {
+    ) -> Result<DiveSessionQueryData, BigError> {
         update_dive_session(ctx, session_input_data).await
     }
 
@@ -253,12 +251,24 @@ impl MutationRoot {
     }
 
     // LOGGER STUFF
-    // add logger(input_data: An array of inputs) {
-    // map the inputs
-    // say they want SLEEP_START, SLEEP_END and GENERAL_FEELING
-    // that should store a logger and then also store some category_entries and also some field_entries related to that logger.
-    // as the app scales, there will be many category_entries and many field_entries. Is this necw
-    // }
+    // add_logger() {}
+    // edit_logger() {}
+    // delete_logger() {}
+
+    // LOGGER_INPUT STUFF
+    // add_logger_input() {}
+    // edit_logger_input() {}
+    // delete_logger_input() {}
+
+    // LOG STUFF
+    // add_log() {}
+    // edit_log() {}
+    // delete_log() {}
+
+    // LOG_INPUT STUFF
+    // add_log_input() {}
+    // edit_log_input() {}
+    // delete_log_input() {}
 
     //for testing
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {

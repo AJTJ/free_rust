@@ -4,7 +4,7 @@ CREATE TABLE log_entries (
   -- Should this eventually be decided by the database?
   category_type TEXT NOT NULL,
   -- input data
-  input_type PREDEFINED_INPUT_TYPES NOT NULL,
+  input_type TEXT NOT NULL,
   -- TEXT to be parsed by the server?
   input_value TEXT,
   -- relationship data

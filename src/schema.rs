@@ -1,11 +1,5 @@
 // @generated automatically by Diesel CLI.
 
-pub mod sql_types {
-    #[derive(diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "predefined_input_types"))]
-    pub struct PredefinedInputTypes;
-}
-
 diesel::table! {
     all_logs (id) {
         log_name -> Nullable<Text>,
@@ -55,13 +49,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::PredefinedInputTypes;
-
     log_entries (id) {
         item_order -> Nullable<Int4>,
         category_type -> Text,
-        input_type -> PredefinedInputTypes,
+        input_type -> Text,
         input_value -> Nullable<Text>,
         log_id -> Uuid,
         user_id -> Uuid,
@@ -75,14 +66,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::PredefinedInputTypes;
-
     logger_entries (id) {
         item_order -> Nullable<Int4>,
         field_name -> Text,
         category_name -> Text,
-        input_type -> PredefinedInputTypes,
+        input_type -> Text,
         logger_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
