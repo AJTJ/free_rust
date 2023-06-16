@@ -2,6 +2,9 @@ use crate::actions::add_dive;
 use crate::actions::add_dive_session;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
+use crate::actions::get_logger_entries_by_logger;
+use crate::actions::get_loggers_from_user_id;
+use crate::actions::get_logs_from_user_id;
 use crate::actions::get_user_id_from_cookie_session;
 use crate::actions::get_user_session_data;
 use crate::actions::get_user_with_email;
@@ -20,6 +23,9 @@ use crate::dto::dive_session_dto::DiveSessionInputData;
 use crate::dto::dive_session_dto::DiveSessionModificationData;
 use crate::dto::dive_session_dto::DiveSessionQueryData;
 use crate::dto::dive_session_dto::DiveSessionQueryInput;
+use crate::dto::log_dto::LogData;
+use crate::dto::loggers_dto::LoggerData;
+use crate::dto::loggers_dto::LoggerEntryData;
 use crate::dto::user_dto::UserQueryDataOutput;
 use crate::dto::user_dto::{UserInputData, UserQueryData};
 use crate::errors::BigError;
@@ -130,17 +136,52 @@ impl QueryRoot {
         Ok(dives)
     }
 
-    // #[graphql(guard = "LoggedInGuard {}")]
-    // async fn loggers(&self, ctx: &Context<'_>) -> FieldResult<Vec<Logger>> {
-    //     let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
-    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-    //     web::block(move || {
-    //         let mut conn = pool_ctx.get().unwrap();
-    //         get_loggers_from_id(&mut conn, user_id, None)
-    //     })
-    //     .await
-    //     .unwrap()
-    // }
+    // LOGGERS
+
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<LoggerData>, BigError> {
+        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_loggers_from_user_id(&mut conn, user_id, None)
+        })
+        .await
+        .unwrap()
+        .map_err(|e| BigError::QueryError { source: e })
+    }
+
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn logger_entries(
+        &self,
+        ctx: &Context<'_>,
+        logger_id: Uuid,
+    ) -> Result<Vec<LoggerEntryData>, BigError> {
+        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_logger_entries_by_logger(&mut conn, &logger_id, &user_id, None)
+        })
+        .await
+        .unwrap()
+        .map_err(|e| BigError::QueryError { source: e })
+    }
+
+    // LOGS
+
+    #[graphql(guard = "LoggedInGuard {}")]
+    async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<LogData>, BigError> {
+        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_logs_from_user_id(&mut conn, user_id, None)
+        })
+        .await
+        .unwrap()
+        .map_err(|e| BigError::QueryError { source: e })
+    }
 }
 
 #[Object]

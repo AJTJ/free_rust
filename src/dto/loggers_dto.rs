@@ -31,10 +31,11 @@ impl LoggerData {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let logger_id = self.id;
+        let user_id = self.user_id;
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_logger_entries_by_logger(&mut conn, &logger_id, db_query_dto)
+            get_logger_entries_by_logger(&mut conn, &logger_id, &user_id, db_query_dto)
         })
         .await
         .map_err(|e| BigError::WebBlocking { source: e })
