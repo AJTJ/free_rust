@@ -14,6 +14,8 @@ use crate::token_source::Token;
 
 // COOKIE THINGS
 pub const COOKIE_NAME: &str = "free_rust_cookie";
+pub const CUSTOM_HEADER: &str = "Custom-Header";
+pub const AUTHORIZATION_HEADER: &str = "Authorization";
 
 #[derive(Serialize, Deserialize)]
 pub struct CookieStruct {

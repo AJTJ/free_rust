@@ -62,9 +62,14 @@ impl ToRedisArgs for SessionData {
 
 impl FromRedisValue for SessionData {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
-        let redis_value: String = from_redis_value(&v).expect("from_redis_value to String failing");
-        let session_data: SessionData =
-            serde_json::from_str(&redis_value).expect("redis to SessionData failing");
-        RedisResult::Ok(session_data)
+        let redis_value: String = from_redis_value(v)?;
+        RedisResult::Ok(serde_json::from_str(&redis_value).expect("redis to SessionData failing"))
     }
 }
+
+// match redis_value {
+//     Ok(v) => serde_json::from_str(&v).unwrap(),
+//     Err(e) => {
+
+//     }
+// }

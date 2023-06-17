@@ -29,34 +29,38 @@ use crate::{actions::get_user_session_data, helpers::cookie_helpers::get_cookie_
 //         }
 //     }
 // }
-
+#[derive(Default)]
 pub struct LoggedInGuard {}
 
-// impl LoggedInGuard {
-//     fn new() -> Self {
-//         Self {}
-//     }
-// }
+impl LoggedInGuard {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 #[async_trait]
 impl Guard for LoggedInGuard {
     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        if let Ok(cookie_data) = get_cookie_from_token(ctx) {
-            let user_session = get_user_session_data(ctx, cookie_data.encoded_session_id).await;
-
-            match user_session {
-                Ok(s) => {
-                    // TODO: Would it be possible to pass data into the object from the guard?
-                    Ok(())
+        info!("CHECKING IN GUARD");
+        match get_cookie_from_token(ctx) {
+            Ok(c) => {
+                match get_user_session_data(ctx, c.encoded_session_id).await {
+                    Ok(s) => {
+                        info!("The session data in guard: {s:?}");
+                        // TODO Need to check that the token hasn't expired
+                        // TODO Should I extend the token's lifetime if it hasn't expired?
+                        Ok(())
+                    }
+                    Err(e) => {
+                        info!("RedisError: {}", e);
+                        Err(e.into())
+                    }
                 }
-                Err(e) => Err({
-                    info!("user not in session");
-                    "Forbidden".into()
-                }),
             }
-        } else {
-            info!("no cookie");
-            Err("Forbidden".into())
+            Err(e) => {
+                info!("no cookie: {}", e);
+                Err(e.into())
+            }
         }
     }
 }

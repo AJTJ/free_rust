@@ -31,6 +31,7 @@ use crate::dto::user_dto::{UserInputData, UserQueryData};
 use crate::errors::BigError;
 use crate::guards::LoggedInGuard;
 use crate::helpers::cookie_helpers::get_cookie_from_token;
+use rand::prelude::*;
 
 use actix_web::error;
 use actix_web::web;
@@ -51,8 +52,8 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 #[Object]
 impl QueryRoot {
     // UNGUARDED - for testing
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
-        info!("ALL_USERS HIT");
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
         let all_users = web::block(move || {
@@ -67,7 +68,7 @@ impl QueryRoot {
         Ok(all_users)
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn user<'ctx>(
         &self,
         ctx: &Context<'ctx>,
@@ -85,7 +86,7 @@ impl QueryRoot {
         Ok(user)
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
@@ -115,7 +116,7 @@ impl QueryRoot {
         Ok(dive_sessions)
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn dives(
         &self,
         ctx: &Context<'_>,
@@ -138,7 +139,7 @@ impl QueryRoot {
 
     // LOGGERS
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<LoggerData>, BigError> {
         let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -151,7 +152,7 @@ impl QueryRoot {
         .map_err(|e| BigError::QueryError { source: e })
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn logger_entries(
         &self,
         ctx: &Context<'_>,
@@ -170,7 +171,7 @@ impl QueryRoot {
 
     // LOGS
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<LogData>, BigError> {
         let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -182,11 +183,27 @@ impl QueryRoot {
         .unwrap()
         .map_err(|e| BigError::QueryError { source: e })
     }
+
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn guarded_route(&self, ctx: &Context<'_>) -> f64 {
+        // Ok("Made it".to_string())
+        let mut rng = rand::thread_rng();
+        let y: f64 = rng.gen();
+        y
+    }
+
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn guarded_route_two(&self, ctx: &Context<'_>) -> f64 {
+        // Ok("Made it 2".to_string())
+        let mut rng = rand::thread_rng();
+        let y: f64 = rng.gen();
+        y
+    }
 }
 
 #[Object]
 impl MutationRoot {
-    // Must be UNGUARDED
+    // Must be UNGUARDED?
     async fn insert_user(
         &self,
         ctx: &Context<'_>,
@@ -204,7 +221,7 @@ impl MutationRoot {
         Ok(user)
     }
 
-    // For TESTING
+    // For TESTING ONLY
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -220,6 +237,7 @@ impl MutationRoot {
     }
 
     // AUTH
+    // Must be UNGUARDED?
     async fn login(
         &self,
         ctx: &Context<'_>,
@@ -228,7 +246,8 @@ impl MutationRoot {
         login(ctx, login_data.email, login_data.password).await
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    // Should be guarded eventually
+    // #[graphql(guard = "LoggedInGuard::new()")]
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
         logout(ctx).await;
         // TODO: This could be a better return val?
@@ -237,7 +256,7 @@ impl MutationRoot {
     }
 
     // DIVE SESSION
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn add_dive_session(
         &self,
         ctx: &Context<'_>,
@@ -246,7 +265,7 @@ impl MutationRoot {
         add_dive_session(ctx, session_input_data).await
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn update_dive_session(
         &self,
         ctx: &Context<'_>,
@@ -271,7 +290,7 @@ impl MutationRoot {
     }
 
     // DIVES
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn add_dive(
         &self,
         ctx: &Context<'_>,
@@ -281,7 +300,7 @@ impl MutationRoot {
         add_dive(ctx, dive_session_id, dive_data).await
     }
 
-    #[graphql(guard = "LoggedInGuard {}")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn update_dive(
         &self,
         ctx: &Context<'_>,
@@ -291,6 +310,7 @@ impl MutationRoot {
         Ok(updated_dive)
     }
 
+    // TODOS
     // LOGGER STUFF
     // add_logger() {}
     // edit_logger() {}
@@ -311,7 +331,7 @@ impl MutationRoot {
     // edit_log_input() {}
     // delete_log_input() {}
 
-    //for testing
+    //for testing only
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {

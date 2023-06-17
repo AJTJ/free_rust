@@ -12,10 +12,10 @@ pub mod helpers;
 pub mod schema;
 pub mod token_source;
 
-use actix_web::http::header::HeaderMap;
+use actix_web::http::header::{HeaderMap, AUTHORIZATION};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
-use actix_web::{guard, web, HttpRequest, Result};
+use actix_web::{guard, http, web, HttpRequest, Result};
 use actix_web::{App, HttpResponse, HttpServer};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema};
@@ -25,6 +25,7 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
 use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
+use helpers::cookie_helpers::CUSTOM_HEADER;
 use redis::Client;
 use std::env;
 use std::sync::{Arc, Mutex};
@@ -34,6 +35,8 @@ use token_source::Token;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
+use crate::helpers::cookie_helpers::COOKIE_NAME;
+
 async fn index_playground() -> Result<HttpResponse> {
     let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
     Ok(HttpResponse::Ok()
@@ -42,18 +45,24 @@ async fn index_playground() -> Result<HttpResponse> {
 }
 
 fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
-    headers
-        .get("cookie")
-        .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok())
+    let my_header = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok());
+    my_header
 }
 
 async fn index(
     schema: web::Data<DiveQLSchema>,
-    req: HttpRequest,
+    http_req: HttpRequest,
     gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
     let mut request = gql_req.into_inner();
-    if let Some(token) = get_token_from_headers(req.headers()) {
+
+    // THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
+    let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
+    // info!("auth_header_value: {auth_header_value:?}");
+
+    if let Some(token) = get_token_from_headers(http_req.headers()) {
         request = request.data(token);
     }
     schema.execute(request).await.into()

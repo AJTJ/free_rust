@@ -60,7 +60,7 @@ pub struct UserQueryData {
 impl From<UserQueryData> for UserQueryDataOutput {
     fn from(val: UserQueryData) -> Self {
         UserQueryDataOutput {
-            user_id: val.id,
+            id: val.id,
             username: val.username,
             email: val.email,
             last_login: val.last_login,
@@ -98,7 +98,7 @@ impl UserQueryData {
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct UserQueryDataOutput {
-    pub user_id: Uuid,
+    pub id: Uuid,
     pub username: String,
     pub email: String,
     pub last_login: NaiveDateTime,
@@ -118,7 +118,7 @@ impl UserQueryDataOutput {
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let user_id = self.user_id;
+        let user_id = self.id;
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)

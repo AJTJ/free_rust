@@ -4,9 +4,9 @@ use crate::auth_data::{SessionData, UniversalIdType};
 use crate::dto::user_dto::{UserModificationData, UserQueryDataOutput};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::cookie_helpers::create_cookie;
+use crate::helpers::cookie_helpers::{create_cookie, CUSTOM_HEADER};
 use crate::helpers::encoding_helpers::get_encoded_id;
-use actix_web::http::header::SET_COOKIE;
+use actix_web::http::header::{AUTHORIZATION, SET_COOKIE};
 use actix_web::web;
 use argon2::{self};
 use async_graphql::Context;
@@ -52,7 +52,9 @@ pub async fn login(
                     .await;
 
                     let cookie = create_cookie(encoded_session_id);
-                    ctx.insert_http_header(SET_COOKIE, cookie.to_string());
+                    // ctx.insert_http_header(CUSTOM_HEADER, cookie.to_string());
+                    // ctx.insert_http_header(SET_COOKIE, cookie.to_string());
+                    ctx.insert_http_header(AUTHORIZATION, cookie.to_string());
 
                     let updated_user = UserModificationData {
                         last_login: Some(Utc::now().naive_utc()),

@@ -9,7 +9,7 @@ pub async fn get_user_session_data(
     encoded_session_id: String,
 ) -> Result<SessionData, RedisError> {
     let session_arc = ctx.data::<SharedRedisType>().unwrap().clone();
-    web::block(move || {
+    let el = web::block(move || {
         let redis_server = session_arc.lock().expect("error locking the redis mutex");
 
         let mut connection = redis_server
@@ -19,5 +19,7 @@ pub async fn get_user_session_data(
         connection.get::<String, SessionData>(encoded_session_id)
     })
     .await
-    .expect("error with web block in session_data retrieval")
+    .expect("error with web block in session_data retrieval");
+
+    el
 }
