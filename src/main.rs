@@ -5,6 +5,7 @@ extern crate diesel;
 pub mod actions;
 pub mod auth_data;
 pub mod dto;
+pub mod env_data;
 pub mod errors;
 pub mod graphql_schema;
 pub mod guards;
@@ -24,6 +25,7 @@ use auth_data::SharedRedisType;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
+use env_data::SharedVars;
 use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
 use helpers::cookie_helpers::CUSTOM_HEADER;
 use redis::Client;
@@ -60,6 +62,7 @@ async fn index(
 
     // THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
     let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
+    info!("AUTH HEADER: {:?}", auth_header_value);
     // info!("auth_header_value: {auth_header_value:?}");
 
     if let Some(token) = get_token_from_headers(http_req.headers()) {
@@ -74,6 +77,7 @@ async fn main() -> std::io::Result<()> {
 
     let db_url = env::var("DATABASE_URL").expect("no DB URL");
     let redis_url = env::var("REDIS_URL").expect("no redis URL");
+    let environment = env::var("ENVIRONMENT").expect("no environment variable");
 
     // R2D2 pool
     let manager = ConnectionManager::<PgConnection>::new(db_url);
@@ -96,10 +100,13 @@ async fn main() -> std::io::Result<()> {
 
     let shared_client: SharedRedisType = Arc::new(Mutex::new(client));
 
+    let env_vars = SharedVars { environment };
+
     // graphql schema builder
     let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
         .data(shared_client)
         .data(pool)
+        .data(env_vars)
         .finish();
 
     info!("start of service - Playground: http://localhost:8080");
@@ -107,10 +114,6 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(schema.clone()))
-            // .wrap(SessionMiddleware::new(
-            //     RedisActorSessionStore::new(redis_url.clone()),
-            //     secret_key.clone(),
-            // ))
             .wrap(Logger::default())
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
             .service(web::resource("/").guard(guard::Post()).to(index))

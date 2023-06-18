@@ -14,22 +14,29 @@ pub enum BigError {
     #[snafu(display("web::block error: {}", source))]
     WebBlocking { source: BlockingError },
     // COOKIE
-    #[snafu(display("Parsed cookie doesn't match: {}", source))]
+    #[snafu(display("{source}"))]
     WrongCookieString { source: ParseError },
+
     #[snafu(display("No Cookie present: {}", error.message))]
-    NoCookie { error: AsyncError },
+    IncorrectCookie { error: AsyncError },
+
     #[snafu(display("Error parsing cookie val: {}", source))]
     ParsingCookieVal { source: SerdeError },
+
     // SESSION
     #[snafu(display("RedisSessionError: {}", source))]
     RedisSessionError { source: RedisError },
+
     // DB/DIESEL
     #[snafu(display("QueryError: {}", source))]
     QueryError { source: DieselError },
+
     #[snafu(display("UpdateError: {}", source))]
     UpdateError { source: DieselError },
+
     #[snafu(display("User Not Found: {}", source))]
     UserNotFound { source: DieselError },
+
     // LOGIN
     #[snafu(display("incorrect password"))]
     WrongPassword,

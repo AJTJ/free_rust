@@ -981,7 +981,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "free-rust"
+name = "free_rust"
 version = "0.1.0"
 dependencies = [
  "actix-cors",

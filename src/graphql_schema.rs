@@ -52,7 +52,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 #[Object]
 impl QueryRoot {
     // UNGUARDED - for testing
-    // #[graphql(guard = "LoggedInGuard::new()")]
+    #[graphql(guard = "LoggedInGuard::new()")]
     async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
