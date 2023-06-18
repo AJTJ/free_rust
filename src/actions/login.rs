@@ -13,6 +13,7 @@ use async_graphql::Context;
 
 use chrono::{Duration, Utc};
 use rand::Rng;
+use tracing::info;
 
 use super::update_user;
 
@@ -21,13 +22,16 @@ pub async fn login(
     inc_email: String,
     password: String,
 ) -> Result<UserQueryDataOutput, BigError> {
+    info!("MEOW 2");
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
         get_user_with_email(&mut conn, inc_email)
     })
     .await
-    .expect("web block error get user");
+    .map_err(|e| BigError::BlockingError { source: e })?;
+
+    info!("MEOW 3");
 
     let return_user = match maybe_user {
         Ok(user) => {
@@ -52,7 +56,7 @@ pub async fn login(
                     .await;
 
                     let cookie = create_cookie(encoded_session_id);
-                    // ctx.insert_http_header(CUSTOM_HEADER, cookie.to_string());
+
                     ctx.insert_http_header(SET_COOKIE, cookie.to_string());
                     ctx.insert_http_header(AUTHORIZATION, cookie.to_string());
 
@@ -74,5 +78,6 @@ pub async fn login(
         }
         Err(e) => Err(BigError::UserNotFound { source: e }),
     };
+    info!("MEOW 4");
     return_user
 }

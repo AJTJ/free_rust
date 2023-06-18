@@ -231,7 +231,7 @@ impl MutationRoot {
     // Should be guarded eventually
     // #[graphql(guard = "LoggedInGuard::new()")]
     async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
-        logout(ctx).await;
+        logout(ctx).await?;
         // TODO: This could be a better return val?
         info!("logout done");
         Ok(true)
