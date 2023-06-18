@@ -81,3 +81,24 @@ impl Guard for LoggedInGuard {
         }
     }
 }
+
+#[derive(Default)]
+pub struct DevelopmentGuard {}
+
+impl DevelopmentGuard {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+#[async_trait]
+impl Guard for DevelopmentGuard {
+    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+        let shared_vars = ctx.data_unchecked::<SharedVars>();
+        if shared_vars.environment == DEV_ENV {
+            Ok(())
+        } else {
+            Err("Not in dev".into())
+        }
+    }
+}

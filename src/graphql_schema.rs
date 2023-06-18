@@ -29,7 +29,7 @@ use crate::dto::loggers_dto::LoggerEntryData;
 use crate::dto::user_dto::UserQueryDataOutput;
 use crate::dto::user_dto::{UserInputData, UserQueryData};
 use crate::errors::BigError;
-use crate::guards::LoggedInGuard;
+use crate::guards::{DevelopmentGuard, LoggedInGuard};
 use crate::helpers::cookie_helpers::get_cookie_from_token;
 use rand::prelude::*;
 
@@ -52,7 +52,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 #[Object]
 impl QueryRoot {
     // UNGUARDED - for testing
-    #[graphql(guard = "LoggedInGuard::new()")]
+    #[graphql(guard = "DevelopmentGuard::new()")]
     async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
@@ -191,14 +191,6 @@ impl QueryRoot {
         let y: f64 = rng.gen();
         y
     }
-
-    #[graphql(guard = "LoggedInGuard::new()")]
-    async fn guarded_route_two(&self, ctx: &Context<'_>) -> f64 {
-        // Ok("Made it 2".to_string())
-        let mut rng = rand::thread_rng();
-        let y: f64 = rng.gen();
-        y
-    }
 }
 
 #[Object]
@@ -221,7 +213,7 @@ impl MutationRoot {
         Ok(user)
     }
 
-    // For TESTING ONLY
+    #[graphql(guard = "DevelopmentGuard::new()")]
     async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -275,6 +267,7 @@ impl MutationRoot {
     }
 
     // for testing
+    #[graphql(guard = "DevelopmentGuard::new()")]
     async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {
@@ -332,6 +325,7 @@ impl MutationRoot {
     // delete_log_input() {}
 
     //for testing only
+    #[graphql(guard = "DevelopmentGuard::new()")]
     async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let deleted = web::block(move || {

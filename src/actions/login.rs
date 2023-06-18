@@ -53,7 +53,7 @@ pub async fn login(
 
                     let cookie = create_cookie(encoded_session_id);
                     // ctx.insert_http_header(CUSTOM_HEADER, cookie.to_string());
-                    // ctx.insert_http_header(SET_COOKIE, cookie.to_string());
+                    ctx.insert_http_header(SET_COOKIE, cookie.to_string());
                     ctx.insert_http_header(AUTHORIZATION, cookie.to_string());
 
                     let updated_user = UserModificationData {
