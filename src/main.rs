@@ -13,7 +13,7 @@ pub mod helpers;
 pub mod schema;
 pub mod token_source;
 
-use actix_web::http::header::{HeaderMap, AUTHORIZATION};
+use actix_web::http::header::{HeaderMap, AUTHORIZATION, COOKIE};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use actix_web::{guard, http, web, HttpRequest, Result};
@@ -27,7 +27,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
 use env_data::SharedVars;
 use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
-use helpers::cookie_helpers::CUSTOM_HEADER;
+use helpers::token_helpers::CUSTOM_HEADER;
 use redis::Client;
 use std::env;
 use std::sync::{Arc, Mutex};
@@ -37,7 +37,7 @@ use token_source::Token;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
-use crate::helpers::cookie_helpers::COOKIE_NAME;
+use crate::helpers::token_helpers::TOKEN_NAME;
 
 async fn index_playground() -> Result<HttpResponse> {
     let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
@@ -49,6 +49,7 @@ async fn index_playground() -> Result<HttpResponse> {
 fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
     let my_header = headers
         .get(AUTHORIZATION)
+        .or_else(|| headers.get(COOKIE))
         .and_then(|value| value.to_str().map(|s| Token(s.to_string())).ok());
     my_header
 }
@@ -63,6 +64,8 @@ async fn index(
     // THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
     let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
     info!("AUTH HEADER: {:?}", auth_header_value);
+    let cookie_header_value = http_req.headers().get(http::header::COOKIE);
+    info!("COOKIE HEADER: {:?}", cookie_header_value);
     // info!("auth_header_value: {auth_header_value:?}");
 
     if let Some(token) = get_token_from_headers(http_req.headers()) {

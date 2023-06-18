@@ -57,20 +57,6 @@ pub struct UserQueryData {
     pub deleted_by: Option<Uuid>,
 }
 
-impl From<UserQueryData> for UserQueryDataOutput {
-    fn from(val: UserQueryData) -> Self {
-        UserQueryDataOutput {
-            id: val.id,
-            username: val.username,
-            email: val.email,
-            last_login: val.last_login,
-            created_at: val.created_at,
-            updated_at: val.updated_at,
-            is_active: val.is_active,
-        }
-    }
-}
-
 #[ComplexObject]
 impl UserQueryData {
     async fn dive_sessions(
@@ -105,6 +91,20 @@ pub struct UserQueryDataOutput {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
+}
+
+impl From<UserQueryData> for UserQueryDataOutput {
+    fn from(val: UserQueryData) -> Self {
+        UserQueryDataOutput {
+            id: val.id,
+            username: val.username,
+            email: val.email,
+            last_login: val.last_login,
+            created_at: val.created_at,
+            updated_at: val.updated_at,
+            is_active: val.is_active,
+        }
+    }
 }
 
 #[ComplexObject]

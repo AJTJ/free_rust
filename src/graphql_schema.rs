@@ -5,8 +5,7 @@ use crate::actions::get_dives_by_user;
 use crate::actions::get_logger_entries_by_logger;
 use crate::actions::get_loggers_from_user_id;
 use crate::actions::get_logs_from_user_id;
-use crate::actions::get_user_id_from_cookie_session;
-use crate::actions::get_user_session_data;
+use crate::actions::get_user_id_from_token_and_session;
 use crate::actions::get_user_with_email;
 use crate::actions::insert_user;
 use crate::actions::login;
@@ -30,7 +29,6 @@ use crate::dto::user_dto::UserQueryDataOutput;
 use crate::dto::user_dto::{UserInputData, UserQueryData};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
-use crate::helpers::cookie_helpers::get_cookie_from_token;
 use rand::prelude::*;
 
 use actix_web::error;
@@ -95,19 +93,11 @@ impl QueryRoot {
     ) -> FieldResult<Vec<DiveSessionQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let cookie = get_cookie_from_token(ctx)
-            .expect("there should be cookie data, as this route is guarded");
-
-        let user_session = get_user_session_data(ctx, cookie.encoded_session_id).await?;
+        let user_id = get_user_id_from_token_and_session(ctx).await?;
 
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions_by_user(
-                &mut conn,
-                &user_session.user_id,
-                dive_session_input,
-                db_query_dto,
-            )
+            get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
         })
         .await?
         .map_err(error::ErrorInternalServerError)
@@ -125,7 +115,7 @@ impl QueryRoot {
     ) -> FieldResult<Vec<DiveQueryData>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let user_id = get_user_id_from_cookie_session(ctx).await?;
+        let user_id = get_user_id_from_token_and_session(ctx).await?;
 
         let dives = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -141,7 +131,7 @@ impl QueryRoot {
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<LoggerData>, BigError> {
-        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -158,7 +148,7 @@ impl QueryRoot {
         ctx: &Context<'_>,
         logger_id: Uuid,
     ) -> Result<Vec<LoggerEntryData>, BigError> {
-        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -173,7 +163,7 @@ impl QueryRoot {
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<LogData>, BigError> {
-        let user_id = get_user_id_from_cookie_session(ctx).await.unwrap();
+        let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();

@@ -1,11 +1,11 @@
-use crate::actions::get_user_session_data;
+use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
 use crate::dto::dive_dto::{DiveCreationData, DiveInputData, DiveQueryData};
 use crate::dto::dive_session_dto::{
     DiveSessionCreationData, DiveSessionInputData, DiveSessionQueryData,
 };
 use crate::graphql_schema::DbPool;
-use crate::helpers::cookie_helpers::get_cookie_from_token;
+use crate::helpers::token_helpers::get_cookie_from_token;
 
 use actix_web::web;
 use async_graphql::{Context, Error};
@@ -21,12 +21,7 @@ pub async fn add_dive(
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
 
-    let cookie_data =
-        get_cookie_from_token(ctx).expect("there should be cookie data, as this route is guarded");
-
-    let user_session = get_user_session_data(ctx, cookie_data.encoded_session_id)
-        .await
-        .expect("expecting session to be there");
+    let user_id = get_user_id_from_token_and_session(ctx).await?;
 
     let new_dive = DiveCreationData {
         id: uuid,
@@ -36,7 +31,7 @@ pub async fn add_dive(
         dive_time: dive_data.dive_time,
         dive_name: dive_data.dive_name,
         session_id: dive_session_id,
-        user_id: user_session.user_id,
+        user_id,
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,

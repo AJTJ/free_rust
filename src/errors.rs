@@ -12,7 +12,7 @@ use thiserror::Error as ThisError;
 pub enum BigError {
     // ACTIX
     #[snafu(display("web::block error: {}", source))]
-    WebBlocking { source: BlockingError },
+    BlockingError { source: BlockingError },
     // COOKIE
     #[snafu(display("{source}"))]
     WrongCookieString { source: ParseError },
@@ -22,6 +22,9 @@ pub enum BigError {
 
     #[snafu(display("Error parsing cookie val: {}", source))]
     ParsingCookieVal { source: SerdeError },
+
+    #[snafu(display("No session_id on Token"))]
+    NoSessionIDOnToken,
 
     // SESSION
     #[snafu(display("RedisSessionError: {}", source))]

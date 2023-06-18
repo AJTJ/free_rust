@@ -4,8 +4,8 @@ use crate::auth_data::{SessionData, UniversalIdType};
 use crate::dto::user_dto::{UserModificationData, UserQueryDataOutput};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::cookie_helpers::{create_cookie, CUSTOM_HEADER};
 use crate::helpers::encoding_helpers::get_encoded_id;
+use crate::helpers::token_helpers::{create_cookie, CUSTOM_HEADER};
 use actix_web::http::header::{AUTHORIZATION, SET_COOKIE};
 use actix_web::web;
 use argon2::{self};
@@ -63,9 +63,9 @@ pub async fn login(
                         is_active: None,
                     };
 
-                    let updated_user = update_user(ctx, None, Some(user.id), updated_user).await;
+                    let updated_user = update_user(ctx, None, Some(user.id), updated_user).await?;
 
-                    let user_out: UserQueryDataOutput = updated_user.into();
+                    let user_out = UserQueryDataOutput::from(updated_user);
 
                     Ok(user_out)
                 }

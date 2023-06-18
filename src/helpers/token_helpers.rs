@@ -13,19 +13,21 @@ use crate::errors::BigError;
 use crate::token_source::Token;
 
 // COOKIE THINGS
-pub const COOKIE_NAME: &str = "free_rust_cookie";
+pub const TOKEN_NAME: &str = "free_rust_token";
 pub const CUSTOM_HEADER: &str = "Custom-Header";
 pub const AUTHORIZATION_HEADER: &str = "Authorization";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CookieStruct {
-    pub encoded_session_id: String,
+    pub encoded_session_id: Option<String>,
 }
 
 pub fn create_cookie<'c>(encoded_session_id: String) -> Cookie<'c> {
-    let cookie_struct = CookieStruct { encoded_session_id };
+    let cookie_struct = CookieStruct {
+        encoded_session_id: Some(encoded_session_id),
+    };
 
-    let cookie = Cookie::build(COOKIE_NAME, json!(cookie_struct).to_string())
+    let cookie = Cookie::build(TOKEN_NAME, json!(cookie_struct).to_string())
         .path("/")
         .secure(true)
         .max_age(TimeDuration::minutes(10080))
@@ -37,10 +39,10 @@ pub fn create_cookie<'c>(encoded_session_id: String) -> Cookie<'c> {
 pub fn create_expired_cookie<'c>() -> Cookie<'c> {
     let cookie_struct = CookieStruct {
         // TODO: Should this be like so?
-        encoded_session_id: "This cookie done".to_string(),
+        encoded_session_id: None,
     };
 
-    let cookie = Cookie::build(COOKIE_NAME, json!(cookie_struct).to_string())
+    let cookie = Cookie::build(TOKEN_NAME, json!(cookie_struct).to_string())
         .path("/")
         .secure(true)
         .expires(OffsetDateTime::UNIX_EPOCH)

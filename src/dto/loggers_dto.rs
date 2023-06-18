@@ -38,7 +38,7 @@ impl LoggerData {
             get_logger_entries_by_logger(&mut conn, &logger_id, &user_id, db_query_dto)
         })
         .await
-        .map_err(|e| BigError::WebBlocking { source: e })
+        .map_err(|e| BigError::BlockingError { source: e })
         .unwrap()
         .map_err(|e| BigError::QueryError { source: e })
     }
