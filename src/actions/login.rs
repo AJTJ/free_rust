@@ -22,7 +22,6 @@ pub async fn login(
     inc_email: String,
     password: String,
 ) -> Result<UserQueryDataOutput, BigError> {
-    info!("MEOW 2");
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
@@ -30,8 +29,6 @@ pub async fn login(
     })
     .await
     .map_err(|e| BigError::BlockingError { source: e })?;
-
-    info!("MEOW 3");
 
     let return_user = match maybe_user {
         Ok(user) => {
@@ -78,6 +75,6 @@ pub async fn login(
         }
         Err(e) => Err(BigError::UserNotFound { source: e }),
     };
-    info!("MEOW 4");
+
     return_user
 }

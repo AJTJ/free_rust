@@ -6,6 +6,7 @@ use crate::graphql_schema::DbPool;
 use crate::helpers::token_helpers::get_cookie_from_token;
 
 use actix_web::web;
+use async_graphql::async_trait::async_trait;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
@@ -22,7 +23,10 @@ pub async fn update_user(
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     // NOTE: get user_id from cookie/session if it isn't included
-    let input_user_id = input_user_id.unwrap_or(get_user_id_from_token_and_session(ctx).await?);
+    let input_user_id = match input_user_id {
+        Some(u) => u,
+        None => get_user_id_from_token_and_session(ctx).await?,
+    };
 
     let my_user_mod_data = user_mod_data.clone();
 
