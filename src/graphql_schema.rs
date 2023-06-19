@@ -31,6 +31,7 @@ use crate::dto::user_dto::UserOutput;
 use crate::dto::user_dto::{User, UserInput};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
+use crate::helpers::form_helper::UserFormInput;
 use rand::prelude::*;
 
 use actix_web::error;
@@ -286,9 +287,10 @@ impl MutationRoot {
     async fn add_logger(
         &self,
         ctx: &Context<'_>,
-        logger_input: LoggerInput,
+        logger_data: LoggerInput,
+        user_form_input: UserFormInput,
     ) -> Result<Logger, BigError> {
-        add_logger(ctx, logger_input).await
+        add_logger(ctx, logger_data, user_form_input).await
     }
     // update_logger() {}
     // delete_logger() {}

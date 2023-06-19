@@ -2,15 +2,26 @@ use crate::actions::get_user_id_from_token_and_session;
 use crate::dto::loggers_dto::{Logger, LoggerCreation, LoggerInput};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
+use crate::helpers::form_helper::{FormTemplate, UserFormInput};
 
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 
-pub async fn add_logger(ctx: &Context<'_>, logger_data: LoggerInput) -> Result<Logger, BigError> {
+pub async fn add_logger(
+    ctx: &Context<'_>,
+    logger_data: LoggerInput,
+    user_form_input: UserFormInput,
+) -> Result<Logger, BigError> {
+    let new_form = FormTemplate::validate_form(user_form_input);
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
+
+    // TODO: How should the form be stored?
+    // What are the implications for logs made, and if the form changes?
+    // What about data analysis? Analyzing json docs isn't as easy as looking at database values, but it's also not that hard.
+
     let new_logger = LoggerCreation {
         logger_name: logger_data.logger_name,
         user_id,
