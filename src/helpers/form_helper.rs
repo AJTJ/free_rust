@@ -75,6 +75,12 @@ impl FormTemplate {
         output
     }
 
+    // should take in a log, validate that it's information is correct
+    // and then spit out a storable structure
+    pub fn validate_form_log() {
+        unimplemented!()
+    }
+
     pub fn get_form_structure() -> FormTemplate {
         FormTemplate {
             all_inputs: vec![
