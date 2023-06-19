@@ -4,12 +4,12 @@ use async_graphql::{ComplexObject, Context, Enum, FieldResult, OutputType, Simpl
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use super::db_query_dto::DBQueryObject;
+use super::db_query_dto::DBQueryParams;
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
 #[graphql(complex)]
-pub struct LoggerData {
+pub struct Logger {
     pub logger_name: String,
     pub user_id: Uuid,
 
@@ -22,12 +22,12 @@ pub struct LoggerData {
 }
 
 #[ComplexObject]
-impl LoggerData {
+impl Logger {
     async fn logger_entries(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: Option<DBQueryObject>,
-    ) -> Result<Vec<LoggerEntryData>, BigError> {
+        db_query_dto: Option<DBQueryParams>,
+    ) -> Result<Vec<LoggerEntry>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let logger_id = self.id;
@@ -48,7 +48,7 @@ impl LoggerData {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject)]
-pub struct LoggerEntryData {
+pub struct LoggerEntry {
     pub item_order: Option<i32>,
     pub field_name: String,
     pub category_name: String,

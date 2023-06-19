@@ -5,12 +5,12 @@ use chrono::NaiveDateTime;
 use uuid::Uuid;
 
 use super::{
-    db_query_dto::{self, DBQueryObject},
-    dive_session_dto::{DiveSessionQueryData, DiveSessionQueryInput},
+    db_query_dto::{self, DBQueryParams},
+    dive_session_dto::{DiveSessionQuery, DiveSessionQueryParams},
 };
 
 #[derive(Debug, Clone, InputObject)]
-pub struct UserInputData {
+pub struct UserInput {
     pub username: String,
     pub password: String,
     pub email: String,
@@ -18,7 +18,7 @@ pub struct UserInputData {
 
 #[derive(AsChangeset, InputObject, Clone)]
 #[diesel(table_name = users)]
-pub struct UserModificationData {
+pub struct UserUpdate {
     pub username: Option<String>,
     pub email: Option<String>,
     pub last_login: Option<NaiveDateTime>,
@@ -27,7 +27,7 @@ pub struct UserModificationData {
 
 #[derive(Insertable)]
 #[diesel(table_name = users)]
-pub struct UserCreationData {
+pub struct UserCreation {
     pub username: String,
     pub id: Uuid,
     pub hashed_password: String,
@@ -42,7 +42,7 @@ pub struct UserCreationData {
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
 #[graphql(complex)]
-pub struct UserQueryData {
+pub struct UserQuery {
     pub username: String,
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
@@ -58,14 +58,14 @@ pub struct UserQueryData {
 }
 
 #[ComplexObject]
-impl UserQueryData {
+impl UserQuery {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
         // this needs to be mut
-        mut dive_session_query: Option<DiveSessionQueryInput>,
-        db_query_dto: Option<DBQueryObject>,
-    ) -> FieldResult<Vec<DiveSessionQueryData>> {
+        mut dive_session_query: Option<DiveSessionQueryParams>,
+        db_query_dto: Option<DBQueryParams>,
+    ) -> FieldResult<Vec<DiveSessionQuery>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = self.id;
@@ -83,7 +83,7 @@ impl UserQueryData {
 }
 #[derive(SimpleObject)]
 #[graphql(complex)]
-pub struct UserQueryDataOutput {
+pub struct UserQueryOutput {
     pub id: Uuid,
     pub username: String,
     pub email: String,
@@ -93,9 +93,9 @@ pub struct UserQueryDataOutput {
     pub is_active: bool,
 }
 
-impl From<UserQueryData> for UserQueryDataOutput {
-    fn from(val: UserQueryData) -> Self {
-        UserQueryDataOutput {
+impl From<UserQuery> for UserQueryOutput {
+    fn from(val: UserQuery) -> Self {
+        UserQueryOutput {
             id: val.id,
             username: val.username,
             email: val.email,
@@ -108,14 +108,14 @@ impl From<UserQueryData> for UserQueryDataOutput {
 }
 
 #[ComplexObject]
-impl UserQueryDataOutput {
+impl UserQueryOutput {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
         // this needs to be mut
-        dive_session_query: Option<DiveSessionQueryInput>,
-        db_query_dto: Option<DBQueryObject>,
-    ) -> FieldResult<Vec<DiveSessionQueryData>> {
+        dive_session_query: Option<DiveSessionQueryParams>,
+        db_query_dto: Option<DBQueryParams>,
+    ) -> FieldResult<Vec<DiveSessionQuery>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = self.id;

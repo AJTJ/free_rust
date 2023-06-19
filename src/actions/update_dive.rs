@@ -1,6 +1,6 @@
 use crate::actions::get_dive_by_id;
-use crate::dto::dive_dto::{DiveModificationData, DiveQueryData};
-use crate::dto::dive_session_dto::{DiveSessionModificationData, DiveSessionQueryData};
+use crate::dto::dive_dto::{DiveQuery, DiveUpdate};
+use crate::dto::dive_session_dto::{DiveSessionQuery, DiveSessionUpdate};
 use crate::graphql_schema::DbPool;
 use crate::{actions::get_dive_session_by_id, diesel::ExpressionMethods};
 
@@ -10,7 +10,7 @@ use chrono::Utc;
 use diesel::{result::Error, RunQueryDsl};
 use tracing::info;
 
-pub async fn update_dive(ctx: &Context<'_>, dive_mod_data: DiveModificationData) -> DiveQueryData {
+pub async fn update_dive(ctx: &Context<'_>, dive_mod_data: DiveUpdate) -> DiveQuery {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     let my_dive_mod_data = dive_mod_data.clone();

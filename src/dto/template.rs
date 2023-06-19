@@ -6,17 +6,17 @@ use uuid::Uuid;
 
 #[derive(AsChangeset, InputObject, Clone)]
 #[diesel(table_name = users)]
-pub struct UserModificationData {}
+pub struct UserUpdate {}
 
 #[derive(Insertable)]
 #[diesel(table_name = users)]
-pub struct UserCreationData {}
+pub struct UserCreation {}
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
 #[graphql(complex)]
-pub struct UserQueryData {}
+pub struct User {}
 
 #[derive(SimpleObject)]
 #[graphql(complex)]
-pub struct UserQueryDataOutput {}
+pub struct UserOutput {}

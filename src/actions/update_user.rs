@@ -1,6 +1,6 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data, get_user_with_id};
 use crate::diesel::ExpressionMethods;
-use crate::dto::user_dto::{UserModificationData, UserQueryData};
+use crate::dto::user_dto::{UserQuery, UserUpdate};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 use crate::helpers::token_helpers::get_cookie_from_token;
@@ -18,8 +18,8 @@ pub async fn update_user(
     // TODO: Impl change password here? Or somewhere else?
     new_password: Option<String>,
     input_user_id: Option<Uuid>,
-    user_mod_data: UserModificationData,
-) -> Result<UserQueryData, BigError> {
+    user_mod_data: UserUpdate,
+) -> Result<UserQuery, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     // NOTE: get user_id from cookie/session if it isn't included

@@ -12,21 +12,21 @@ use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
-use crate::dto::auth_dto::LoginData;
-use crate::dto::db_query_dto::DBQueryObject;
-use crate::dto::dive_dto::DiveInputData;
-use crate::dto::dive_dto::DiveModificationData;
-use crate::dto::dive_dto::DiveQueryData;
+use crate::dto::auth_dto::Login;
+use crate::dto::db_query_dto::DBQueryParams;
+use crate::dto::dive_dto::DiveInput;
+use crate::dto::dive_dto::DiveQuery;
 use crate::dto::dive_dto::DiveQueryInput;
-use crate::dto::dive_session_dto::DiveSessionInputData;
-use crate::dto::dive_session_dto::DiveSessionModificationData;
-use crate::dto::dive_session_dto::DiveSessionQueryData;
-use crate::dto::dive_session_dto::DiveSessionQueryInput;
-use crate::dto::log_dto::LogData;
-use crate::dto::loggers_dto::LoggerData;
-use crate::dto::loggers_dto::LoggerEntryData;
-use crate::dto::user_dto::UserQueryDataOutput;
-use crate::dto::user_dto::{UserInputData, UserQueryData};
+use crate::dto::dive_dto::DiveUpdate;
+use crate::dto::dive_session_dto::DiveSessionInput;
+use crate::dto::dive_session_dto::DiveSessionQuery;
+use crate::dto::dive_session_dto::DiveSessionQueryParams;
+use crate::dto::dive_session_dto::DiveSessionUpdate;
+use crate::dto::log_dto::Log;
+use crate::dto::loggers_dto::Logger;
+use crate::dto::loggers_dto::LoggerEntry;
+use crate::dto::user_dto::UserQueryOutput;
+use crate::dto::user_dto::{UserInput, UserQuery};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
 use rand::prelude::*;
@@ -51,14 +51,14 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 impl QueryRoot {
     // UNGUARDED - for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQueryData>> {
+    async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQuery>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
         let all_users = web::block(move || {
             let mut pool = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
             users
-                .load::<UserQueryData>(&mut pool)
+                .load::<UserQuery>(&mut pool)
                 .expect("loading all users")
         })
         .await?;
@@ -67,11 +67,7 @@ impl QueryRoot {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn user<'ctx>(
-        &self,
-        ctx: &Context<'ctx>,
-        query_email: String,
-    ) -> FieldResult<UserQueryData> {
+    async fn user<'ctx>(&self, ctx: &Context<'ctx>, query_email: String) -> FieldResult<UserQuery> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -88,9 +84,9 @@ impl QueryRoot {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
-        dive_session_input: Option<DiveSessionQueryInput>,
-        db_query_dto: Option<DBQueryObject>,
-    ) -> FieldResult<Vec<DiveSessionQueryData>> {
+        dive_session_input: Option<DiveSessionQueryParams>,
+        db_query_dto: Option<DBQueryParams>,
+    ) -> FieldResult<Vec<DiveSessionQuery>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = get_user_id_from_token_and_session(ctx).await?;
@@ -111,8 +107,8 @@ impl QueryRoot {
         &self,
         ctx: &Context<'_>,
         dive_input: Option<DiveQueryInput>,
-        db_query_dto: Option<DBQueryObject>,
-    ) -> FieldResult<Vec<DiveQueryData>> {
+        db_query_dto: Option<DBQueryParams>,
+    ) -> FieldResult<Vec<DiveQuery>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = get_user_id_from_token_and_session(ctx).await?;
@@ -130,7 +126,7 @@ impl QueryRoot {
     // LOGGERS
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<LoggerData>, BigError> {
+    async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<Logger>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
@@ -147,7 +143,7 @@ impl QueryRoot {
         &self,
         ctx: &Context<'_>,
         logger_id: Uuid,
-    ) -> Result<Vec<LoggerEntryData>, BigError> {
+    ) -> Result<Vec<LoggerEntry>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
@@ -162,7 +158,7 @@ impl QueryRoot {
     // LOGS
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<LogData>, BigError> {
+    async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<Log>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
@@ -186,11 +182,7 @@ impl QueryRoot {
 #[Object]
 impl MutationRoot {
     // Must be UNGUARDED?
-    async fn insert_user(
-        &self,
-        ctx: &Context<'_>,
-        user_data: UserInputData,
-    ) -> FieldResult<UserQueryData> {
+    async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> FieldResult<UserQuery> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -223,8 +215,8 @@ impl MutationRoot {
     async fn login(
         &self,
         ctx: &Context<'_>,
-        login_data: LoginData,
-    ) -> Result<UserQueryDataOutput, BigError> {
+        login_data: Login,
+    ) -> Result<UserQueryOutput, BigError> {
         login(ctx, login_data.email, login_data.password).await
     }
 
@@ -242,8 +234,8 @@ impl MutationRoot {
     async fn add_dive_session(
         &self,
         ctx: &Context<'_>,
-        session_input_data: DiveSessionInputData,
-    ) -> FieldResult<DiveSessionQueryData> {
+        session_input_data: DiveSessionInput,
+    ) -> FieldResult<DiveSessionQuery> {
         add_dive_session(ctx, session_input_data).await
     }
 
@@ -251,8 +243,8 @@ impl MutationRoot {
     async fn update_dive_session(
         &self,
         ctx: &Context<'_>,
-        session_input_data: DiveSessionModificationData,
-    ) -> Result<DiveSessionQueryData, BigError> {
+        session_input_data: DiveSessionUpdate,
+    ) -> Result<DiveSessionQuery, BigError> {
         update_dive_session(ctx, session_input_data).await
     }
 
@@ -278,8 +270,8 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         dive_session_id: Uuid,
-        dive_data: DiveInputData,
-    ) -> FieldResult<DiveQueryData> {
+        dive_data: DiveInput,
+    ) -> FieldResult<DiveQuery> {
         add_dive(ctx, dive_session_id, dive_data).await
     }
 
@@ -287,8 +279,8 @@ impl MutationRoot {
     async fn update_dive(
         &self,
         ctx: &Context<'_>,
-        dive_mod_data: DiveModificationData,
-    ) -> FieldResult<DiveQueryData> {
+        dive_mod_data: DiveUpdate,
+    ) -> FieldResult<DiveQuery> {
         let updated_dive = update_dive(ctx, dive_mod_data).await;
         Ok(updated_dive)
     }

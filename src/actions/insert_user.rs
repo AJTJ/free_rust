@@ -1,6 +1,6 @@
 use crate::auth_data::UniversalIdType;
 use crate::diesel::ExpressionMethods;
-use crate::dto::user_dto::{UserCreationData, UserInputData, UserQueryData};
+use crate::dto::user_dto::{UserCreation, UserInput, UserQuery};
 use argon2::{self, Config};
 
 use chrono::Utc;
@@ -11,8 +11,8 @@ use uuid::Uuid;
 // TODO: improve error handling
 pub fn insert_user(
     conn: &mut PgConnection,
-    user_data: UserInputData,
-) -> diesel::QueryResult<UserQueryData> {
+    user_data: UserInput,
+) -> diesel::QueryResult<UserQuery> {
     use crate::schema::users::dsl::{id as user_id, users};
 
     let current_stamp = Utc::now().naive_utc();
@@ -24,7 +24,7 @@ pub fn insert_user(
     let hashed_pw =
         argon2::hash_encoded(user_data.password.as_bytes(), &salt_gen, &Config::default()).unwrap();
 
-    let new_user = UserCreationData {
+    let new_user = UserCreation {
         username: user_data.username,
         id: uuid,
         hashed_password: hashed_pw,
@@ -42,5 +42,5 @@ pub fn insert_user(
         .expect("diesel insert new user error");
 
     // implicit return of user that was just inserted
-    users.filter(user_id.eq(&uuid)).first::<UserQueryData>(conn)
+    users.filter(user_id.eq(&uuid)).first::<UserQuery>(conn)
 }

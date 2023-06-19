@@ -2,12 +2,12 @@ use async_graphql::InputObject;
 
 // AUTH STUFF
 #[derive(InputObject, Debug)]
-pub struct LoginData {
+pub struct Login {
     pub email: String,
     pub password: String,
 }
 
 #[derive(InputObject)]
-pub struct LogoutData {
+pub struct Logout {
     pub email: String,
 }

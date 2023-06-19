@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::schema::dives;
 
 #[derive(InputObject)]
-pub struct DiveInputData {
+pub struct DiveInput {
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,
@@ -15,7 +15,7 @@ pub struct DiveInputData {
 
 #[derive(AsChangeset, InputObject, Clone)]
 #[diesel(table_name = dives)]
-pub struct DiveModificationData {
+pub struct DiveUpdate {
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,
@@ -28,7 +28,7 @@ pub struct DiveModificationData {
 
 #[derive(Insertable, InputObject)]
 #[diesel(table_name = dives)]
-pub struct DiveCreationData {
+pub struct DiveCreation {
     pub id: Uuid,
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
@@ -44,7 +44,7 @@ pub struct DiveCreationData {
 
 // Matches the database object order 1:1
 #[derive(Queryable, SimpleObject)]
-pub struct DiveQueryData {
+pub struct DiveQuery {
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,

@@ -1,4 +1,4 @@
-use crate::dto::dive_session_dto::{DiveSessionModificationData, DiveSessionQueryData};
+use crate::dto::dive_session_dto::{DiveSessionQuery, DiveSessionUpdate};
 
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
@@ -14,8 +14,8 @@ use tracing::info;
 // TODO: better error handling
 pub async fn update_dive_session(
     ctx: &Context<'_>,
-    session_mod_data: DiveSessionModificationData,
-) -> Result<DiveSessionQueryData, BigError> {
+    session_mod_data: DiveSessionUpdate,
+) -> Result<DiveSessionQuery, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     let my_session_mod_data = session_mod_data.clone();

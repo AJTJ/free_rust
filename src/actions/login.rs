@@ -1,7 +1,7 @@
 use crate::actions::add_to_user_session::add_to_user_session;
 use crate::actions::get_user_with_email;
 use crate::auth_data::{SessionData, UniversalIdType};
-use crate::dto::user_dto::{UserModificationData, UserQueryDataOutput};
+use crate::dto::user_dto::{UserQueryOutput, UserUpdate};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 use crate::helpers::encoding_helpers::get_encoded_id;
@@ -21,7 +21,7 @@ pub async fn login(
     ctx: &Context<'_>,
     inc_email: String,
     password: String,
-) -> Result<UserQueryDataOutput, BigError> {
+) -> Result<UserQueryOutput, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
@@ -57,7 +57,7 @@ pub async fn login(
                     ctx.insert_http_header(SET_COOKIE, cookie.to_string());
                     ctx.insert_http_header(AUTHORIZATION, cookie.to_string());
 
-                    let updated_user = UserModificationData {
+                    let updated_user = UserUpdate {
                         last_login: Some(Utc::now().naive_utc()),
                         username: None,
                         email: None,
@@ -66,7 +66,7 @@ pub async fn login(
 
                     let updated_user = update_user(ctx, None, Some(user.id), updated_user).await?;
 
-                    let user_out = UserQueryDataOutput::from(updated_user);
+                    let user_out = UserQueryOutput::from(updated_user);
 
                     Ok(user_out)
                 }

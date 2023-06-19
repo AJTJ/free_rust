@@ -5,12 +5,12 @@ use chrono::NaiveDateTime;
 use uuid::Uuid;
 
 use super::{
-    db_query_dto::DBQueryObject,
-    dive_dto::{DiveQueryData, DiveQueryInput},
+    db_query_dto::DBQueryParams,
+    dive_dto::{DiveQuery, DiveQueryInput},
 };
 
 #[derive(InputObject)]
-pub struct DiveSessionInputData {
+pub struct DiveSessionInput {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
@@ -18,7 +18,7 @@ pub struct DiveSessionInputData {
 
 #[derive(AsChangeset, InputObject, Clone)]
 #[diesel(table_name = dive_sessions)]
-pub struct DiveSessionModificationData {
+pub struct DiveSessionUpdate {
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
@@ -27,9 +27,9 @@ pub struct DiveSessionModificationData {
     pub is_active: Option<bool>,
 }
 
-#[derive(Insertable, InputObject)]
+#[derive(Insertable)]
 #[diesel(table_name = dive_sessions)]
-pub struct DiveSessionCreationData {
+pub struct DiveSessionCreation {
     pub id: Uuid,
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
@@ -43,7 +43,7 @@ pub struct DiveSessionCreationData {
 // Matches the database object 1:1
 #[derive(Queryable, SimpleObject)]
 #[graphql(complex)]
-pub struct DiveSessionQueryData {
+pub struct DiveSessionQuery {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
@@ -58,14 +58,14 @@ pub struct DiveSessionQueryData {
     pub deleted_by: Option<Uuid>,
 }
 #[ComplexObject]
-impl DiveSessionQueryData {
+impl DiveSessionQuery {
     async fn dives(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: Option<DBQueryObject>,
+        db_query_dto: Option<DBQueryParams>,
         // this needs to be mut
         dive_query: Option<DiveQueryInput>,
-    ) -> FieldResult<Vec<DiveQueryData>> {
+    ) -> FieldResult<Vec<DiveQuery>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.user_id;
@@ -83,7 +83,7 @@ impl DiveSessionQueryData {
 }
 
 #[derive(InputObject)]
-pub struct DiveSessionQueryInput {
+pub struct DiveSessionQueryParams {
     pub session_id: Option<Uuid>,
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,

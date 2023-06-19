@@ -1,8 +1,6 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
-use crate::dto::dive_session_dto::{
-    DiveSessionCreationData, DiveSessionInputData, DiveSessionQueryData,
-};
+use crate::dto::dive_session_dto::{DiveSessionCreation, DiveSessionInput, DiveSessionQuery};
 use crate::graphql_schema::DbPool;
 use crate::helpers::token_helpers::get_cookie_from_token;
 
@@ -14,8 +12,8 @@ use uuid::Uuid;
 
 pub async fn add_dive_session(
     ctx: &Context<'_>,
-    session_data: DiveSessionInputData,
-) -> Result<DiveSessionQueryData, Error> {
+    session_data: DiveSessionInput,
+) -> Result<DiveSessionQuery, Error> {
     use crate::schema::dive_sessions::dsl::{dive_sessions, id as schema_session_id};
 
     let current_stamp = Utc::now().naive_utc();
@@ -23,7 +21,7 @@ pub async fn add_dive_session(
 
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-    let new_session = DiveSessionCreationData {
+    let new_session = DiveSessionCreation {
         id: uuid,
         start_time: session_data.start_time,
         end_time: session_data.end_time,
@@ -45,7 +43,7 @@ pub async fn add_dive_session(
 
         dive_sessions
             .filter(schema_session_id.eq(&uuid))
-            .first::<DiveSessionQueryData>(&mut conn)
+            .first::<DiveSessionQuery>(&mut conn)
             .expect("error loading dive_session that was just inserted")
     })
     .await
