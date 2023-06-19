@@ -1,6 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE loggers (
   logger_name TEXT NOT NULL,
+  logger_fields jsonb NOT NULL,
   -- relationships
   user_id uuid NOT NULL REFERENCES users (id),
   -- default data

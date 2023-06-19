@@ -85,6 +85,7 @@ diesel::table! {
 diesel::table! {
     loggers (id) {
         logger_name -> Text,
+        logger_fields -> Jsonb,
         user_id -> Uuid,
         id -> Uuid,
         created_at -> Timestamp,

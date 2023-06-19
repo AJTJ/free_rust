@@ -8,6 +8,7 @@ use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
+use serde_json::json;
 
 pub async fn add_logger(
     ctx: &Context<'_>,
@@ -25,6 +26,7 @@ pub async fn add_logger(
     let new_logger = LoggerCreation {
         logger_name: logger_data.logger_name,
         user_id,
+        logger_fields: json!(new_form),
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,

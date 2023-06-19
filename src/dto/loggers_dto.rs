@@ -1,9 +1,13 @@
 use crate::actions::get_logger_entries_by_logger;
+use crate::diesel::Expression;
 use crate::errors::BigError;
+use crate::helpers::form_helper::FormTemplate;
 use crate::{actions::get_dive_sessions_by_user, graphql_schema::DbPool, schema::loggers};
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
+use diesel::sql_types::Jsonb;
+use serde_json::{value, Value};
 use uuid::Uuid;
 
 use super::{
@@ -26,11 +30,13 @@ pub struct LoggerInput {
     pub logger_name: String,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[diesel(table_name = loggers)]
 pub struct LoggerCreation {
     pub logger_name: String,
     pub user_id: Uuid,
+    pub logger_fields: serde_json::Value,
+    // pub logger_fields: String,
     // partial default data
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
