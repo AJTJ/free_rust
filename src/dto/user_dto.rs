@@ -42,7 +42,7 @@ pub struct UserCreation {
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
 #[graphql(complex)]
-pub struct UserQuery {
+pub struct User {
     pub username: String,
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
@@ -58,7 +58,7 @@ pub struct UserQuery {
 }
 
 #[ComplexObject]
-impl UserQuery {
+impl User {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
@@ -83,7 +83,7 @@ impl UserQuery {
 }
 #[derive(SimpleObject)]
 #[graphql(complex)]
-pub struct UserQueryOutput {
+pub struct UserOutput {
     pub id: Uuid,
     pub username: String,
     pub email: String,
@@ -93,9 +93,9 @@ pub struct UserQueryOutput {
     pub is_active: bool,
 }
 
-impl From<UserQuery> for UserQueryOutput {
-    fn from(val: UserQuery) -> Self {
-        UserQueryOutput {
+impl From<User> for UserOutput {
+    fn from(val: User) -> Self {
+        UserOutput {
             id: val.id,
             username: val.username,
             email: val.email,
@@ -108,7 +108,7 @@ impl From<UserQuery> for UserQueryOutput {
 }
 
 #[ComplexObject]
-impl UserQueryOutput {
+impl UserOutput {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,

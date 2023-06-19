@@ -27,8 +27,8 @@ use crate::dto::log_dto::Log;
 use crate::dto::loggers_dto::Logger;
 use crate::dto::loggers_dto::LoggerEntry;
 use crate::dto::loggers_dto::LoggerInput;
-use crate::dto::user_dto::UserQueryOutput;
-use crate::dto::user_dto::{UserInput, UserQuery};
+use crate::dto::user_dto::UserOutput;
+use crate::dto::user_dto::{User, UserInput};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
 use rand::prelude::*;
@@ -53,15 +53,13 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 impl QueryRoot {
     // UNGUARDED - for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<UserQuery>> {
+    async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<User>> {
         let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
 
         let all_users = web::block(move || {
             let mut pool = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
-            users
-                .load::<UserQuery>(&mut pool)
-                .expect("loading all users")
+            users.load::<User>(&mut pool).expect("loading all users")
         })
         .await?;
 
@@ -69,7 +67,7 @@ impl QueryRoot {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn user<'ctx>(&self, ctx: &Context<'ctx>, query_email: String) -> FieldResult<UserQuery> {
+    async fn user<'ctx>(&self, ctx: &Context<'ctx>, query_email: String) -> FieldResult<User> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -184,7 +182,7 @@ impl QueryRoot {
 #[Object]
 impl MutationRoot {
     // Must be UNGUARDED?
-    async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> FieldResult<UserQuery> {
+    async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> FieldResult<User> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -214,11 +212,7 @@ impl MutationRoot {
 
     // AUTH
     // Must be UNGUARDED?
-    async fn login(
-        &self,
-        ctx: &Context<'_>,
-        login_data: Login,
-    ) -> Result<UserQueryOutput, BigError> {
+    async fn login(&self, ctx: &Context<'_>, login_data: Login) -> Result<UserOutput, BigError> {
         login(ctx, login_data.email, login_data.password).await
     }
 

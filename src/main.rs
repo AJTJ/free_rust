@@ -112,6 +112,8 @@ async fn main() -> std::io::Result<()> {
         .data(env_vars)
         .finish();
 
+    println!("{}", &schema.sdl());
+
     info!("start of service - Playground: http://localhost:8080");
 
     HttpServer::new(move || {

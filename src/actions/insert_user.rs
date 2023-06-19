@@ -1,6 +1,6 @@
 use crate::auth_data::UniversalIdType;
 use crate::diesel::ExpressionMethods;
-use crate::dto::user_dto::{UserCreation, UserInput, UserQuery, UserQueryOutput};
+use crate::dto::user_dto::{User, UserCreation, UserInput, UserOutput};
 use argon2::{self, Config};
 
 use chrono::Utc;
@@ -8,10 +8,7 @@ use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use rand::Rng;
 use uuid::Uuid;
 
-pub fn insert_user(
-    conn: &mut PgConnection,
-    user_data: UserInput,
-) -> diesel::QueryResult<UserQuery> {
+pub fn insert_user(conn: &mut PgConnection, user_data: UserInput) -> diesel::QueryResult<User> {
     use crate::schema::users::dsl::users;
 
     let current_stamp = Utc::now().naive_utc();
@@ -34,5 +31,5 @@ pub fn insert_user(
 
     diesel::insert_into(users)
         .values(&new_user)
-        .get_result::<UserQuery>(conn)
+        .get_result::<User>(conn)
 }
