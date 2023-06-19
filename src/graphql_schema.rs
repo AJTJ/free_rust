@@ -127,7 +127,7 @@ impl QueryRoot {
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<Logger>, BigError> {
-        let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
+        let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -135,7 +135,7 @@ impl QueryRoot {
         })
         .await
         .unwrap()
-        .map_err(|e| BigError::QueryError { source: e })
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
@@ -144,7 +144,7 @@ impl QueryRoot {
         ctx: &Context<'_>,
         logger_id: Uuid,
     ) -> Result<Vec<LoggerEntry>, BigError> {
-        let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
+        let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -152,14 +152,14 @@ impl QueryRoot {
         })
         .await
         .unwrap()
-        .map_err(|e| BigError::QueryError { source: e })
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     // LOGS
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<Log>, BigError> {
-        let user_id = get_user_id_from_token_and_session(ctx).await.unwrap();
+        let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
@@ -167,7 +167,7 @@ impl QueryRoot {
         })
         .await
         .unwrap()
-        .map_err(|e| BigError::QueryError { source: e })
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
@@ -235,7 +235,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionInput,
-    ) -> FieldResult<DiveSessionQuery> {
+    ) -> Result<DiveSessionQuery, BigError> {
         add_dive_session(ctx, session_input_data).await
     }
 
@@ -271,7 +271,7 @@ impl MutationRoot {
         ctx: &Context<'_>,
         dive_session_id: Uuid,
         dive_data: DiveInput,
-    ) -> FieldResult<DiveQuery> {
+    ) -> Result<DiveQuery, BigError> {
         add_dive(ctx, dive_session_id, dive_data).await
     }
 
@@ -286,24 +286,28 @@ impl MutationRoot {
     }
 
     // TODOS
-    // LOGGER STUFF
-    // add_logger() {}
-    // edit_logger() {}
+    #[graphql(guard = "LoggedInGuard::new()")]
+
+    async fn add_logger(&self, ctx: &Context<'_>, logger_input: i32) -> i32 {
+        // add_logger()
+        4
+    }
+    // update_logger() {}
     // delete_logger() {}
 
     // LOGGER_INPUT STUFF
     // add_logger_input() {}
-    // edit_logger_input() {}
+    // update_logger_input() {}
     // delete_logger_input() {}
 
     // LOG STUFF
     // add_log() {}
-    // edit_log() {}
+    // update_log() {}
     // delete_log() {}
 
     // LOG_INPUT STUFF
     // add_log_input() {}
-    // edit_log_input() {}
+    // update_log_input() {}
     // delete_log_input() {}
 
     //for testing only

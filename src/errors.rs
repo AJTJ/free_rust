@@ -32,13 +32,16 @@ pub enum BigError {
 
     // DB/DIESEL
     #[snafu(display("QueryError: {}", source))]
-    QueryError { source: DieselError },
+    DieselQueryError { source: DieselError },
 
     #[snafu(display("UpdateError: {}", source))]
-    UpdateError { source: DieselError },
+    DieselUpdateError { source: DieselError },
 
     #[snafu(display("User Not Found: {}", source))]
-    UserNotFound { source: DieselError },
+    DieselUserNotFound { source: DieselError },
+
+    #[snafu(display("Insert Error: {}", source))]
+    DieselInsertError { source: DieselError },
 
     // LOGIN
     #[snafu(display("incorrect password"))]

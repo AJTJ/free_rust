@@ -73,7 +73,7 @@ pub async fn login(
                 false => Err(BigError::WrongPassword),
             }
         }
-        Err(e) => Err(BigError::UserNotFound { source: e }),
+        Err(e) => Err(BigError::DieselUserNotFound { source: e }),
     };
 
     return_user

@@ -40,7 +40,7 @@ pub async fn update_user(
     })
     .await
     .map_err(|e| BigError::BlockingError { source: e })?
-    .map_err(|e| BigError::UpdateError { source: e })?;
+    .map_err(|e| BigError::DieselUpdateError { source: e })?;
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -50,5 +50,5 @@ pub async fn update_user(
     })
     .await
     .expect("web::block error here?")
-    .map_err(|e| BigError::QueryError { source: e })
+    .map_err(|e| BigError::DieselQueryError { source: e })
 }

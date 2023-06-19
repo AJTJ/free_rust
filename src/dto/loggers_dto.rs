@@ -40,7 +40,7 @@ impl Logger {
         .await
         .map_err(|e| BigError::BlockingError { source: e })
         .unwrap()
-        .map_err(|e| BigError::QueryError { source: e })
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }
 

@@ -9,7 +9,7 @@ use super::{
     dive_session_dto::{DiveSessionQuery, DiveSessionQueryParams},
 };
 
-#[derive(Debug, Clone, InputObject)]
+#[derive(Clone, InputObject)]
 pub struct UserInput {
     pub username: String,
     pub password: String,
@@ -29,7 +29,7 @@ pub struct UserUpdate {
 #[diesel(table_name = users)]
 pub struct UserCreation {
     pub username: String,
-    pub id: Uuid,
+    // pub id: Uuid,
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,

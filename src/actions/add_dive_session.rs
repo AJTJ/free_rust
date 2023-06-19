@@ -1,6 +1,7 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
 use crate::dto::dive_session_dto::{DiveSessionCreation, DiveSessionInput, DiveSessionQuery};
+use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 use crate::helpers::token_helpers::get_cookie_from_token;
 
@@ -13,8 +14,8 @@ use uuid::Uuid;
 pub async fn add_dive_session(
     ctx: &Context<'_>,
     session_data: DiveSessionInput,
-) -> Result<DiveSessionQuery, Error> {
-    use crate::schema::dive_sessions::dsl::{dive_sessions, id as schema_session_id};
+) -> Result<DiveSessionQuery, BigError> {
+    use crate::schema::dive_sessions::dsl::dive_sessions;
 
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
@@ -34,20 +35,13 @@ pub async fn add_dive_session(
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    let dive_session = web::block(move || {
+    web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
         diesel::insert_into(dive_sessions)
             .values(&new_session)
-            .execute(&mut conn)
-            .expect("diesel insert new dive_session error");
-
-        dive_sessions
-            .filter(schema_session_id.eq(&uuid))
-            .first::<DiveSessionQuery>(&mut conn)
-            .expect("error loading dive_session that was just inserted")
+            .get_result::<DiveSessionQuery>(&mut conn)
     })
     .await
-    .expect("web::block error here?");
-
-    Ok(dive_session)
+    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::DieselInsertError { source: e })
 }
