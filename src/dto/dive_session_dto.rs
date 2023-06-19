@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use super::{
     db_query_dto::DBQueryParams,
-    dive_dto::{DiveQuery, DiveQueryInput},
+    dive_dto::{Dive, DiveQueryParams},
 };
 
 #[derive(InputObject)]
@@ -43,7 +43,7 @@ pub struct DiveSessionCreation {
 // Matches the database object 1:1
 #[derive(Queryable, SimpleObject)]
 #[graphql(complex)]
-pub struct DiveSessionQuery {
+pub struct DiveSession {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
@@ -58,14 +58,14 @@ pub struct DiveSessionQuery {
     pub deleted_by: Option<Uuid>,
 }
 #[ComplexObject]
-impl DiveSessionQuery {
+impl DiveSession {
     async fn dives(
         &self,
         ctx: &Context<'_>,
         db_query_dto: Option<DBQueryParams>,
         // this needs to be mut
-        dive_query: Option<DiveQueryInput>,
-    ) -> FieldResult<Vec<DiveQuery>> {
+        dive_query: Option<DiveQueryParams>,
+    ) -> FieldResult<Vec<Dive>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.user_id;

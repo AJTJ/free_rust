@@ -1,5 +1,6 @@
 mod add_dive;
 mod add_dive_session;
+mod add_logger;
 mod add_to_user_session;
 mod get_dive_by_id;
 mod get_dive_session_by_id;
@@ -24,6 +25,7 @@ mod update_user;
 
 pub use add_dive::add_dive;
 pub use add_dive_session::add_dive_session;
+pub use add_logger::add_logger;
 pub use add_to_user_session::add_to_user_session;
 pub use get_dive_by_id::get_dive_by_id;
 pub use get_dive_session_by_id::get_dive_session_by_id;

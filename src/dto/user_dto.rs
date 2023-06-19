@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use super::{
     db_query_dto::{self, DBQueryParams},
-    dive_session_dto::{DiveSessionQuery, DiveSessionQueryParams},
+    dive_session_dto::{DiveSession, DiveSessionQueryParams},
 };
 
 #[derive(Clone, InputObject)]
@@ -29,11 +29,11 @@ pub struct UserUpdate {
 #[diesel(table_name = users)]
 pub struct UserCreation {
     pub username: String,
-    // pub id: Uuid,
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
     pub last_login: NaiveDateTime,
+
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -65,7 +65,7 @@ impl UserQuery {
         // this needs to be mut
         mut dive_session_query: Option<DiveSessionQueryParams>,
         db_query_dto: Option<DBQueryParams>,
-    ) -> FieldResult<Vec<DiveSessionQuery>> {
+    ) -> FieldResult<Vec<DiveSession>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = self.id;
@@ -115,7 +115,7 @@ impl UserQueryOutput {
         // this needs to be mut
         dive_session_query: Option<DiveSessionQueryParams>,
         db_query_dto: Option<DBQueryParams>,
-    ) -> FieldResult<Vec<DiveSessionQuery>> {
+    ) -> FieldResult<Vec<DiveSession>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = self.id;

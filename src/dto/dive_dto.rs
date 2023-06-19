@@ -29,7 +29,6 @@ pub struct DiveUpdate {
 #[derive(Insertable, InputObject)]
 #[diesel(table_name = dives)]
 pub struct DiveCreation {
-    pub id: Uuid,
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,
@@ -37,6 +36,7 @@ pub struct DiveCreation {
     pub dive_name: Option<String>,
     pub session_id: Uuid,
     pub user_id: Uuid,
+    // partial default data
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -44,7 +44,7 @@ pub struct DiveCreation {
 
 // Matches the database object order 1:1
 #[derive(Queryable, SimpleObject)]
-pub struct DiveQuery {
+pub struct Dive {
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
     pub distance: Option<f64>,
@@ -63,7 +63,7 @@ pub struct DiveQuery {
 }
 
 #[derive(InputObject)]
-pub struct DiveQueryInput {
+pub struct DiveQueryParams {
     pub dive_id: Option<Uuid>,
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,

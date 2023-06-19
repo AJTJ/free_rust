@@ -1,5 +1,6 @@
 use crate::actions::add_dive;
 use crate::actions::add_dive_session;
+use crate::actions::add_logger;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
 use crate::actions::get_logger_entries_by_logger;
@@ -14,17 +15,18 @@ use crate::actions::update_dive;
 use crate::actions::update_dive_session;
 use crate::dto::auth_dto::Login;
 use crate::dto::db_query_dto::DBQueryParams;
+use crate::dto::dive_dto::Dive;
 use crate::dto::dive_dto::DiveInput;
-use crate::dto::dive_dto::DiveQuery;
-use crate::dto::dive_dto::DiveQueryInput;
+use crate::dto::dive_dto::DiveQueryParams;
 use crate::dto::dive_dto::DiveUpdate;
+use crate::dto::dive_session_dto::DiveSession;
 use crate::dto::dive_session_dto::DiveSessionInput;
-use crate::dto::dive_session_dto::DiveSessionQuery;
 use crate::dto::dive_session_dto::DiveSessionQueryParams;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
 use crate::dto::log_dto::Log;
 use crate::dto::loggers_dto::Logger;
 use crate::dto::loggers_dto::LoggerEntry;
+use crate::dto::loggers_dto::LoggerInput;
 use crate::dto::user_dto::UserQueryOutput;
 use crate::dto::user_dto::{UserInput, UserQuery};
 use crate::errors::BigError;
@@ -86,7 +88,7 @@ impl QueryRoot {
         ctx: &Context<'_>,
         dive_session_input: Option<DiveSessionQueryParams>,
         db_query_dto: Option<DBQueryParams>,
-    ) -> FieldResult<Vec<DiveSessionQuery>> {
+    ) -> FieldResult<Vec<DiveSession>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = get_user_id_from_token_and_session(ctx).await?;
@@ -106,9 +108,9 @@ impl QueryRoot {
     async fn dives(
         &self,
         ctx: &Context<'_>,
-        dive_input: Option<DiveQueryInput>,
+        dive_input: Option<DiveQueryParams>,
         db_query_dto: Option<DBQueryParams>,
-    ) -> FieldResult<Vec<DiveQuery>> {
+    ) -> FieldResult<Vec<Dive>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id = get_user_id_from_token_and_session(ctx).await?;
@@ -235,7 +237,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionInput,
-    ) -> Result<DiveSessionQuery, BigError> {
+    ) -> Result<DiveSession, BigError> {
         add_dive_session(ctx, session_input_data).await
     }
 
@@ -244,7 +246,7 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         session_input_data: DiveSessionUpdate,
-    ) -> Result<DiveSessionQuery, BigError> {
+    ) -> Result<DiveSession, BigError> {
         update_dive_session(ctx, session_input_data).await
     }
 
@@ -271,7 +273,7 @@ impl MutationRoot {
         ctx: &Context<'_>,
         dive_session_id: Uuid,
         dive_data: DiveInput,
-    ) -> Result<DiveQuery, BigError> {
+    ) -> Result<Dive, BigError> {
         add_dive(ctx, dive_session_id, dive_data).await
     }
 
@@ -280,17 +282,19 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         dive_mod_data: DiveUpdate,
-    ) -> FieldResult<DiveQuery> {
-        let updated_dive = update_dive(ctx, dive_mod_data).await;
-        Ok(updated_dive)
+    ) -> Result<Dive, BigError> {
+        update_dive(ctx, dive_mod_data).await
     }
 
     // TODOS
     #[graphql(guard = "LoggedInGuard::new()")]
 
-    async fn add_logger(&self, ctx: &Context<'_>, logger_input: i32) -> i32 {
-        // add_logger()
-        4
+    async fn add_logger(
+        &self,
+        ctx: &Context<'_>,
+        logger_input: LoggerInput,
+    ) -> Result<Logger, BigError> {
+        add_logger(ctx, logger_input).await
     }
     // update_logger() {}
     // delete_logger() {}

@@ -1,41 +1,25 @@
-use crate::actions::get_dive_by_id;
-use crate::dto::dive_dto::{DiveQuery, DiveUpdate};
-use crate::dto::dive_session_dto::{DiveSessionQuery, DiveSessionUpdate};
+use crate::diesel::ExpressionMethods;
+use crate::dto::dive_dto::{Dive, DiveUpdate};
+use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::{actions::get_dive_session_by_id, diesel::ExpressionMethods};
 
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
-use diesel::{result::Error, RunQueryDsl};
-use tracing::info;
+use diesel::RunQueryDsl;
 
-pub async fn update_dive(ctx: &Context<'_>, dive_mod_data: DiveUpdate) -> DiveQuery {
+pub async fn update_dive(ctx: &Context<'_>, dive_mod_data: DiveUpdate) -> Result<Dive, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
     let my_dive_mod_data = dive_mod_data.clone();
-    let output_dive = web::block(move || {
+    web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
         use crate::schema::dives::dsl::{dives, id as dive_id, updated_at};
         diesel::update(dives)
             .filter(dive_id.eq(&my_dive_mod_data.id))
             .set((&my_dive_mod_data, updated_at.eq(Utc::now().naive_utc())))
-            .execute(&mut conn)
+            .get_result::<Dive>(&mut conn)
     })
     .await
-    .expect("web::block error here?");
-
-    let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-    let updated_dive = web::block(move || {
-        let mut conn = pool_ctx.get().unwrap();
-        get_dive_by_id(&mut conn, dive_mod_data.id)
-    })
-    .await
-    .expect("web::block error here?")
-    .expect("error getting session");
-
-    info!("the output: {:?}", output_dive);
-
-    updated_dive
+    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::DieselUpdateError { source: e })
 }
