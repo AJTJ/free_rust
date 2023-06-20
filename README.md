@@ -66,3 +66,7 @@ https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-
 - logging
   - tracing
     - https://crates.io/crates/tracing
+
+FUTURE THOUGHTS
+- database
+  - geospatial storage: https://ridewithgps.com/careers/systems_engineer

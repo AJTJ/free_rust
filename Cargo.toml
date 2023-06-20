@@ -44,6 +44,7 @@ uuid = { version= "1.3.3 ", features = ["serde", "v4"] }
 tracing = "0.1.33"
 slab = "0.4.6"
 futures-util = "0.3.0"
+strum = { version = "0.25", features = ["derive"] }
 # async-trait = "0.1.68" already included
 # time = "0.2.27"
 

@@ -1,28 +1,13 @@
 use crate::actions::get_logger_entries_by_logger;
-use crate::diesel::Expression;
 use crate::errors::BigError;
-use crate::helpers::form_helper::FormTemplate;
-use crate::{actions::get_dive_sessions_by_user, graphql_schema::DbPool, schema::loggers};
+use crate::{graphql_schema::DbPool, schema::loggers};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
-use diesel::sql_types::Jsonb;
-use serde_json::{value, Value};
 use uuid::Uuid;
 
-use super::{
-    db_query_dto::{self, DBQueryParams},
-    dive_session_dto::{DiveSession, DiveSessionQueryParams},
-};
-
-// #[derive(AsChangeset, InputObject)]
-// #[diesel(table_name = users)]
-// pub struct FooUpdate {}
-
-// // not sure this one is necessary
-// #[derive(SimpleObject)]
-// #[graphql(complex)]
-// pub struct FooOutput {}
+use super::db_query_dto::DBQueryParams;
+use super::logger_entries_dto::LoggerEntry;
 
 #[derive(InputObject)]
 
@@ -48,6 +33,8 @@ pub struct LoggerCreation {
 #[graphql(complex)]
 pub struct Logger {
     pub logger_name: String,
+    pub logger_fields: serde_json::Value,
+    // relationship data
     pub user_id: Uuid,
     // default data
     pub id: Uuid,
@@ -79,24 +66,4 @@ impl Logger {
         .unwrap()
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
-}
-
-// LOGGER ENTRIES
-
-// This one needs to match 1:1
-#[derive(Queryable, SimpleObject)]
-pub struct LoggerEntry {
-    pub item_order: Option<i32>,
-    pub field_name: String,
-    pub category_name: String,
-    pub input_type: String,
-    pub logger_id: Uuid,
-    pub user_id: Uuid,
-
-    pub id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
-    pub is_active: bool,
-    pub deleted_at: Option<NaiveDateTime>,
-    pub deleted_by: Option<Uuid>,
 }

@@ -37,9 +37,10 @@ pub async fn add_dive_session(
 
     web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        diesel::insert_into(dive_sessions)
+        let response = diesel::insert_into(dive_sessions)
             .values(&new_session)
-            .get_result::<DiveSession>(&mut conn)
+            .get_result::<DiveSession>(&mut conn);
+        response
     })
     .await
     .map_err(|e| BigError::BlockingError { source: e })?

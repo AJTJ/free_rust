@@ -2,11 +2,12 @@ use async_graphql::{Enum, InputObject};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::mem::discriminant;
+use strum::{Display, EnumString};
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum AllCustomEnums {}
 
-#[derive(Serialize, Deserialize, PartialEq, Clone, Copy, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display)]
 pub enum InputTypes {
     Number,
     CustomEnums,
@@ -21,12 +22,12 @@ pub enum InputTypes {
 //     // there will be more...
 // }
 
-#[derive(Enum, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Debug)]
+#[derive(Enum, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Debug, EnumString, Display)]
 pub enum FormInputNames {
     GeneralFeeling,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display)]
 pub enum AllCategoryNames {
     General,
     // there will be more
@@ -36,12 +37,12 @@ pub enum AllCategoryNames {
 pub struct FormInput {
     // input_order: Option<u32>,
     // input_name: AllInputNames,
-    category_name: AllCategoryNames,
-    input_type: InputTypes,
+    pub category_name: AllCategoryNames,
+    pub input_type: InputTypes,
 }
 
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-pub struct AltStruct {
+pub struct InputContainer {
     pub input_name: FormInputNames,
     pub form_input: FormInput,
 }
@@ -49,7 +50,7 @@ pub struct AltStruct {
 #[derive(Serialize, Deserialize)]
 pub struct FormTemplate {
     // pub general_feeling: Option<FormInput>,
-    pub all_inputs: Vec<AltStruct>,
+    pub all_inputs: Vec<InputContainer>,
 }
 
 pub type UserFormInput = Vec<FormInputNames>;
@@ -84,7 +85,7 @@ impl FormTemplate {
     pub fn get_form_structure() -> FormTemplate {
         FormTemplate {
             all_inputs: vec![
-                (AltStruct {
+                (InputContainer {
                     input_name: FormInputNames::GeneralFeeling,
                     form_input: FormInput {
                         // input_order: None,
