@@ -1,6 +1,6 @@
 use crate::{actions::get_log_entries_by_log, errors::BigError, graphql_schema::DbPool};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, Enum, FieldResult, OutputType, SimpleObject};
+use async_graphql::{ComplexObject, Context, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 

@@ -1,10 +1,6 @@
-use crate::{actions::get_log_entries_by_log, errors::BigError, graphql_schema::DbPool};
-use actix_web::web;
-use async_graphql::{ComplexObject, Context, Enum, FieldResult, OutputType, SimpleObject};
+use async_graphql::SimpleObject;
 use chrono::NaiveDateTime;
 use uuid::Uuid;
-
-use super::query_dto::QueryParams;
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]

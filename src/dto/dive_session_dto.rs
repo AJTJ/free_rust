@@ -7,6 +7,7 @@ use uuid::Uuid;
 use super::{
     dive_dto::{Dive, DiveFilter},
     query_dto::QueryParams,
+    user_dto::UserOutput,
 };
 
 #[derive(InputObject)]
@@ -68,7 +69,47 @@ impl DiveSession {
     ) -> FieldResult<Vec<Dive>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let session_id = self.user_id;
+        let session_id = self.id;
+
+        let dives = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_dives_by_session(&mut conn, session_id, dive_query, db_query_dto)
+        })
+        .await
+        .expect("error in dive sessions web::block")
+        .expect("error in another loading dive sessions");
+
+        Ok(dives)
+    }
+}
+
+pub struct DiveSessionOutput {
+    pub start_time: NaiveDateTime,
+    pub end_time: NaiveDateTime,
+    pub session_name: Option<String>,
+
+    pub user_id: Option<UserOutput>,
+
+    pub id: Uuid,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+    pub is_active: bool,
+    pub deleted_at: Option<NaiveDateTime>,
+    pub deleted_by: Option<Uuid>,
+}
+
+#[ComplexObject]
+impl DiveSessionOutput {
+    async fn dives(
+        &self,
+        ctx: &Context<'_>,
+        db_query_dto: Option<QueryParams>,
+        // this needs to be mut
+        dive_query: Option<DiveFilter>,
+    ) -> FieldResult<Vec<Dive>> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let session_id = self.id;
 
         let dives = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();

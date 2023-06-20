@@ -61,7 +61,7 @@ pub fn get_cookie_from_token(ctx: &Context<'_>) -> Result<CookieStruct, BigError
                 .map_err(|e| BigError::WrongCookieString { source: e })?;
 
             let (_, value) = c.name_value();
-            serde_json::from_str(value).map_err(|e| BigError::ParsingCookieVal { source: e })
+            serde_json::from_str(value).map_err(|e| BigError::SerdeParsingCookieVal { source: e })
         }
         Err(e) => Err(BigError::IncorrectCookie { error: e }),
     }

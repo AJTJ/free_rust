@@ -1,6 +1,8 @@
-use crate::{actions::get_dive_sessions_by_user, graphql_schema::DbPool, schema::users};
+use crate::{
+    actions::get_dive_sessions_by_user, errors::BigError, graphql_schema::DbPool, schema::users,
+};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject, ID};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -41,7 +43,7 @@ pub struct UserCreation {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
-#[graphql(complex)]
+// #[graphql(complex)]
 pub struct User {
     pub username: String,
     pub hashed_password: String,
@@ -57,37 +59,38 @@ pub struct User {
     pub deleted_by: Option<Uuid>,
 }
 
-#[ComplexObject]
-impl User {
-    async fn dive_sessions(
-        &self,
-        ctx: &Context<'_>,
-        // this needs to be mut
-        mut dive_session_query: Option<DiveSessionFilter>,
-        db_query_dto: Option<QueryParams>,
-    ) -> FieldResult<Vec<DiveSession>> {
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+// #[ComplexObject]
+// impl User {
+//     async fn dive_sessions(
+//         &self,
+//         ctx: &Context<'_>,
+//         // this needs to be mut
+//         mut dive_session_query: Option<DiveSessionFilter>,
+//         db_query_dto: Option<QueryParams>,
+//     ) -> FieldResult<Vec<DiveSession>> {
+//         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let user_id = self.id;
+//         let user_id = self.id;
 
-        let dive_sessions = web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
-        })
-        .await
-        .expect("error in dive sessions web::block")
-        .expect("error in another loading dive sessions");
+//         let dive_sessions = web::block(move || {
+//             let mut conn = pool_ctx.get().unwrap();
+//             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
+//         })
+//         .await
+//         .expect("error in dive sessions web::block")
+//         .expect("error in another loading dive sessions");
 
-        Ok(dive_sessions)
-    }
-}
+//         Ok(dive_sessions)
+//     }
+// }
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct UserOutput {
-    pub id: Uuid,
     pub username: String,
     pub email: String,
     pub last_login: NaiveDateTime,
+
+    pub id: ID,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -96,7 +99,7 @@ pub struct UserOutput {
 impl From<User> for UserOutput {
     fn from(val: User) -> Self {
         UserOutput {
-            id: val.id,
+            id: val.id.into(),
             username: val.username,
             email: val.email,
             last_login: val.last_login,
@@ -118,7 +121,8 @@ impl UserOutput {
     ) -> FieldResult<Vec<DiveSession>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let user_id = self.id;
+        let user_id: Uuid =
+            Uuid::parse_str(&self.id).map_err(|e| BigError::UuidParsingerror { source: e })?;
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)

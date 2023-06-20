@@ -1,4 +1,7 @@
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    io::Error,
+};
 
 use actix_web::{cookie::ParseError, error::BlockingError};
 use async_graphql::Error as AsyncError;
@@ -7,12 +10,14 @@ use redis::RedisError;
 use serde_json::Error as SerdeError;
 use snafu::prelude::*;
 use thiserror::Error as ThisError;
+use uuid::Error as UuidError;
 
 #[derive(Debug, Snafu)]
 pub enum BigError {
     // ACTIX
     #[snafu(display("web::block error: {}", source))]
     BlockingError { source: BlockingError },
+
     // COOKIE
     #[snafu(display("{source}"))]
     WrongCookieString { source: ParseError },
@@ -21,10 +26,14 @@ pub enum BigError {
     IncorrectCookie { error: AsyncError },
 
     #[snafu(display("Error parsing cookie val: {}", source))]
-    ParsingCookieVal { source: SerdeError },
+    SerdeParsingCookieVal { source: SerdeError },
 
     #[snafu(display("No session_id on Token"))]
     NoSessionIDOnToken,
+
+    // Uuid
+    #[snafu(display("Uuid Error: {}", source))]
+    UuidParsingerror { source: UuidError },
 
     // SESSION
     #[snafu(display("RedisSessionError: {}", source))]

@@ -21,11 +21,12 @@ use crate::dto::dive_dto::DiveUpdate;
 use crate::dto::dive_session_dto::DiveSession;
 use crate::dto::dive_session_dto::DiveSessionFilter;
 use crate::dto::dive_session_dto::DiveSessionInput;
+use crate::dto::dive_session_dto::DiveSessionOutput;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
 use crate::dto::log_dto::Log;
+use crate::dto::logger_dto::Logger;
+use crate::dto::logger_dto::LoggerInput;
 use crate::dto::logger_entries_dto::LoggerEntry;
-use crate::dto::loggers_dto::Logger;
-use crate::dto::loggers_dto::LoggerInput;
 use crate::dto::query_dto::QueryParams;
 use crate::dto::user_dto::UserOutput;
 use crate::dto::user_dto::{User, UserInput};
@@ -38,6 +39,7 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
 use rand::prelude::*;
+use tracing::info;
 use uuid::Uuid;
 
 pub type DiveQLSchema = Schema<Query, Mutation, EmptySubscription>;
@@ -50,13 +52,18 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 impl Query {
     // UNGUARDED - for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
+    async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<UserOutput>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
-            users.load::<User>(&mut conn)
+            users.load::<User>(&mut conn).map(|user_vec| {
+                user_vec
+                    .into_iter()
+                    .map(UserOutput::from)
+                    .collect::<Vec<UserOutput>>()
+            })
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -64,11 +71,11 @@ impl Query {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn user(&self, ctx: &Context<'_>, email: String) -> Result<User, BigError> {
+    async fn user(&self, ctx: &Context<'_>, email: String) -> Result<UserOutput, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_user_with_email(&mut conn, email)
+            get_user_with_email(&mut conn, email).map(UserOutput::from)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -81,7 +88,7 @@ impl Query {
         ctx: &Context<'_>,
         dive_session_input: Option<DiveSessionFilter>,
         db_query_dto: Option<QueryParams>,
-    ) -> Result<Vec<DiveSession>, BigError> {
+    ) -> Result<Vec<DiveSessionOutput>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 

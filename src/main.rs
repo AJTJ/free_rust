@@ -19,7 +19,7 @@ use actix_web::web::Data;
 use actix_web::{guard, http, web, HttpRequest, Result};
 use actix_web::{App, HttpResponse, HttpServer};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{EmptySubscription, Schema};
+use async_graphql::{EmptySubscription, Schema, ID};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth_data::SharedRedisType;
 use diesel::pg::PgConnection;
@@ -32,6 +32,7 @@ use redis::Client;
 use std::env;
 use std::sync::{Arc, Mutex};
 use token_source::Token;
+use uuid::Uuid;
 
 // tracing
 use tracing::{info, Level};
@@ -112,7 +113,7 @@ async fn main() -> std::io::Result<()> {
         .data(env_vars)
         .finish();
 
-    println!("{}", &schema.sdl());
+    // println!("{}", &schema.sdl());
 
     info!("start of service - Playground: http://localhost:8080");
 
