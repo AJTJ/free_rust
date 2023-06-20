@@ -14,114 +14,103 @@ use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
 use crate::dto::auth_dto::Login;
-use crate::dto::db_query_dto::DBQueryParams;
 use crate::dto::dive_dto::Dive;
+use crate::dto::dive_dto::DiveFilter;
 use crate::dto::dive_dto::DiveInput;
-use crate::dto::dive_dto::DiveQueryParams;
 use crate::dto::dive_dto::DiveUpdate;
 use crate::dto::dive_session_dto::DiveSession;
+use crate::dto::dive_session_dto::DiveSessionFilter;
 use crate::dto::dive_session_dto::DiveSessionInput;
-use crate::dto::dive_session_dto::DiveSessionQueryParams;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
 use crate::dto::log_dto::Log;
+use crate::dto::logger_entries_dto::LoggerEntry;
 use crate::dto::loggers_dto::Logger;
-use crate::dto::loggers_dto::LoggerEntry;
 use crate::dto::loggers_dto::LoggerInput;
+use crate::dto::query_dto::QueryParams;
 use crate::dto::user_dto::UserOutput;
 use crate::dto::user_dto::{User, UserInput};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
 use crate::helpers::form_helper::UserFormInput;
-use rand::prelude::*;
-
-use actix_web::error;
 use actix_web::web;
-use async_graphql::FieldResult;
 use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
-use tracing::info;
+use rand::prelude::*;
 use uuid::Uuid;
 
-pub type DiveQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
-pub struct QueryRoot;
-pub struct MutationRoot;
+pub type DiveQLSchema = Schema<Query, Mutation, EmptySubscription>;
+pub struct Query;
+pub struct Mutation;
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
-impl QueryRoot {
+impl Query {
     // UNGUARDED - for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn all_users<'ctx>(&self, inc_ctx: &Context<'ctx>) -> FieldResult<Vec<User>> {
-        let pool_ctx = inc_ctx.data_unchecked::<DbPool>().clone();
+    async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let all_users = web::block(move || {
-            let mut pool = pool_ctx.get().unwrap();
+        web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
-            users.load::<User>(&mut pool).expect("loading all users")
+            users.load::<User>(&mut conn)
         })
-        .await?;
-
-        Ok(all_users)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn user<'ctx>(&self, ctx: &Context<'ctx>, query_email: String) -> FieldResult<User> {
+    async fn user(&self, ctx: &Context<'_>, email: String) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let user = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_user_with_email(&mut conn, query_email)
+            get_user_with_email(&mut conn, email)
         })
-        .await?
-        .map_err(error::ErrorInternalServerError)
-        .unwrap();
-
-        Ok(user)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
-        dive_session_input: Option<DiveSessionQueryParams>,
-        db_query_dto: Option<DBQueryParams>,
-    ) -> FieldResult<Vec<DiveSession>> {
+        dive_session_input: Option<DiveSessionFilter>,
+        db_query_dto: Option<QueryParams>,
+    ) -> Result<Vec<DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-        let dive_sessions = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
         })
-        .await?
-        .map_err(error::ErrorInternalServerError)
-        .unwrap();
-
-        Ok(dive_sessions)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn dives(
         &self,
         ctx: &Context<'_>,
-        dive_input: Option<DiveQueryParams>,
-        db_query_dto: Option<DBQueryParams>,
-    ) -> FieldResult<Vec<Dive>> {
+        dive_input: Option<DiveFilter>,
+        db_query_dto: Option<QueryParams>,
+    ) -> Result<Vec<Dive>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-        let dives = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dives_by_user(&mut conn, user_id, dive_input, db_query_dto)
         })
-        .await?
-        .map_err(error::ErrorInternalServerError)
-        .unwrap();
-        Ok(dives)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     // LOGGERS
@@ -135,7 +124,7 @@ impl QueryRoot {
             get_loggers_from_user_id(&mut conn, user_id, None)
         })
         .await
-        .unwrap()
+        .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -152,7 +141,7 @@ impl QueryRoot {
             get_logger_entries_by_logger(&mut conn, &logger_id, &user_id, None)
         })
         .await
-        .unwrap()
+        .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -167,7 +156,7 @@ impl QueryRoot {
             get_logs_from_user_id(&mut conn, user_id, None)
         })
         .await
-        .unwrap()
+        .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -181,34 +170,30 @@ impl QueryRoot {
 }
 
 #[Object]
-impl MutationRoot {
+impl Mutation {
     // Must be UNGUARDED?
-    async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> FieldResult<User> {
+    async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let user = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             insert_user(&mut conn, user_data)
         })
-        .await?
-        .map_err(error::ErrorInternalServerError)
-        .unwrap();
-
-        Ok(user)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselInsertError { source: e })
     }
 
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn delete_all_users(&self, ctx: &Context<'_>) -> FieldResult<usize> {
+    async fn delete_all_users(&self, ctx: &Context<'_>) -> Result<usize, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let deleted = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::users;
-            diesel::delete(users)
-                .execute(&mut conn)
-                .expect("problem deleting users")
+            diesel::delete(users).execute(&mut conn)
         })
-        .await?;
-
-        Ok(deleted)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselDeleteError { source: e })
     }
 
     // AUTH
@@ -219,11 +204,8 @@ impl MutationRoot {
 
     // Should be guarded eventually
     // #[graphql(guard = "LoggedInGuard::new()")]
-    async fn logout(&self, ctx: &Context<'_>) -> FieldResult<bool> {
-        logout(ctx).await?;
-        // TODO: This could be a better return val?
-        info!("logout done");
-        Ok(true)
+    async fn logout(&self, ctx: &Context<'_>) -> Result<bool, BigError> {
+        logout(ctx).await
     }
 
     // DIVE SESSION
@@ -231,34 +213,32 @@ impl MutationRoot {
     async fn add_dive_session(
         &self,
         ctx: &Context<'_>,
-        session_input_data: DiveSessionInput,
+        dive_session_input: DiveSessionInput,
     ) -> Result<DiveSession, BigError> {
-        add_dive_session(ctx, session_input_data).await
+        add_dive_session(ctx, dive_session_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn update_dive_session(
         &self,
         ctx: &Context<'_>,
-        session_input_data: DiveSessionUpdate,
+        dive_session_update: DiveSessionUpdate,
     ) -> Result<DiveSession, BigError> {
-        update_dive_session(ctx, session_input_data).await
+        update_dive_session(ctx, dive_session_update).await
     }
 
     // for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> FieldResult<usize> {
+    async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> Result<usize, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let deleted = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             use crate::schema::dive_sessions::dsl::dive_sessions;
-            diesel::delete(dive_sessions)
-                .execute(&mut conn)
-                .expect("problem deleting dive sessions")
+            diesel::delete(dive_sessions).execute(&mut conn)
         })
-        .await?;
-
-        Ok(deleted)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselDeleteError { source: e })
     }
 
     // DIVES
@@ -267,18 +247,18 @@ impl MutationRoot {
         &self,
         ctx: &Context<'_>,
         dive_session_id: Uuid,
-        dive_data: DiveInput,
+        dive_input: DiveInput,
     ) -> Result<Dive, BigError> {
-        add_dive(ctx, dive_session_id, dive_data).await
+        add_dive(ctx, dive_session_id, dive_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn update_dive(
         &self,
         ctx: &Context<'_>,
-        dive_mod_data: DiveUpdate,
+        dive_update: DiveUpdate,
     ) -> Result<Dive, BigError> {
-        update_dive(ctx, dive_mod_data).await
+        update_dive(ctx, dive_update).await
     }
 
     // TODOS
@@ -312,17 +292,15 @@ impl MutationRoot {
 
     //for testing only
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn delete_all_dives(&self, ctx: &Context<'_>) -> FieldResult<usize> {
+    async fn delete_all_dives(&self, ctx: &Context<'_>) -> Result<usize, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let deleted = web::block(move || {
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             use crate::schema::dives::dsl::dives;
-            diesel::delete(dives)
-                .execute(&mut conn)
-                .expect("problem deleting dives")
+            diesel::delete(dives).execute(&mut conn)
         })
-        .await?;
-
-        Ok(deleted)
+        .await
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselDeleteError { source: e })
     }
 }

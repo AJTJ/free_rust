@@ -5,8 +5,8 @@ use chrono::NaiveDateTime;
 use uuid::Uuid;
 
 use super::{
-    db_query_dto::DBQueryParams,
-    dive_dto::{Dive, DiveQueryParams},
+    dive_dto::{Dive, DiveFilter},
+    query_dto::QueryParams,
 };
 
 #[derive(InputObject)]
@@ -62,9 +62,9 @@ impl DiveSession {
     async fn dives(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: Option<DBQueryParams>,
+        db_query_dto: Option<QueryParams>,
         // this needs to be mut
-        dive_query: Option<DiveQueryParams>,
+        dive_query: Option<DiveFilter>,
     ) -> FieldResult<Vec<Dive>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -83,7 +83,7 @@ impl DiveSession {
 }
 
 #[derive(InputObject)]
-pub struct DiveSessionQueryParams {
+pub struct DiveSessionFilter {
     pub session_id: Option<Uuid>,
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,

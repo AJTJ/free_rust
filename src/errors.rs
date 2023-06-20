@@ -43,6 +43,9 @@ pub enum BigError {
     #[snafu(display("Insert Error: {}", source))]
     DieselInsertError { source: DieselError },
 
+    #[snafu(display("Delete Error: {}", source))]
+    DieselDeleteError { source: DieselError },
+
     // LOGIN
     #[snafu(display("incorrect password"))]
     WrongPassword,

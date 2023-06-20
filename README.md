@@ -2,6 +2,8 @@
 ## CURRENT
 - Code -> Free Source
 
+
+
 ## Dev Env
 - Start DB image
 - `cargo run`
@@ -32,6 +34,10 @@ https://github.com/lucperkins/rust-graphql-juniper-actix-diesel-postgres/blob/ma
 // diesel example
 https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-cli/migrations
 
+
+### gql things
+- for partially fallible user-defined-resolvers
+  - https://github.com/async-graphql/async-graphql/issues/531
 
 ## The Proposed Stack
 - actix-web

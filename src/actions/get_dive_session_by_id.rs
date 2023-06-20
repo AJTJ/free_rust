@@ -1,6 +1,6 @@
 use crate::{
     diesel::ExpressionMethods,
-    dto::{db_query_dto::DBQueryParams, dive_session_dto::DiveSession},
+    dto::{dive_session_dto::DiveSession, query_dto::QueryParams},
 };
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
@@ -8,7 +8,7 @@ use uuid::Uuid;
 pub fn get_dive_session_by_id(
     conn: &mut PgConnection,
     input_session_id: &Uuid,
-    db_query_ob: Option<DBQueryParams>,
+    db_query_ob: Option<QueryParams>,
 ) -> diesel::QueryResult<DiveSession> {
     use crate::schema::dive_sessions::dsl::{dive_sessions, id as session_id};
 

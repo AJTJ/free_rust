@@ -5,8 +5,8 @@ use chrono::NaiveDateTime;
 use uuid::Uuid;
 
 use super::{
-    db_query_dto::{self, DBQueryParams},
-    dive_session_dto::{DiveSession, DiveSessionQueryParams},
+    dive_session_dto::{DiveSession, DiveSessionFilter},
+    query_dto::{self, QueryParams},
 };
 
 #[derive(Clone, InputObject)]
@@ -63,8 +63,8 @@ impl User {
         &self,
         ctx: &Context<'_>,
         // this needs to be mut
-        mut dive_session_query: Option<DiveSessionQueryParams>,
-        db_query_dto: Option<DBQueryParams>,
+        mut dive_session_query: Option<DiveSessionFilter>,
+        db_query_dto: Option<QueryParams>,
     ) -> FieldResult<Vec<DiveSession>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -113,8 +113,8 @@ impl UserOutput {
         &self,
         ctx: &Context<'_>,
         // this needs to be mut
-        dive_session_query: Option<DiveSessionQueryParams>,
-        db_query_dto: Option<DBQueryParams>,
+        dive_session_query: Option<DiveSessionFilter>,
+        db_query_dto: Option<QueryParams>,
     ) -> FieldResult<Vec<DiveSession>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 

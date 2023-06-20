@@ -1,14 +1,12 @@
-use crate::diesel::ExpressionMethods;
-use crate::dto::db_query_dto::DBQueryParams;
-use crate::dto::log_dto::LogEntry;
-use crate::errors::BigError;
+use crate::dto::query_dto::QueryParams;
+use crate::{diesel::ExpressionMethods, dto::log_entries::LogEntry};
 use diesel::{PgConnection, QueryDsl, QueryResult, RunQueryDsl};
 use uuid::Uuid;
 
 pub fn get_log_entries_by_log(
     conn: &mut PgConnection,
     input_log_id: &Uuid,
-    db_query_ob: Option<DBQueryParams>,
+    db_query_ob: Option<QueryParams>,
 ) -> QueryResult<Vec<LogEntry>> {
     use crate::schema::log_entries::dsl::{log_entries, log_id};
 

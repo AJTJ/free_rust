@@ -1,8 +1,8 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
 use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
+use crate::dto::logger_dto::{Logger, LoggerCreation, LoggerInput};
 use crate::dto::logger_entries_dto::LoggerEntryCreation;
-use crate::dto::loggers_dto::{Logger, LoggerCreation, LoggerInput};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 use crate::helpers::form_helper::{FormTemplate, UserFormInput};

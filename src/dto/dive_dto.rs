@@ -63,7 +63,7 @@ pub struct Dive {
 }
 
 #[derive(InputObject)]
-pub struct DiveQueryParams {
+pub struct DiveFilter {
     pub dive_id: Option<Uuid>,
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,

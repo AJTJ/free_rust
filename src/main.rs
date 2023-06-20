@@ -26,7 +26,7 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
 use env_data::SharedVars;
-use graphql_schema::{DbPool, DiveQLSchema, MutationRoot, QueryRoot};
+use graphql_schema::{DbPool, DiveQLSchema, Mutation, Query};
 use helpers::token_helpers::CUSTOM_HEADER;
 use redis::Client;
 use std::env;
@@ -106,7 +106,7 @@ async fn main() -> std::io::Result<()> {
     let env_vars = SharedVars { environment };
 
     // graphql schema builder
-    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+    let schema = Schema::build(Query, Mutation, EmptySubscription)
         .data(shared_client)
         .data(pool)
         .data(env_vars)

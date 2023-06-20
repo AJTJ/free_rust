@@ -6,8 +6,8 @@ use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use super::db_query_dto::DBQueryParams;
 use super::logger_entries_dto::LoggerEntry;
+use super::query_dto::QueryParams;
 
 #[derive(InputObject)]
 
@@ -47,10 +47,10 @@ pub struct Logger {
 
 #[ComplexObject]
 impl Logger {
-    async fn logger_entries(
+    pub async fn logger_entries(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: Option<DBQueryParams>,
+        db_query_dto: Option<QueryParams>,
     ) -> Result<Vec<LoggerEntry>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
