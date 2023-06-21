@@ -1,17 +1,37 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    all_logs (id) {
-        log_name -> Nullable<Text>,
-        session_id -> Nullable<Uuid>,
-        logger_used -> Uuid,
+    completed_form_fields (id) {
+        item_order -> Nullable<Int4>,
+        field_name -> Text,
+        field_value -> Nullable<Text>,
+        category_name -> Text,
+        field_value_type -> Text,
+        completed_form_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
+    }
+}
+
+diesel::table! {
+    completed_forms (id) {
+        completed_form_name -> Nullable<Text>,
+        template_version -> Array<Nullable<Int4>>,
+        original_form_id -> Uuid,
+        previous_completed_form_id -> Nullable<Uuid>,
+        session_id -> Uuid,
+        user_id -> Uuid,
+        id -> Uuid,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        is_active -> Bool,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
     }
 }
 
@@ -25,8 +45,8 @@ diesel::table! {
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
     }
 }
 
@@ -43,56 +63,42 @@ diesel::table! {
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
     }
 }
 
 diesel::table! {
-    log_entries (id) {
-        item_order -> Nullable<Int4>,
-        category_type -> Text,
-        input_type -> Text,
-        input_value -> Nullable<Text>,
-        log_id -> Uuid,
-        user_id -> Uuid,
-        id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-        is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
-    }
-}
-
-diesel::table! {
-    logger_entries (id) {
+    form_fields (id) {
         item_order -> Nullable<Int4>,
         field_name -> Text,
+        field_value -> Nullable<Text>,
         category_name -> Text,
-        input_type -> Text,
-        logger_id -> Uuid,
+        field_value_type -> Text,
+        form_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
     }
 }
 
 diesel::table! {
-    loggers (id) {
-        logger_name -> Text,
-        logger_fields -> Jsonb,
+    forms (id) {
+        form_name -> Text,
+        template_version -> Array<Nullable<Int4>>,
         user_id -> Uuid,
+        original_form_id -> Uuid,
+        previous_form_id -> Nullable<Uuid>,
         id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
     }
 }
 
@@ -107,29 +113,29 @@ diesel::table! {
         created_at -> Timestamp,
         updated_at -> Timestamp,
         is_active -> Bool,
-        deleted_at -> Nullable<Timestamp>,
-        deleted_by -> Nullable<Uuid>,
+        archived_at -> Nullable<Timestamp>,
+        archived_by -> Nullable<Uuid>,
     }
 }
 
-diesel::joinable!(all_logs -> dive_sessions (session_id));
-diesel::joinable!(all_logs -> loggers (logger_used));
-diesel::joinable!(all_logs -> users (user_id));
+diesel::joinable!(completed_form_fields -> completed_forms (completed_form_id));
+diesel::joinable!(completed_form_fields -> users (user_id));
+diesel::joinable!(completed_forms -> dive_sessions (session_id));
+diesel::joinable!(completed_forms -> forms (original_form_id));
+diesel::joinable!(completed_forms -> users (user_id));
 diesel::joinable!(dive_sessions -> users (user_id));
 diesel::joinable!(dives -> dive_sessions (session_id));
 diesel::joinable!(dives -> users (user_id));
-diesel::joinable!(log_entries -> all_logs (log_id));
-diesel::joinable!(log_entries -> users (user_id));
-diesel::joinable!(logger_entries -> loggers (logger_id));
-diesel::joinable!(logger_entries -> users (user_id));
-diesel::joinable!(loggers -> users (user_id));
+diesel::joinable!(form_fields -> forms (form_id));
+diesel::joinable!(form_fields -> users (user_id));
+diesel::joinable!(forms -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    all_logs,
+    completed_form_fields,
+    completed_forms,
     dive_sessions,
     dives,
-    log_entries,
-    logger_entries,
-    loggers,
+    form_fields,
+    forms,
     users,
 );

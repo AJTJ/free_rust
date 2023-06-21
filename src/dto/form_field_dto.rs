@@ -1,24 +1,24 @@
 use crate::{
-    actions::get_logger_by_id, errors::BigError, graphql_schema::DbPool, schema::logger_entries,
+    actions::get_form_by_id, errors::BigError, graphql_schema::DbPool, schema::form_fields,
 };
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, SimpleObject};
+use async_graphql::{ComplexObject, Context, SimpleObject, ID};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use super::logger_dto::Logger;
-
-// LOGGER ENTRIES
+use super::form_dto::Form;
 
 #[derive(Insertable, Debug)]
-#[diesel(table_name = logger_entries)]
-pub struct LoggerEntryCreation {
+#[diesel(table_name = form_fields)]
+pub struct FormFieldCreation {
     pub item_order: Option<i32>,
-    pub field_name: String,
-    pub category_name: String,
-    pub input_type: String,
 
-    pub logger_id: Uuid,
+    pub field_name: String,
+    pub field_value: Option<String>,
+    pub category_name: String,
+    pub field_value_type: String,
+
+    pub form_id: Uuid,
     pub user_id: Uuid,
 
     pub created_at: NaiveDateTime,
@@ -29,34 +29,39 @@ pub struct LoggerEntryCreation {
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject)]
 #[graphql(complex)]
-pub struct LoggerEntry {
+pub struct FormField {
     pub item_order: Option<i32>,
+    // field data
     pub field_name: String,
+    pub field_value: Option<String>,
     pub category_name: String,
-    pub input_type: String,
-
+    pub field_value_type: String,
+    // relationships
     #[graphql(skip)]
-    pub logger_id: Uuid,
+    pub form_id: Uuid,
     #[graphql(skip)]
     pub user_id: Uuid,
-
+    // default data
+    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
-    pub deleted_at: Option<NaiveDateTime>,
-    pub deleted_by: Option<Uuid>,
+    #[graphql(skip)]
+    pub archived_at: Option<NaiveDateTime>,
+    #[graphql(skip)]
+    pub archived_by: Option<Uuid>,
 }
 
 #[ComplexObject]
-impl LoggerEntry {
-    async fn log(&self, ctx: &Context<'_>) -> Result<Logger, BigError> {
+impl FormField {
+    async fn form(&self, ctx: &Context<'_>) -> Result<Form, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let logger_id = self.logger_id;
+        let form_id = self.form_id;
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_logger_by_id(&mut conn, logger_id).map(Logger::from)
+            get_form_by_id(&mut conn, form_id).map(Form::from)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?

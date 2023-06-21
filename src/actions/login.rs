@@ -1,5 +1,5 @@
-use crate::actions::add_to_user_session::add_to_user_session;
 use crate::actions::get_user_with_email;
+use crate::actions::insert_into_user_session::add_to_user_session;
 use crate::auth_data::{SessionData, UniversalIdType};
 use crate::dto::user_dto::{UserOutput, UserUpdate};
 use crate::errors::BigError;

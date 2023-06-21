@@ -1,2 +1,2 @@
 -- This file should undo anything in `up.sql`
-DROP TABLE all_logs
+DROP TABLE completed_form_fields

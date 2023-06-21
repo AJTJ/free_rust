@@ -9,8 +9,8 @@ CREATE TABLE loggers (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 );
 
@@ -44,8 +44,8 @@ CREATE TABLE logger_category_entries (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 );
 
@@ -90,8 +90,8 @@ CREATE TABLE logger_input_entries (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 );
 
@@ -108,8 +108,8 @@ CREATE TABLE all_logs (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 );
 
@@ -162,7 +162,7 @@ CREATE TABLE log_input_entries (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 );

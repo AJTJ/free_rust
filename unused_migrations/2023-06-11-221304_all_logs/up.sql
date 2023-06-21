@@ -10,7 +10,7 @@ CREATE TABLE all_logs (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 )

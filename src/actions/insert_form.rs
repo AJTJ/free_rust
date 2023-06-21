@@ -1,12 +1,11 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
 use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
-use crate::dto::log_dto::LogInput;
-use crate::dto::logger_dto::{Logger, LoggerCreation, LoggerInput};
-use crate::dto::logger_entries_dto::LoggerEntryCreation;
+use crate::dto::form_dto::{Form, FormCreation, FormInput};
+use crate::dto::form_field_dto::FormFieldCreation;
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::form_helper::{Form, UserFormInput};
+use crate::helpers::form_helper::{FormStructure, UserFormInput};
 use crate::helpers::token_helpers::get_cookie_from_token;
 use actix_web::web;
 use async_graphql::Context;
@@ -14,9 +13,13 @@ use chrono::Utc;
 use diesel::RunQueryDsl;
 use serde_json::json;
 
-pub async fn add_log(ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigError> {
+pub async fn add_logger(
+    ctx: &Context<'_>,
+    logger_data: FormInput,
+    user_form_input: UserFormInput,
+) -> Result<FormStructure, BigError> {
     // ) -> i32 {
-    let new_completed_form = Form::validate_form(log.);
+    let new_form = FormStructure::validate_form(user_form_input);
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
@@ -28,10 +31,9 @@ pub async fn add_log(ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigErro
     If the user has goals, then we are going to want to query the database for log data
      */
 
-    let new_logger = LoggerCreation {
-        logger_name: logger_data.logger_name,
+    let new_logger = FormCreation {
+        form_name: logger_data.logger_name,
         user_id,
-        logger_fields: json!(new_form),
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,
@@ -44,7 +46,7 @@ pub async fn add_log(ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigErro
         let mut conn = pool_ctx.get().unwrap();
         let insert_response = diesel::insert_into(loggers)
             .values(&new_logger)
-            .get_result::<Logger>(&mut conn);
+            .get_result::<FormStructure>(&mut conn);
 
         insert_response
     })
@@ -53,12 +55,12 @@ pub async fn add_log(ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigErro
     .map_err(|e| BigError::DieselInsertError { source: e });
 
     // Another approach... or both?!?
-    let all_new_entries: Vec<LoggerEntryCreation> = new_form
-        .all_inputs
+    let all_new_entries: Vec<FormFieldCreation> = new_form
+        .all_fields
         .iter()
         .enumerate()
         .map(|(i, c)| {
-            let le = LoggerEntryCreation {
+            let le = FormFieldCreation {
                 item_order: Some(i.try_into().unwrap()),
                 field_name: c.input_name.to_string(),
                 category_name: c.category_name.to_string(),

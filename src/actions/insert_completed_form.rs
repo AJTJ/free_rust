@@ -1,11 +1,12 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
+use crate::dto::completed_form_dto::{CompletedFormCreation, CompletedFormInput};
 use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
-use crate::dto::logger_dto::{Logger, LoggerCreation, LoggerInput};
-use crate::dto::logger_entries_dto::LoggerEntryCreation;
+use crate::dto::form_dto::{Form, FormCreation, FormInput};
+use crate::dto::form_field_dto::FormFieldCreation;
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::form_helper::{Form, UserFormInput};
+use crate::helpers::form_helper::{FormStructure, UserFormInput};
 use crate::helpers::token_helpers::get_cookie_from_token;
 use actix_web::web;
 use async_graphql::Context;
@@ -13,31 +14,26 @@ use chrono::Utc;
 use diesel::RunQueryDsl;
 use serde_json::json;
 
-pub async fn add_logger(
+pub async fn insert_completed_form(
     ctx: &Context<'_>,
-    logger_data: LoggerInput,
-    user_form_input: UserFormInput,
-) -> Result<Logger, BigError> {
+    form_input: CompletedFormInput,
+) -> Result<FormStructure, BigError> {
     // ) -> i32 {
-    let new_form = Form::validate_form(user_form_input);
+    let validated_completed_form = FormStructure::validate_form(&form_input.completed_form)?;
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-    /*
-    TODO: How should the form be stored?
-    What are the implications for logs made, and if the form changes?
-    What about data analysis? Analyzing json docs isn't as easy as looking at database values, but it's also not that hard.
-
-    If the user has goals, then we are going to want to query the database for log data
-     */
-
-    let new_logger = LoggerCreation {
-        logger_name: logger_data.logger_name,
+    let new_logger = CompletedFormCreation {
+        completed_form_name: form_input.completed_form_name,
+        original_form_id: form_input.,
+        previous_completed_form_id: todo!(),
+        session_id: todo!(),
         user_id,
-        logger_fields: json!(new_form),
-        created_at: current_stamp,
-        updated_at: current_stamp,
-        is_active: true,
+        id: todo!(),
+        created_at: todo!(),
+        updated_at: todo!(),
+        is_active: todo!(),
+        
     };
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -47,7 +43,7 @@ pub async fn add_logger(
         let mut conn = pool_ctx.get().unwrap();
         let insert_response = diesel::insert_into(loggers)
             .values(&new_logger)
-            .get_result::<Logger>(&mut conn);
+            .get_result::<FormStructure>(&mut conn);
 
         insert_response
     })
@@ -56,12 +52,12 @@ pub async fn add_logger(
     .map_err(|e| BigError::DieselInsertError { source: e });
 
     // Another approach... or both?!?
-    let all_new_entries: Vec<LoggerEntryCreation> = new_form
-        .all_fields
+    let all_new_entries: Vec<FormFieldCreation> = new_form
+        .all_inputs
         .iter()
         .enumerate()
         .map(|(i, c)| {
-            let le = LoggerEntryCreation {
+            let le = FormFieldCreation {
                 item_order: Some(i.try_into().unwrap()),
                 field_name: c.input_name.to_string(),
                 category_name: c.category_name.to_string(),

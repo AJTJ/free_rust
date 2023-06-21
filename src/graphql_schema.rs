@@ -1,48 +1,43 @@
 use crate::actions::add_dive;
 use crate::actions::add_dive_session;
-use crate::actions::add_log;
 use crate::actions::add_logger;
+use crate::actions::get_completed_forms_by_user_id;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
-use crate::actions::get_logger_entries_by_logger;
-use crate::actions::get_loggers_from_user_id;
-use crate::actions::get_logs_from_user_id;
+use crate::actions::get_form_fields_by_form;
+use crate::actions::get_forms_by_user_id;
 use crate::actions::get_user_id_from_token_and_session;
 use crate::actions::get_user_with_email;
+use crate::actions::insert_completed_form;
 use crate::actions::insert_user;
 use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
 use crate::dto::auth_dto::Login;
+use crate::dto::completed_form_dto::CompletedForm;
+use crate::dto::completed_form_dto::CompletedFormInput;
 use crate::dto::dive_dto::Dive;
 use crate::dto::dive_dto::DiveFilter;
 use crate::dto::dive_dto::DiveInput;
-use crate::dto::dive_dto::DiveOutput;
 use crate::dto::dive_dto::DiveUpdate;
 use crate::dto::dive_session_dto::DiveSession;
 use crate::dto::dive_session_dto::DiveSessionFilter;
 use crate::dto::dive_session_dto::DiveSessionInput;
-use crate::dto::dive_session_dto::DiveSessionOutput;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
-use crate::dto::log_dto::Log;
-use crate::dto::log_dto::LogInput;
-use crate::dto::logger_dto::Logger;
-use crate::dto::logger_dto::LoggerInput;
-use crate::dto::logger_entries_dto::LoggerEntry;
+use crate::dto::form_dto::FormInput;
+use crate::dto::form_field_dto::FormField;
 use crate::dto::query_dto::QueryParams;
-use crate::dto::user_dto::UserOutput;
 use crate::dto::user_dto::{User, UserInput};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
-use crate::helpers::form_helper::Form;
+use crate::helpers::form_helper::FormStructure;
 use actix_web::web;
 use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
 use rand::prelude::*;
-use tracing::info;
 use uuid::Uuid;
 
 pub type DiveQLSchema = Schema<Query, Mutation, EmptySubscription>;
@@ -55,7 +50,7 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 impl Query {
     // UNGUARDED - for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<UserOutput>, BigError> {
+    async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         web::block(move || {
@@ -130,12 +125,12 @@ impl Query {
     // LOGGERS
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<Logger>, BigError> {
+    async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<FormStructure>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_loggers_from_user_id(&mut conn, user_id, None)
+            get_forms_by_user_id(&mut conn, user_id, None)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -147,12 +142,12 @@ impl Query {
         &self,
         ctx: &Context<'_>,
         logger_id: Uuid,
-    ) -> Result<Vec<LoggerEntry>, BigError> {
+    ) -> Result<Vec<FormField>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_logger_entries_by_logger(&mut conn, &logger_id, &user_id, None)
+            get_form_fields_by_form(&mut conn, &logger_id, &user_id, None)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -162,12 +157,12 @@ impl Query {
     // LOGS
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<Log>, BigError> {
+    async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<CompletedForm>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_logs_from_user_id(&mut conn, user_id, None)
+            get_completed_forms_by_user_id(&mut conn, user_id, None)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -281,17 +276,21 @@ impl Mutation {
     async fn add_logger(
         &self,
         ctx: &Context<'_>,
-        logger_data: LoggerInput,
-        form_input: Form,
-    ) -> Result<Logger, BigError> {
+        logger_data: FormInput,
+        form_input: FormStructure,
+    ) -> Result<FormStructure, BigError> {
         add_logger(ctx, logger_data, form_input).await
     }
     // update_logger() {}
     // delete_logger() {}
 
     // LOG STUFF
-    async fn add_log(&self, ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigError> {
-        add_log(ctx, log).await
+    async fn add_log(
+        &self,
+        ctx: &Context<'_>,
+        log: CompletedFormInput,
+    ) -> Result<FormStructure, BigError> {
+        insert_completed_form(ctx, log).await
     }
 
     // update_log() {}

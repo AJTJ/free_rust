@@ -10,8 +10,8 @@ CREATE TABLE custom_enum_categories (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 );
 
@@ -25,8 +25,8 @@ CREATE TABLE custom_enum_variants (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid
+  archived_at TIMESTAMP,
+  archived_by uuid
 );
 
 CREATE TABLE logger_input_types (
@@ -42,7 +42,7 @@ CREATE TABLE logger_input_types (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   is_active BOOLEAN NOT NULL,
-  deleted_at TIMESTAMP,
-  deleted_by uuid,
+  archived_at TIMESTAMP,
+  archived_by uuid,
   PRIMARY KEY (id)
 )

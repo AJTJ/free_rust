@@ -1,12 +1,13 @@
 -- Your SQL goes here
-CREATE TABLE logger_category_entries (
-  -- other specific data
+CREATE TABLE form_fields (
   item_order INTEGER,
-  -- relationship data
-  -- NOTE: An entry refers to its type
-  logger_category_type_id uuid NOT NULL REFERENCES logger_category_types (id),
-  -- NOTE: An entry ALWAYS exists in a list
-  logger_id uuid NOT NULL REFERENCES loggers (id),
+  -- field data
+  field_name TEXT NOT NULL,
+  field_value TEXT,
+  category_name TEXT NOT NULL,
+  field_value_type TEXT NOT NULL,
+  -- relationships
+  form_id uuid NOT NULL REFERENCES forms (id),
   user_id uuid NOT NULL REFERENCES users (id),
   -- default data
   id uuid DEFAULT uuid_generate_v4(),
@@ -16,4 +17,4 @@ CREATE TABLE logger_category_entries (
   archived_at TIMESTAMP,
   archived_by uuid,
   PRIMARY KEY (id)
-)
+);

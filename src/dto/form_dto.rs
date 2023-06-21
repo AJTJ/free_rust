@@ -1,29 +1,32 @@
-use crate::actions::get_logger_entries_by_logger;
+use crate::actions::get_form_fields_by_form;
 use crate::errors::BigError;
-use crate::helpers::form_helper::Form;
-use crate::{graphql_schema::DbPool, schema::loggers};
+use crate::helpers::form_helper::FormStructure;
+use crate::{graphql_schema::DbPool, schema::forms};
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use super::logger_entries_dto::LoggerEntry;
+use super::form_field_dto::FormField;
 use super::query_dto::QueryParams;
 
 #[derive(InputObject)]
-pub struct LoggerInput {
+pub struct FormInput {
     pub logger_name: String,
-    pub form_template: Form,
+    pub form_template: FormStructure,
 }
 
 #[derive(Insertable, Debug)]
-#[diesel(table_name = loggers)]
-pub struct LoggerCreation {
-    pub logger_name: String,
+#[diesel(table_name = forms)]
+pub struct FormCreation {
+    pub form_name: String,
+
     pub user_id: Uuid,
-    pub logger_fields: serde_json::Value,
-    // pub logger_fields: String,
+    pub original_form_id: Uuid,
+    pub previous_form_id: Option<Uuid>,
+
     // partial default data
+    pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -32,30 +35,35 @@ pub struct LoggerCreation {
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject)]
 #[graphql(complex)]
-pub struct Logger {
-    pub logger_name: String,
-    pub logger_fields: serde_json::Value,
+pub struct Form {
+    pub form_name: String,
+    pub template_version: Vec<Option<i32>>,
     // relationship data
     #[graphql(skip)]
     pub user_id: Uuid,
-    pub logger_family_id: Uuid,
-    pub version: u32,
+    #[graphql(skip)]
+    pub original_form_id: Uuid,
+    #[graphql(skip)]
+    pub previous_form_id: Option<Uuid>,
     // default data
+    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
-    pub deleted_at: Option<NaiveDateTime>,
-    pub deleted_by: Option<Uuid>,
+    #[graphql(skip)]
+    pub archived_at: Option<NaiveDateTime>,
+    #[graphql(skip)]
+    pub archived_by: Option<Uuid>,
 }
 
 #[ComplexObject]
-impl Logger {
-    pub async fn logger_entries(
+impl Form {
+    pub async fn form_fields(
         &self,
         ctx: &Context<'_>,
         db_query_dto: Option<QueryParams>,
-    ) -> Result<Vec<LoggerEntry>, BigError> {
+    ) -> Result<Vec<FormField>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let logger_id = self.id;
@@ -63,8 +71,8 @@ impl Logger {
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_logger_entries_by_logger(&mut conn, &logger_id, &user_id, db_query_dto)
-                .map(|v| v.into_iter().map(LoggerEntry::from).collect())
+            get_form_fields_by_form(&mut conn, &logger_id, &user_id, db_query_dto)
+                .map(|v| v.into_iter().map(FormField::from).collect())
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })
