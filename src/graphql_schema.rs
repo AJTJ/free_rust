@@ -35,7 +35,7 @@ use crate::dto::user_dto::UserOutput;
 use crate::dto::user_dto::{User, UserInput};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
-use crate::helpers::form_helper::UserFormInput;
+use crate::helpers::form_helper::Form;
 use actix_web::web;
 use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
@@ -282,9 +282,9 @@ impl Mutation {
         &self,
         ctx: &Context<'_>,
         logger_data: LoggerInput,
-        user_form_input: UserFormInput,
+        form_input: Form,
     ) -> Result<Logger, BigError> {
-        add_logger(ctx, logger_data, user_form_input).await
+        add_logger(ctx, logger_data, form_input).await
     }
     // update_logger() {}
     // delete_logger() {}

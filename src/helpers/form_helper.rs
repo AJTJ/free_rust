@@ -196,7 +196,7 @@ mod tests {
             form_used: None,
             enums: None,
             all_fields: vec![Field {
-                input_value: "100",
+                input_value: Some("100".to_string()),
                 input_name: FormInputNames::GeneralFeeling,
                 category_name: AllCategoryNames::General,
                 input_type: InputTypes::Number,
@@ -205,7 +205,7 @@ mod tests {
 
         // this new form is validated
 
-        let validated_completed_form = completed_form.validate_completed_form();
+        let validated_completed_form = completed_form.validate_form().unwrap();
 
         // and is then stored in the database
     }
