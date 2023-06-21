@@ -4,8 +4,9 @@ use std::{
     num::ParseIntError,
 };
 
-use actix_web::{cookie::ParseError, error::BlockingError};
+use actix_web::{cookie::ParseError as CookieParseError, error::BlockingError};
 use async_graphql::Error as AsyncError;
+use chrono::ParseError as ChronoParseError;
 use diesel::result::Error as DieselError;
 use redis::RedisError;
 use serde_json::Error as SerdeError;
@@ -21,7 +22,7 @@ pub enum BigError {
 
     // COOKIE
     #[snafu(display("{source}"))]
-    WrongCookieString { source: ParseError },
+    WrongCookieString { source: CookieParseError },
 
     #[snafu(display("No Cookie present: {}", error.message))]
     IncorrectCookie { error: AsyncError },
@@ -41,7 +42,7 @@ pub enum BigError {
     ParseIntError { source: ParseIntError },
 
     #[snafu(display("ParseError: {}", source))]
-    ParseError { source: ParseError },
+    ChronoParseError { source: ChronoParseError },
 
     // SESSION
     #[snafu(display("RedisSessionError: {}", source))]

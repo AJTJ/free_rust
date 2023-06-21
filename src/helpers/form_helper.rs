@@ -94,7 +94,7 @@ impl Form {
                             .is_some(),
 
                         InputTypes::Timestamp => NaiveDateTime::from_str(&val)
-                            .map_err(|e| BigError::ParseError { source: e })
+                            .map_err(|e| BigError::ChronoParseError { source: e })
                             .is_ok(),
                         InputTypes::Interval => val
                             .parse::<u64>()
