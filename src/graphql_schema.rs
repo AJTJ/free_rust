@@ -1,5 +1,6 @@
 use crate::actions::add_dive;
 use crate::actions::add_dive_session;
+use crate::actions::add_log;
 use crate::actions::add_logger;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
@@ -25,6 +26,7 @@ use crate::dto::dive_session_dto::DiveSessionInput;
 use crate::dto::dive_session_dto::DiveSessionOutput;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
 use crate::dto::log_dto::Log;
+use crate::dto::log_dto::LogInput;
 use crate::dto::logger_dto::Logger;
 use crate::dto::logger_dto::LoggerInput;
 use crate::dto::logger_entries_dto::LoggerEntry;
@@ -287,13 +289,11 @@ impl Mutation {
     // update_logger() {}
     // delete_logger() {}
 
-    // LOGGER_INPUT STUFF
-    // add_logger_input() {}
-    // update_logger_input() {}
-    // delete_logger_input() {}
-
     // LOG STUFF
-    // add_log() {}
+    async fn add_log(&self, ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigError> {
+        add_log(ctx, log).await
+    }
+
     // update_log() {}
     // delete_log() {}
 

@@ -41,42 +41,61 @@ pub struct FooQueryParams {}
 #[graphql(complex)]
 pub struct FooOutput {}
 
-impl From<User> for UserOutput {
-    fn from(val: User) -> Self {
-        UserOutput {
-            id: val.id.into(),
-            username: val.username,
-            email: val.email,
-            last_login: val.last_login,
-
-            created_at: val.created_at,
-            updated_at: val.updated_at,
-            is_active: val.is_active,
+impl From<Log> for LogOutput {
+    fn from(x: Log) -> Self {
+        LogOutput {
+            log_name: x.log_name,
+            session_id: x.session_id,
+            logger_used: x.logger_used,
+            user_id: x.user_id,
+            id: x.id,
+            created_at: x.created_at,
+            updated_at: x.updated_at,
+            is_active: x.is_active,
+            deleted_at: x.deleted_at,
+            deleted_by: x.deleted_by,
         }
     }
 }
 
+#[derive(SimpleObject)]
+#[graphql(complex)]
+pub struct LogOutput {
+    pub log_name: Option<String>,
+
+    #[graphql(skip)]
+    pub session_id: Option<Uuid>,
+    #[graphql(skip)]
+    pub logger_used: Uuid,
+    #[graphql(skip)]
+    pub user_id: Uuid,
+
+    pub id: Uuid,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+    pub is_active: bool,
+    pub deleted_at: Option<NaiveDateTime>,
+    pub deleted_by: Option<Uuid>,
+}
+
 #[ComplexObject]
-impl UserOutput {
-    async fn dive_sessions(
+impl LogOutput {
+    async fn log_entries(
         &self,
         ctx: &Context<'_>,
-        // this needs to be mut
-        dive_session_query: Option<DiveSessionFilter>,
         db_query_dto: Option<QueryParams>,
-    ) -> FieldResult<Vec<DiveSession>> {
+    ) -> Result<Vec<LogEntryOutput>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let user_id: Uuid =
-            Uuid::parse_str(&self.id).map_err(|e| BigError::UuidParsingerror { source: e })?;
-        let dive_sessions = web::block(move || {
+        let log_id = self.id;
+
+        web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
+            get_log_entries_by_log(&mut conn, &log_id, db_query_dto)
+                .map(|v| v.into_iter().map(LogEntryOutput::from).collect())
         })
         .await
-        .expect("error in dive sessions web::block")
-        .expect("error in another loading dive sessions");
-
-        Ok(dive_sessions)
+        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }

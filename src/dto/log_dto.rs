@@ -1,6 +1,9 @@
-use crate::{actions::get_log_entries_by_log, errors::BigError, graphql_schema::DbPool};
+use crate::{
+    actions::get_log_entries_by_log, errors::BigError, graphql_schema::DbPool,
+    helpers::form_helper::Form,
+};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, SimpleObject};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -8,6 +11,14 @@ use super::{
     log_entries::{LogEntry, LogEntryOutput},
     query_dto::QueryParams,
 };
+
+#[derive(InputObject)]
+pub struct LogInput {
+    pub log_name: String,
+    pub session_id: ID,
+    pub logger_used: ID,
+    pub completed_form: Form,
+}
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
@@ -26,13 +37,32 @@ pub struct Log {
     pub deleted_by: Option<Uuid>,
 }
 
+impl From<Log> for LogOutput {
+    fn from(x: Log) -> Self {
+        LogOutput {
+            log_name: x.log_name,
+            session_id: x.session_id,
+            logger_used: x.logger_used,
+            user_id: x.user_id,
+            id: x.id,
+            created_at: x.created_at,
+            updated_at: x.updated_at,
+            is_active: x.is_active,
+            deleted_at: x.deleted_at,
+            deleted_by: x.deleted_by,
+        }
+    }
+}
+
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct LogOutput {
     pub log_name: Option<String>,
-    pub session_id: Option<Uuid>,
-    pub logger_used: Uuid,
 
+    #[graphql(skip)]
+    pub session_id: Option<Uuid>,
+    #[graphql(skip)]
+    pub logger_used: Uuid,
     #[graphql(skip)]
     pub user_id: Uuid,
 

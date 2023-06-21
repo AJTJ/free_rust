@@ -59,30 +59,6 @@ pub struct User {
     pub deleted_by: Option<Uuid>,
 }
 
-// #[ComplexObject]
-// impl User {
-//     async fn dive_sessions(
-//         &self,
-//         ctx: &Context<'_>,
-//         // this needs to be mut
-//         mut dive_session_query: Option<DiveSessionFilter>,
-//         db_query_dto: Option<QueryParams>,
-//     ) -> FieldResult<Vec<DiveSession>> {
-//         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-//         let user_id = self.id;
-
-//         let dive_sessions = web::block(move || {
-//             let mut conn = pool_ctx.get().unwrap();
-//             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
-//         })
-//         .await
-//         .expect("error in dive sessions web::block")
-//         .expect("error in another loading dive sessions");
-
-//         Ok(dive_sessions)
-//     }
-// }
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct UserOutput {

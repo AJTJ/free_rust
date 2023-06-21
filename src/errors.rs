@@ -1,6 +1,7 @@
 use std::{
     fmt::{self, Display},
     io::Error,
+    num::ParseIntError,
 };
 
 use actix_web::{cookie::ParseError, error::BlockingError};
@@ -35,6 +36,13 @@ pub enum BigError {
     #[snafu(display("Uuid Error: {}", source))]
     UuidParsingerror { source: UuidError },
 
+    // other parsing
+    #[snafu(display("ParseIntError: {}", source))]
+    ParseIntError { source: ParseIntError },
+
+    #[snafu(display("ParseError: {}", source))]
+    ParseError { source: ParseError },
+
     // SESSION
     #[snafu(display("RedisSessionError: {}", source))]
     RedisSessionError { source: RedisError },
@@ -58,6 +66,13 @@ pub enum BigError {
     // LOGIN
     #[snafu(display("incorrect password"))]
     WrongPassword,
+
+    // Form
+    #[snafu(display("Fields not matching"))]
+    FormFieldNotMatching,
+
+    #[snafu(display("Fields not matching"))]
+    FormValueNotMatching,
 }
 
 // #[derive(Debug)]

@@ -1,13 +1,17 @@
-use async_graphql::{Enum, InputObject};
+use std::str::FromStr;
+
+use async_graphql::{Enum, InputObject, ID};
+use chrono::{Duration, NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::mem::discriminant;
 use strum::{Display, EnumString};
+
+use crate::{actions::get_logger_by_id, errors::BigError};
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum AllCustomEnums {}
 
-#[derive(Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display)]
+#[derive(Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq)]
 pub enum InputTypes {
     Number,
     CustomEnums,
@@ -16,90 +20,138 @@ pub enum InputTypes {
     Text,
 }
 
-// #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
-// pub enum AllInputNames {
-//     GeneralFeeling(Option<FormInput>),
-//     // there will be more...
-// }
-
 #[derive(Enum, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Debug, EnumString, Display)]
 pub enum FormInputNames {
     GeneralFeeling,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq)]
 pub enum AllCategoryNames {
     General,
     // there will be more
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
-pub struct FormInput {
-    // input_order: Option<u32>,
-    // input_name: AllInputNames,
+#[derive(Serialize, Deserialize, Clone, Debug, InputObject)]
+pub struct Field {
+    pub input_name: FormInputNames,
+    pub input_value: Option<String>,
     pub category_name: AllCategoryNames,
     pub input_type: InputTypes,
 }
 
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-pub struct InputContainer {
-    pub input_name: FormInputNames,
-    pub form_input: FormInput,
+#[derive(InputObject, Serialize, Deserialize)]
+pub struct Form {
+    pub form_template_version: f64,
+    pub form_used: Option<ID>,
+    pub enums: Option<Vec<EnumLists>>,
+    pub all_fields: Vec<Field>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct FormTemplate {
-    // pub general_feeling: Option<FormInput>,
-    pub all_inputs: Vec<InputContainer>,
+#[derive(InputObject, Serialize, Deserialize)]
+pub struct EnumLists {
+    field_name: FormInputNames,
+    enums: Vec<String>,
 }
 
-pub type UserFormInput = Vec<FormInputNames>;
+impl Form {
+    /*
+    the user is creating or editin a form, and we replace it with our own preset values
+       TODO: Versioning
+       - if the user is updating an old form that uses an older form template, we need to take that into account.
+    */
+    pub fn validate_form(&self) -> Result<Form, BigError> {
+        let template = Form::get_versioned_form_template(self.form_template_version);
 
-impl FormTemplate {
-    pub fn validate_form(inc_inputs: UserFormInput) -> FormTemplate {
-        let predefined_structure = crate::helpers::form_helper::FormTemplate::get_form_structure();
-        let output: FormTemplate = {
-            let mut all_inputs = vec![];
+        let mut new_fields = vec![];
 
-            inc_inputs.iter().for_each(|i| {
-                if let Some(matching_input) = predefined_structure
-                    .all_inputs
-                    .iter()
-                    .find(|e| discriminant(&e.input_name) == discriminant(i))
+        for field in self.all_fields {
+            // check that there is a related template field
+            let template_field = template
+                .all_fields
+                .iter()
+                .find(|e| e.input_name == field.input_name);
+
+            if let Some(template_field) = template_field {
+                if template_field.category_name != field.category_name
+                    || template_field.input_type != field.input_type
                 {
-                    all_inputs.push(*matching_input);
+                    return Err(BigError::FormFieldNotMatching);
                 }
-            });
 
-            FormTemplate { all_inputs }
-        };
-        output
+                if let Some(val) = field.input_value {
+                    let val_ok = match field.input_type {
+                        InputTypes::Number => val
+                            .parse::<i32>()
+                            .map_err(|e| BigError::ParseIntError { source: e })
+                            .is_ok(),
+                        InputTypes::CustomEnums => template
+                            .enums
+                            .iter()
+                            .find(|e| e.field_name == field.input_name)
+                            .and_then(|e| Some(e.enums.contains(&val)))
+                            .is_some(),
+                        InputTypes::Timestamp => NaiveDateTime::from_str(&val)
+                            .map_err(|e| BigError::ParseError { source: e })
+                            .is_ok(),
+                        InputTypes::Interval => val
+                            .parse::<u64>()
+                            .map_err(|e| BigError::ParseIntError { source: e })
+                            .is_ok(),
+                        InputTypes::Text => true,
+                    };
+                    if !val_ok {
+                        return Err(BigError::FormValueNotMatching);
+                    }
+                }
+
+                // push the input form to the new fields, thus keeping the value if it is completed
+                new_fields.push(field)
+            } else {
+                // no related template field
+                return Err(BigError::FormFieldNotMatching);
+            }
+        }
+
+        // Does this make sense?
+        Ok(Form {
+            form_used: self.form_used,
+            enums: template.enums,
+            form_template_version: template.form_template_version,
+            all_fields: new_fields,
+        })
     }
 
-    // should take in a log, validate that it's information is correct
-    // and then spit out a storable structure
-    pub fn validate_form_log() {
-        unimplemented!()
-    }
-
-    pub fn get_form_structure() -> FormTemplate {
-        FormTemplate {
-            all_inputs: vec![
-                (InputContainer {
+    // TODO: Probably get this from JSON/DOCUMENTATION files
+    pub fn get_versioned_form_template(version: f64) -> Form {
+        Form {
+            form_template_version: 1.0,
+            form_used: None,
+            enums: None,
+            all_fields: vec![
+                (Field {
+                    input_value: None,
                     input_name: FormInputNames::GeneralFeeling,
-                    form_input: FormInput {
-                        // input_order: None,
-                        // input_name: AllInputNames::GeneralFeeling,
-                        category_name: AllCategoryNames::General,
-                        input_type: InputTypes::Number,
-                    },
+                    category_name: AllCategoryNames::General,
+                    input_type: InputTypes::Number,
                 }),
             ],
         }
     }
-
-    pub fn get_form_structure_json() -> Value {
-        json!(&Self::get_form_structure())
+    // TODO: Probably get this from JSON/DOCUMENTATION files
+    pub fn get_latest_form_template() -> Form {
+        Form {
+            form_template_version: 1.0,
+            form_used: None,
+            enums: None,
+            all_fields: vec![
+                (Field {
+                    input_value: None,
+                    input_name: FormInputNames::GeneralFeeling,
+                    category_name: AllCategoryNames::General,
+                    input_type: InputTypes::Number,
+                }),
+            ],
+        }
     }
 }
 
@@ -115,16 +167,43 @@ mod tests {
     fn form_lifecycle() {
         use crate::helpers::form_helper::*;
 
-        // user gets sent this json object of all possible form input fields and their values etc...
-        let json_form = FormTemplate::get_form_structure_json();
+        // user gets the latest form template fields and their values etc...
+        // crucially this is everything they need to save and use forms
+        let json_form = Form::get_latest_form_template();
 
-        // client returns a list of AllInputNames enums
-        let return_val = vec![FormInputNames::GeneralFeeling];
+        // client returns a custom form
+        let custom_form = Form {
+            form_template_version: 1.0,
+            form_used: None,
+            enums: None,
+            all_fields: vec![Field {
+                input_value: None,
+                input_name: FormInputNames::GeneralFeeling,
+                category_name: AllCategoryNames::General,
+                input_type: InputTypes::Number,
+            }],
+        };
 
         // get new form based on the enums from the client
-        let new_form = FormTemplate::validate_form(return_val);
+        let validated_new_form = custom_form.validate_form();
 
-        // and now with this new form, I can either store it in the database as a json blob (simplest for now)
-        // or I can break it out into logger entries
+        // they create a completed form with it
+        let completed_form = Form {
+            form_template_version: 1.0,
+            form_used: None,
+            enums: None,
+            all_fields: vec![Field {
+                input_value: "100",
+                input_name: FormInputNames::GeneralFeeling,
+                category_name: AllCategoryNames::General,
+                input_type: InputTypes::Number,
+            }],
+        };
+
+        // this new form is validated
+
+        let validated_completed_form = completed_form.validate_completed_form();
+
+        // and is then stored in the database
     }
 }

@@ -1,6 +1,7 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
 use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
+use crate::dto::log_dto::LogInput;
 use crate::dto::logger_dto::{Logger, LoggerCreation, LoggerInput};
 use crate::dto::logger_entries_dto::LoggerEntryCreation;
 use crate::errors::BigError;
@@ -13,13 +14,9 @@ use chrono::Utc;
 use diesel::RunQueryDsl;
 use serde_json::json;
 
-pub async fn add_logger(
-    ctx: &Context<'_>,
-    logger_data: LoggerInput,
-    user_form_input: UserFormInput,
-) -> Result<Logger, BigError> {
+pub async fn add_log(ctx: &Context<'_>, log: LogInput) -> Result<Logger, BigError> {
     // ) -> i32 {
-    let new_form = Form::validate_form(user_form_input);
+    let new_completed_form = Form::validate_form(log.);
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
@@ -57,7 +54,7 @@ pub async fn add_logger(
 
     // Another approach... or both?!?
     let all_new_entries: Vec<LoggerEntryCreation> = new_form
-        .all_fields
+        .all_inputs
         .iter()
         .enumerate()
         .map(|(i, c)| {
