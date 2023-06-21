@@ -1,7 +1,7 @@
 use crate::{
     diesel::ExpressionMethods,
     dto::{
-        dive_session_dto::{DiveSession, DiveSessionQueryParams},
+        dive_session_dto::{DiveSession, DiveSessionFilter},
         query_dto::QueryParams,
     },
 };
@@ -11,7 +11,7 @@ use uuid::Uuid;
 pub fn get_dive_sessions_by_user(
     conn: &mut PgConnection,
     input_user_id: &Uuid,
-    dive_session_query_input: Option<DiveSessionQueryParams>,
+    dive_session_filter: Option<DiveSessionFilter>,
     db_query_ob: Option<QueryParams>,
 ) -> QueryResult<Vec<DiveSession>> {
     use crate::schema::dive_sessions::dsl::{dive_sessions, user_id};

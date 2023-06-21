@@ -17,6 +17,7 @@ use crate::dto::auth_dto::Login;
 use crate::dto::dive_dto::Dive;
 use crate::dto::dive_dto::DiveFilter;
 use crate::dto::dive_dto::DiveInput;
+use crate::dto::dive_dto::DiveOutput;
 use crate::dto::dive_dto::DiveUpdate;
 use crate::dto::dive_session_dto::DiveSession;
 use crate::dto::dive_session_dto::DiveSessionFilter;
@@ -95,11 +96,14 @@ impl Query {
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
+                .map(|dv| dv.into_iter().map(DiveSessionOutput::from).collect())
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
+
+    // .map(|dv| dv.into_iter().map(DiveSessionOutput::from).collect())
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn dives(
@@ -107,13 +111,14 @@ impl Query {
         ctx: &Context<'_>,
         dive_input: Option<DiveFilter>,
         db_query_dto: Option<QueryParams>,
-    ) -> Result<Vec<Dive>, BigError> {
+    ) -> Result<Vec<DiveOutput>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dives_by_user(&mut conn, user_id, dive_input, db_query_dto)
+                .map(|dv| dv.into_iter().map(DiveOutput::from).collect())
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?

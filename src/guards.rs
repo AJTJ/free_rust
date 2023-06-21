@@ -93,3 +93,19 @@ impl Guard for DevelopmentGuard {
         }
     }
 }
+
+#[derive(Default)]
+pub struct NoAllow {}
+
+impl NoAllow {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+#[async_trait]
+impl Guard for NoAllow {
+    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+        Err("".into())
+    }
+}

@@ -7,7 +7,7 @@ use chrono::NaiveDateTime;
 use uuid::Uuid;
 
 use super::{
-    dive_session_dto::{DiveSession, DiveSessionFilter},
+    dive_session_dto::{DiveSession, DiveSessionFilter, DiveSessionOutput},
     query_dto::{self, QueryParams},
 };
 
@@ -118,7 +118,8 @@ impl UserOutput {
         // this needs to be mut
         dive_session_query: Option<DiveSessionFilter>,
         db_query_dto: Option<QueryParams>,
-    ) -> FieldResult<Vec<DiveSession>> {
+        // ) -> FieldResult<Vec<DiveSession>> {
+    ) -> Result<Vec<DiveSessionOutput>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let user_id: Uuid =
@@ -126,6 +127,7 @@ impl UserOutput {
         let dive_sessions = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_query, db_query_dto)
+                .map(|dv| dv.into_iter().map(DiveSessionOutput::from).collect())
         })
         .await
         .expect("error in dive sessions web::block")
