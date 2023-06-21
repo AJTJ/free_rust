@@ -86,10 +86,13 @@ impl Form {
                             .is_ok(),
                         InputTypes::CustomEnums => template
                             .enums
-                            .iter()
-                            .find(|e| e.field_name == field.input_name)
-                            .and_then(|e| Some(e.enums.contains(&val)))
+                            .and_then(|e| {
+                                e.iter()
+                                    .find(|e| e.field_name == field.input_name)
+                                    .and_then(|e| Some(e.enums.contains(&val)))
+                            })
                             .is_some(),
+
                         InputTypes::Timestamp => NaiveDateTime::from_str(&val)
                             .map_err(|e| BigError::ParseError { source: e })
                             .is_ok(),
