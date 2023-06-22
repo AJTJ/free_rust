@@ -1,12 +1,14 @@
 use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
 use crate::diesel::ExpressionMethods;
-use crate::dto::completed_form_dto::{CompletedFormCreation, CompletedFormInput};
+use crate::dto::completed_form_dto::{CompletedForm, CompletedFormCreation, CompletedFormInput};
+use crate::dto::completed_form_field_dto::{CompletedFormField, CompletedFormFieldCreation};
 use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
 use crate::dto::form_dto::{Form, FormCreation, FormInput};
 use crate::dto::form_field_dto::FormFieldCreation;
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::form_helper::{FormStructure, UserFormInput};
+use crate::helpers::conversion_helpers::{id_to_uuid, op_id_to_op_uuid};
+use crate::helpers::form_helper::FormStructure;
 use crate::helpers::token_helpers::get_cookie_from_token;
 use actix_web::web;
 use async_graphql::Context;
@@ -16,52 +18,62 @@ use serde_json::json;
 
 pub async fn insert_completed_form(
     ctx: &Context<'_>,
-    form_input: CompletedFormInput,
-) -> Result<FormStructure, BigError> {
-    let converted_input_form = FormStructure::from_input(form_input.form_template)?;
+    completed_form_input: CompletedFormInput,
+) -> Result<(CompletedForm, Vec<CompletedFormField>), BigError> {
+    let converted_input_form = FormStructure::from_input(completed_form_input.form_structure)?;
     let validated_completed_form = FormStructure::validate_form(&converted_input_form)?;
+
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-    let new_logger = CompletedFormCreation {
-        completed_form_name: form_input.completed_form_name,
-        original_form_id: form_input.original_form_id,
-        previous_completed_form_id: form_input.previous_completed_form_id,
-        session_id: todo!(),
+    let new_form_id = id_to_uuid(&completed_form_input.form_id)?;
+    let new_session_id = id_to_uuid(&completed_form_input.session_id)?;
+    let new_original_form_id = op_id_to_op_uuid(&completed_form_input.original_form_id)?;
+    let new_previous_completed_form_id =
+        op_id_to_op_uuid(&completed_form_input.previous_completed_form_id)?;
+
+    let created_completed_form = CompletedFormCreation {
+        completed_form_name: completed_form_input.completed_form_name,
+        original_form_id: new_original_form_id,
+        previous_completed_form_id: new_previous_completed_form_id,
+        form_id: new_form_id,
+        session_id: new_session_id,
         user_id,
-        id: todo!(),
-        created_at: todo!(),
-        updated_at: todo!(),
-        is_active: todo!(),
+        created_at: current_stamp,
+        updated_at: current_stamp,
+        is_active: true,
     };
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    use crate::schema::loggers::dsl::loggers;
-    let new_logger = web::block(move || {
+    use crate::schema::completed_forms::dsl::completed_forms;
+    let new_created_form_from_db = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        let insert_response = diesel::insert_into(loggers)
-            .values(&new_logger)
-            .get_result::<FormStructure>(&mut conn);
+        let insert_response = diesel::insert_into(completed_forms)
+            .values(&created_completed_form)
+            .get_result::<CompletedForm>(&mut conn);
 
         insert_response
     })
     .await
     .map_err(|e| BigError::BlockingError { source: e })?
-    .map_err(|e| BigError::DieselInsertError { source: e });
+    .map_err(|e| BigError::DieselInsertError { source: e })?;
 
     // Another approach... or both?!?
-    let all_new_entries: Vec<FormFieldCreation> = new_form
-        .all_inputs
+    let new_completed_form_fields: Vec<CompletedFormFieldCreation> = validated_completed_form
+        .all_fields
         .iter()
         .enumerate()
         .map(|(i, c)| {
-            let le = FormFieldCreation {
+            let le = CompletedFormFieldCreation {
                 item_order: Some(i.try_into().unwrap()),
-                field_name: c.input_name.to_string(),
+
+                field_name: c.field_name.to_string(),
+                field_value: c.field_value.clone(),
                 category_name: c.category_name.to_string(),
-                input_type: c.input_type.to_string(),
-                logger_id: user_id,
+                field_value_type: c.field_value_type.to_string(),
+
+                completed_form_id: new_created_form_from_db.id,
                 user_id,
 
                 created_at: current_stamp,
@@ -72,7 +84,20 @@ pub async fn insert_completed_form(
         })
         .collect();
 
-    // now I could insert all these entries that are created...
+    let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    new_logger
+    use crate::schema::completed_form_fields::dsl::completed_form_fields;
+    let all_inserted_completed_form_fields = web::block(move || {
+        let mut conn = pool_ctx.get().unwrap();
+        let insert_response = diesel::insert_into(completed_form_fields)
+            .values(&new_completed_form_fields)
+            .get_results::<CompletedFormField>(&mut conn);
+
+        insert_response
+    })
+    .await
+    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::DieselInsertError { source: e })?;
+
+    Ok((new_created_form_from_db, all_inserted_completed_form_fields))
 }

@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{actions::get_form_by_id, errors::BigError};
 
-use super::conversion_helpers::async_id_to_uuid;
+use super::conversion_helpers::{id_to_uuid, op_id_to_op_uuid};
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum AllCustomEnums {}
@@ -46,7 +46,7 @@ pub struct FSField {
 #[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct FormStructureInput {
     pub form_template_version: Vec<i32>,
-    pub form_used: Option<ID>,
+    pub form_id: Option<ID>,
     pub enums: Option<Vec<EnumLists>>,
     pub all_fields: Vec<FSField>,
 }
@@ -54,16 +54,17 @@ pub struct FormStructureInput {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FormStructure {
     pub form_template_version: Vec<i32>,
-    pub form_used: Option<Uuid>,
+    pub form_id: Option<Uuid>,
     pub enums: Option<Vec<EnumLists>>,
     pub all_fields: Vec<FSField>,
 }
 
 // impl From<FormStructureInput> for FormStructure {
 //     fn from(value: FormStructureInput) -> Self {
+//         let new_form_used = id| async_id_to_uuid(&id)
 //         FormStructure {
 //             form_template_version: value.form_template_version,
-//             form_used: value.form_used.and_then(|id|),
+//             form_used: value.form_used.and_then(|),
 //             enums: value.enums,
 //             all_fields: value.all_fields,
 //         }
@@ -83,7 +84,7 @@ impl FormStructure {
        - if the user is updating an old form that uses an older form template, we need to take that into account.
     */
     pub fn validate_form(&self) -> Result<FormStructure, BigError> {
-        let template = FormStructure::get_versioned_form_template(self.form_template_version);
+        let template = FormStructure::get_versioned_form_template(&self.form_template_version);
 
         let mut new_fields = vec![];
 
@@ -140,7 +141,7 @@ impl FormStructure {
 
         // Does this make sense?
         Ok(FormStructure {
-            form_used: self.form_used.clone(),
+            form_id: self.form_id.clone(),
             enums: template.enums,
             form_template_version: template.form_template_version,
             all_fields: new_fields,
@@ -148,28 +149,22 @@ impl FormStructure {
     }
 
     pub fn from_input(form_input: FormStructureInput) -> Result<FormStructure, BigError> {
-        let new_form_used = match form_input.form_used {
-            Some(f) => match async_id_to_uuid(&f) {
-                Ok(u) => Some(u),
-                Err(e) => return Err(e),
-            },
-            None => None,
-        };
+        let new_form_used = op_id_to_op_uuid(&form_input.form_id)?;
 
         Ok(FormStructure {
             form_template_version: form_input.form_template_version,
-            form_used: new_form_used,
+            form_id: new_form_used,
             enums: form_input.enums,
             all_fields: form_input.all_fields,
         })
     }
 
     // TODO: Probably get this from JSON/DOCUMENTATION files
-    pub fn get_versioned_form_template(version: Vec<i32>) -> FormStructure {
+    pub fn get_versioned_form_template(version: &Vec<i32>) -> FormStructure {
         // SHOULD DO A SEARCH HERE OF ALL THE FORMS
         FormStructure {
             form_template_version: vec![1, 0, 0],
-            form_used: None,
+            form_id: None,
             enums: None,
             all_fields: vec![
                 (FSField {
@@ -185,7 +180,7 @@ impl FormStructure {
     pub fn get_latest_form_template() -> FormStructure {
         FormStructure {
             form_template_version: vec![1, 0, 0],
-            form_used: None,
+            form_id: None,
             enums: None,
             all_fields: vec![
                 (FSField {
@@ -218,7 +213,7 @@ mod tests {
         // client returns a custom form
         let custom_form = FormStructure {
             form_template_version: vec![1, 0, 0],
-            form_used: None,
+            form_id: None,
             enums: None,
             all_fields: vec![FSField {
                 field_value: None,
@@ -234,7 +229,7 @@ mod tests {
         // they create a completed form with it
         let completed_form = FormStructure {
             form_template_version: vec![1, 0, 0],
-            form_used: None,
+            form_id: None,
             enums: None,
             all_fields: vec![FSField {
                 field_value: Some("100".to_string()),

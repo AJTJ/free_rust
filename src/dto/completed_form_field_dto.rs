@@ -4,7 +4,28 @@ use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use crate::{actions::get_completed_form_by_id, errors::BigError, graphql_schema::DbPool};
+use crate::{
+    actions::get_completed_form_by_id, errors::BigError, graphql_schema::DbPool,
+    schema::completed_form_fields,
+};
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = completed_form_fields)]
+pub struct CompletedFormFieldCreation {
+    pub item_order: Option<i32>,
+
+    pub field_name: String,
+    pub field_value: Option<String>,
+    pub category_name: String,
+    pub field_value_type: String,
+
+    pub completed_form_id: Uuid,
+    pub user_id: Uuid,
+
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+    pub is_active: bool,
+}
 
 #[derive(InputObject)]
 pub struct CompletedFormFieldInput {

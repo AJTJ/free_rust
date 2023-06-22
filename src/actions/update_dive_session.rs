@@ -2,7 +2,7 @@ use crate::dto::dive_session_dto::{DiveSession, DiveSessionUpdate};
 
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::conversion_helpers::async_id_to_uuid;
+use crate::helpers::conversion_helpers::id_to_uuid;
 use crate::{actions::get_dive_session_by_id, diesel::ExpressionMethods};
 
 use actix_web::web;
@@ -20,7 +20,7 @@ pub async fn update_dive_session(
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
     let my_session_mod_data = session_mod_data.clone();
-    let my_session_id = async_id_to_uuid(&my_session_mod_data.id)?;
+    let my_session_id = id_to_uuid(&my_session_mod_data.id)?;
 
     web::block(move || {
         let mut conn = pool_ctx.get().unwrap();

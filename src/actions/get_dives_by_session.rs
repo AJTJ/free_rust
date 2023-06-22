@@ -14,7 +14,7 @@ pub fn get_dives_by_session(
     _dive_query_input: Option<DiveFilter>,
     db_query_ob: Option<QueryParams>,
 ) -> diesel::QueryResult<Vec<Dive>> {
-    use crate::schema::dives::dsl::*;
+    use crate::schema::dives::dsl::{dives, session_id};
 
     dives
         .filter(session_id.eq(&input_session_id))

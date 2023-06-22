@@ -13,11 +13,11 @@ use super::query_dto::QueryParams;
 #[derive(InputObject)]
 pub struct FormInput {
     pub form_name: String,
-    /// If this is an "edit", then include the previous form, or this field if the previous form already has it.
+    // If this is an "edit", then include the previous form, or this field if the previous form already has it.
     pub original_form_id: Option<ID>,
-    /// The previous form
+    // The previous form
     pub previous_form_id: Option<ID>,
-    pub form_template: FormStructureInput,
+    pub form_structure_input: FormStructureInput,
 }
 
 #[derive(Insertable, Debug)]
@@ -25,6 +25,7 @@ pub struct FormInput {
 pub struct FormCreation {
     pub form_name: String,
     pub template_version: Vec<Option<i32>>,
+
     pub user_id: Uuid,
     pub original_form_id: Option<Uuid>,
     pub previous_form_id: Option<Uuid>,

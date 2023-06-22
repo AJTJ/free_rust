@@ -15,7 +15,7 @@ use super::{completed_form_field_dto::CompletedFormField, query_dto::QueryParams
 #[derive(InputObject)]
 pub struct CompletedFormInput {
     pub completed_form_name: String,
-    pub completed_form: FormStructureInput,
+    pub form_structure: FormStructureInput,
 
     pub form_id: ID,
     pub original_form_id: Option<ID>,
@@ -36,7 +36,6 @@ pub struct CompletedFormCreation {
     pub user_id: Uuid,
 
     // partial default data
-    pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
