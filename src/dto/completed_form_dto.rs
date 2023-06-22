@@ -1,6 +1,9 @@
 use crate::{
-    actions::get_log_entries_by_log, errors::BigError, graphql_schema::DbPool,
-    helpers::form_helper::FormStructure, schema::completed_forms,
+    actions::get_log_entries_by_log,
+    errors::BigError,
+    graphql_schema::DbPool,
+    helpers::form_helper::{FormStructure, FormStructureInput},
+    schema::completed_forms,
 };
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
@@ -12,7 +15,7 @@ use super::{completed_form_field_dto::CompletedFormField, query_dto::QueryParams
 #[derive(InputObject)]
 pub struct CompletedFormInput {
     pub completed_form_name: String,
-    pub completed_form: FormStructure,
+    pub completed_form: FormStructureInput,
 
     pub form_id: ID,
     pub original_form_id: Option<ID>,

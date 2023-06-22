@@ -2,7 +2,7 @@ use crate::dto::dive_session_dto::{DiveSession, DiveSessionUpdate};
 
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::uuid_helpers::async_id_to_uuid;
+use crate::helpers::conversion_helpers::async_id_to_uuid;
 use crate::{actions::get_dive_session_by_id, diesel::ExpressionMethods};
 
 use actix_web::web;

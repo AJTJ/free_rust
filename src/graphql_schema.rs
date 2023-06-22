@@ -1,6 +1,6 @@
 use crate::actions::add_dive;
 use crate::actions::add_dive_session;
-use crate::actions::add_logger;
+use crate::actions::add_form;
 use crate::actions::get_completed_forms_by_user_id;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
@@ -279,7 +279,7 @@ impl Mutation {
         logger_data: FormInput,
         form_input: FormStructure,
     ) -> Result<FormStructure, BigError> {
-        add_logger(ctx, logger_data, form_input).await
+        add_form(ctx, logger_data, form_input).await
     }
     // update_logger() {}
     // delete_logger() {}

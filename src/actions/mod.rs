@@ -44,7 +44,7 @@ pub use get_user_with_id::get_user_with_id;
 pub use insert_completed_form::insert_completed_form;
 pub use insert_dive::add_dive;
 pub use insert_dive_session::add_dive_session;
-pub use insert_form::add_logger;
+pub use insert_form::add_form;
 pub use insert_into_user_session::add_to_user_session;
 pub use insert_user::insert_user;
 pub use login::login;

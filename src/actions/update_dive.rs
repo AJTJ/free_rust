@@ -2,7 +2,7 @@ use crate::diesel::ExpressionMethods;
 use crate::dto::dive_dto::{Dive, DiveUpdate};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::uuid_helpers::async_id_to_uuid;
+use crate::helpers::conversion_helpers::async_id_to_uuid;
 
 use actix_web::web;
 use async_graphql::Context;

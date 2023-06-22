@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use async_graphql::{Enum, SimpleObject, ID};
+use async_graphql::{Enum, InputObject, SimpleObject, ID};
 use chrono::{Duration, NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -8,6 +8,8 @@ use strum::{Display, EnumString};
 use uuid::Uuid;
 
 use crate::{actions::get_form_by_id, errors::BigError};
+
+use super::conversion_helpers::async_id_to_uuid;
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum AllCustomEnums {}
@@ -32,7 +34,7 @@ pub enum CategoryNames {
     // there will be more
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(InputObject, Serialize, Deserialize, Clone, Debug)]
 pub struct FSField {
     pub field_name: FieldNames,
     pub field_value: Option<String>,
@@ -40,9 +42,10 @@ pub struct FSField {
     pub field_value_type: FieldValueTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+// This is principally an input obj, because it has an ID
+#[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct FormStructureInput {
-    pub form_template_version: Vec<Option<i32>>,
+    pub form_template_version: Vec<i32>,
     pub form_used: Option<ID>,
     pub enums: Option<Vec<EnumLists>>,
     pub all_fields: Vec<FSField>,
@@ -50,13 +53,24 @@ pub struct FormStructureInput {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FormStructure {
-    pub form_template_version: Vec<Option<i32>>,
+    pub form_template_version: Vec<i32>,
     pub form_used: Option<Uuid>,
     pub enums: Option<Vec<EnumLists>>,
     pub all_fields: Vec<FSField>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+// impl From<FormStructureInput> for FormStructure {
+//     fn from(value: FormStructureInput) -> Self {
+//         FormStructure {
+//             form_template_version: value.form_template_version,
+//             form_used: value.form_used.and_then(|id|),
+//             enums: value.enums,
+//             all_fields: value.all_fields,
+//         }
+//     }
+// }
+
+#[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct EnumLists {
     field_name: FieldNames,
     enums: Vec<String>,
@@ -133,8 +147,26 @@ impl FormStructure {
         })
     }
 
+    pub fn from_input(form_input: FormStructureInput) -> Result<FormStructure, BigError> {
+        let new_form_used = match form_input.form_used {
+            Some(f) => match async_id_to_uuid(&f) {
+                Ok(u) => Some(u),
+                Err(e) => return Err(e),
+            },
+            None => None,
+        };
+
+        Ok(FormStructure {
+            form_template_version: form_input.form_template_version,
+            form_used: new_form_used,
+            enums: form_input.enums,
+            all_fields: form_input.all_fields,
+        })
+    }
+
     // TODO: Probably get this from JSON/DOCUMENTATION files
-    pub fn get_versioned_form_template(version: f64) -> FormStructure {
+    pub fn get_versioned_form_template(version: Vec<i32>) -> FormStructure {
+        // SHOULD DO A SEARCH HERE OF ALL THE FORMS
         FormStructure {
             form_template_version: vec![1, 0, 0],
             form_used: None,
@@ -152,7 +184,7 @@ impl FormStructure {
     // TODO: Probably get this from JSON/DOCUMENTATION files
     pub fn get_latest_form_template() -> FormStructure {
         FormStructure {
-            form_template_version: 1.0,
+            form_template_version: vec![1, 0, 0],
             form_used: None,
             enums: None,
             all_fields: vec![
@@ -185,7 +217,7 @@ mod tests {
 
         // client returns a custom form
         let custom_form = FormStructure {
-            form_template_version: 1.0,
+            form_template_version: vec![1, 0, 0],
             form_used: None,
             enums: None,
             all_fields: vec![FSField {
@@ -201,7 +233,7 @@ mod tests {
 
         // they create a completed form with it
         let completed_form = FormStructure {
-            form_template_version: 1.0,
+            form_template_version: vec![1, 0, 0],
             form_used: None,
             enums: None,
             all_fields: vec![FSField {

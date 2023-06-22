@@ -1,9 +1,9 @@
 use crate::actions::get_form_fields_by_form;
 use crate::errors::BigError;
-use crate::helpers::form_helper::FormStructure;
+use crate::helpers::form_helper::{FormStructure, FormStructureInput};
 use crate::{graphql_schema::DbPool, schema::forms};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -14,10 +14,10 @@ use super::query_dto::QueryParams;
 pub struct FormInput {
     pub form_name: String,
     /// If this is an "edit", then include the previous form, or this field if the previous form already has it.
-    pub original_form_id: Option<Uuid>,
+    pub original_form_id: Option<ID>,
     /// The previous form
-    pub previous_form_id: Option<Uuid>,
-    pub form_template: FormStructure,
+    pub previous_form_id: Option<ID>,
+    pub form_template: FormStructureInput,
 }
 
 #[derive(Insertable, Debug)]
