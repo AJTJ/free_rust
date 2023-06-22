@@ -14,9 +14,11 @@ pub struct CompletedFormInput {
     pub completed_form_name: String,
     pub completed_form: FormStructure,
 
+    pub form_id: ID,
+    pub original_form_id: Option<ID>,
+    pub previous_completed_form_id: Option<ID>,
     pub session_id: ID,
     pub user_id: ID,
-    pub form_used: ID,
 }
 
 #[derive(Insertable, Debug)]
@@ -24,7 +26,8 @@ pub struct CompletedFormInput {
 pub struct CompletedFormCreation {
     pub completed_form_name: String,
 
-    pub original_form_id: Uuid,
+    pub form_id: Uuid,
+    pub original_form_id: Option<Uuid>,
     pub previous_completed_form_id: Option<Uuid>,
     pub session_id: Uuid,
     pub user_id: Uuid,
@@ -44,7 +47,9 @@ pub struct CompletedForm {
     pub template_version: Vec<Option<i32>>,
     // relationships
     #[graphql(skip)]
-    pub original_form_id: Uuid,
+    pub form_id: Uuid,
+    #[graphql(skip)]
+    pub original_form_id: Option<Uuid>,
     #[graphql(skip)]
     pub previous_completed_form_id: Option<Uuid>,
     #[graphql(skip)]

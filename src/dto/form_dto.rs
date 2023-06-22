@@ -12,7 +12,11 @@ use super::query_dto::QueryParams;
 
 #[derive(InputObject)]
 pub struct FormInput {
-    pub logger_name: String,
+    pub form_name: String,
+    /// If this is an "edit", then include the previous form, or this field if the previous form already has it.
+    pub original_form_id: Option<Uuid>,
+    /// The previous form
+    pub previous_form_id: Option<Uuid>,
     pub form_template: FormStructure,
 }
 
@@ -20,13 +24,12 @@ pub struct FormInput {
 #[diesel(table_name = forms)]
 pub struct FormCreation {
     pub form_name: String,
-
+    pub template_version: Vec<Option<i32>>,
     pub user_id: Uuid,
-    pub original_form_id: Uuid,
+    pub original_form_id: Option<Uuid>,
     pub previous_form_id: Option<Uuid>,
 
     // partial default data
-    pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,
@@ -42,7 +45,7 @@ pub struct Form {
     #[graphql(skip)]
     pub user_id: Uuid,
     #[graphql(skip)]
-    pub original_form_id: Uuid,
+    pub original_form_id: Option<Uuid>,
     #[graphql(skip)]
     pub previous_form_id: Option<Uuid>,
     // default data

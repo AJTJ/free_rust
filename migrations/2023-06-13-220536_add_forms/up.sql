@@ -4,7 +4,7 @@ CREATE TABLE forms (
   template_version int [] NOT NULL,
   -- relationships
   user_id uuid NOT NULL REFERENCES users (id),
-  original_form_id uuid NOT NULL REFERENCES forms(id),
+  original_form_id uuid REFERENCES forms(id),
   previous_form_id uuid REFERENCES forms(id),
   -- default data
   id uuid DEFAULT uuid_generate_v4(),

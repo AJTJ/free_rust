@@ -22,7 +22,8 @@ diesel::table! {
     completed_forms (id) {
         completed_form_name -> Nullable<Text>,
         template_version -> Array<Nullable<Int4>>,
-        original_form_id -> Uuid,
+        form_id -> Uuid,
+        original_form_id -> Nullable<Uuid>,
         previous_completed_form_id -> Nullable<Uuid>,
         session_id -> Uuid,
         user_id -> Uuid,
@@ -91,7 +92,7 @@ diesel::table! {
         form_name -> Text,
         template_version -> Array<Nullable<Int4>>,
         user_id -> Uuid,
-        original_form_id -> Uuid,
+        original_form_id -> Nullable<Uuid>,
         previous_form_id -> Nullable<Uuid>,
         id -> Uuid,
         created_at -> Timestamp,
@@ -121,7 +122,6 @@ diesel::table! {
 diesel::joinable!(completed_form_fields -> completed_forms (completed_form_id));
 diesel::joinable!(completed_form_fields -> users (user_id));
 diesel::joinable!(completed_forms -> dive_sessions (session_id));
-diesel::joinable!(completed_forms -> forms (original_form_id));
 diesel::joinable!(completed_forms -> users (user_id));
 diesel::joinable!(dive_sessions -> users (user_id));
 diesel::joinable!(dives -> dive_sessions (session_id));

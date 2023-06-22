@@ -1,6 +1,6 @@
 use crate::auth_data::UniversalIdType;
 use crate::diesel::ExpressionMethods;
-use crate::dto::user_dto::{User, UserCreation, UserInput, UserOutput};
+use crate::dto::user_dto::{User, UserCreation, UserInput};
 use argon2::{self, Config};
 
 use chrono::Utc;

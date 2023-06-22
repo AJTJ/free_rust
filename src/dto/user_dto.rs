@@ -24,8 +24,6 @@ pub struct UserUpdate {
     pub username: Option<String>,
     pub email: Option<String>,
     pub last_login: Option<NaiveDateTime>,
-
-    pub id: ID,
     pub is_active: Option<bool>,
 }
 
@@ -76,9 +74,6 @@ impl User {
         // ) -> FieldResult<Vec<DiveSession>> {
     ) -> Result<Vec<DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-        // let user_id: Uuid =
-        //     Uuid::parse_str(&self.id).map_err(|e| BigError::UuidParsingerror { source: e })?;
 
         let user_id = self.id;
         let dive_sessions = web::block(move || {

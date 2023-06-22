@@ -3,7 +3,8 @@ CREATE TABLE completed_forms (
   completed_form_name TEXT,
   template_version int [] NOT NULL,
   -- relationships
-  original_form_id uuid NOT NULL REFERENCES forms (id),
+  form_id uuid NOT NULL REFERENCES forms (id),
+  original_form_id uuid REFERENCES forms (id),
   previous_completed_form_id uuid REFERENCES completed_forms (id),
   session_id uuid NOT NULL REFERENCES dive_sessions (id),
   user_id uuid NOT NULL REFERENCES users (id),

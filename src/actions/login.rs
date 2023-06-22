@@ -1,7 +1,7 @@
 use crate::actions::get_user_with_email;
 use crate::actions::insert_into_user_session::add_to_user_session;
 use crate::auth_data::{SessionData, UniversalIdType};
-use crate::dto::user_dto::{UserOutput, UserUpdate};
+use crate::dto::user_dto::{User, UserUpdate};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 use crate::helpers::encoding_helpers::get_encoded_id;
@@ -21,7 +21,7 @@ pub async fn login(
     ctx: &Context<'_>,
     inc_email: String,
     password: String,
-) -> Result<UserOutput, BigError> {
+) -> Result<User, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
     let maybe_user = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
@@ -66,9 +66,7 @@ pub async fn login(
 
                     let updated_user = update_user(ctx, None, Some(user.id), updated_user).await?;
 
-                    let user_out = UserOutput::from(updated_user);
-
-                    Ok(user_out)
+                    Ok(updated_user)
                 }
                 false => Err(BigError::WrongPassword),
             }

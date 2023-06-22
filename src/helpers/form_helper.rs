@@ -1,10 +1,11 @@
 use std::str::FromStr;
 
-use async_graphql::{Enum, InputObject, ID};
+use async_graphql::{Enum, SimpleObject, ID};
 use chrono::{Duration, NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use strum::{Display, EnumString};
+use uuid::Uuid;
 
 use crate::{actions::get_form_by_id, errors::BigError};
 
@@ -31,7 +32,7 @@ pub enum CategoryNames {
     // there will be more
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, InputObject)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FSField {
     pub field_name: FieldNames,
     pub field_value: Option<String>,
@@ -39,15 +40,23 @@ pub struct FSField {
     pub field_value_type: FieldValueTypes,
 }
 
-#[derive(InputObject, Serialize, Deserialize)]
-pub struct FormStructure {
-    pub form_template_version: f64,
+#[derive(Serialize, Deserialize, Clone)]
+pub struct FormStructureInput {
+    pub form_template_version: Vec<Option<i32>>,
     pub form_used: Option<ID>,
     pub enums: Option<Vec<EnumLists>>,
     pub all_fields: Vec<FSField>,
 }
 
-#[derive(InputObject, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
+pub struct FormStructure {
+    pub form_template_version: Vec<Option<i32>>,
+    pub form_used: Option<Uuid>,
+    pub enums: Option<Vec<EnumLists>>,
+    pub all_fields: Vec<FSField>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct EnumLists {
     field_name: FieldNames,
     enums: Vec<String>,
@@ -64,7 +73,7 @@ impl FormStructure {
 
         let mut new_fields = vec![];
 
-        for field in self.all_fields {
+        for field in &self.all_fields {
             // check that there is a related template field
             let template_field = template
                 .all_fields
@@ -78,7 +87,7 @@ impl FormStructure {
                     return Err(BigError::FormFieldNotMatching);
                 }
 
-                if let Some(val) = field.field_value {
+                if let Some(val) = &field.field_value {
                     let val_ok = match field.field_value_type {
                         FieldValueTypes::Number => val
                             .parse::<i32>()
@@ -108,7 +117,7 @@ impl FormStructure {
                 }
 
                 // push the input form to the new fields, thus keeping the value if it is completed
-                new_fields.push(field)
+                new_fields.push(field.clone())
             } else {
                 // no related template field
                 return Err(BigError::FormFieldNotMatching);
@@ -117,7 +126,7 @@ impl FormStructure {
 
         // Does this make sense?
         Ok(FormStructure {
-            form_used: self.form_used,
+            form_used: self.form_used.clone(),
             enums: template.enums,
             form_template_version: template.form_template_version,
             all_fields: new_fields,
@@ -127,7 +136,7 @@ impl FormStructure {
     // TODO: Probably get this from JSON/DOCUMENTATION files
     pub fn get_versioned_form_template(version: f64) -> FormStructure {
         FormStructure {
-            form_template_version: 1.0,
+            form_template_version: vec![1, 0, 0],
             form_used: None,
             enums: None,
             all_fields: vec![
