@@ -1,6 +1,6 @@
 use crate::{actions::get_dives_by_session, graphql_schema::DbPool, schema::dive_sessions};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject, ID};
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -23,7 +23,7 @@ pub struct DiveSessionUpdate {
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
 
-    pub id: ID,
+    pub id: Uuid,
     pub is_active: Option<bool>,
 }
 

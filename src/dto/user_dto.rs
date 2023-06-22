@@ -2,7 +2,7 @@ use crate::{
     actions::get_dive_sessions_by_user, errors::BigError, graphql_schema::DbPool, schema::users,
 };
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject, ID};
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -43,7 +43,7 @@ pub struct UserCreation {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
-// #[graphql(complex)]
+#[graphql(complex)]
 pub struct User {
     pub username: String,
     pub hashed_password: String,
@@ -52,8 +52,8 @@ pub struct User {
     pub last_login: NaiveDateTime,
 
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
+
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub is_active: bool,

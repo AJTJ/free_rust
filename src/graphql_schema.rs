@@ -17,6 +17,8 @@ use crate::actions::update_dive_session;
 use crate::dto::auth_dto::Login;
 use crate::dto::completed_form_dto::CompletedForm;
 use crate::dto::completed_form_dto::CompletedFormInput;
+use crate::dto::completed_form_dto::CompletedFormOutput;
+use crate::dto::completed_form_field_dto::CompletedFormField;
 use crate::dto::dive_dto::Dive;
 use crate::dto::dive_dto::DiveFilter;
 use crate::dto::dive_dto::DiveInput;
@@ -25,13 +27,14 @@ use crate::dto::dive_session_dto::DiveSession;
 use crate::dto::dive_session_dto::DiveSessionFilter;
 use crate::dto::dive_session_dto::DiveSessionInput;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
+use crate::dto::form_dto::Form;
 use crate::dto::form_dto::FormInput;
+use crate::dto::form_dto::FormOutput;
 use crate::dto::form_field_dto::FormField;
 use crate::dto::query_dto::QueryParams;
 use crate::dto::user_dto::{User, UserInput};
 use crate::errors::BigError;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
-use crate::helpers::form_helper::FormStructure;
 use actix_web::web;
 use async_graphql::{Context, EmptySubscription, Object, Schema};
 use diesel::pg::PgConnection;
@@ -56,12 +59,7 @@ impl Query {
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             use crate::schema::users::dsl::*;
-            users.load::<User>(&mut conn).map(|user_vec| {
-                user_vec
-                    .into_iter()
-                    .map(UserOutput::from)
-                    .collect::<Vec<UserOutput>>()
-            })
+            users.load::<User>(&mut conn)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -69,11 +67,11 @@ impl Query {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn user(&self, ctx: &Context<'_>, email: String) -> Result<UserOutput, BigError> {
+    async fn user(&self, ctx: &Context<'_>, email: String) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_user_with_email(&mut conn, email).map(UserOutput::from)
+            get_user_with_email(&mut conn, email)
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
@@ -86,21 +84,20 @@ impl Query {
         ctx: &Context<'_>,
         dive_session_input: Option<DiveSessionFilter>,
         db_query_dto: Option<QueryParams>,
-    ) -> Result<Vec<DiveSessionOutput>, BigError> {
+    ) -> Result<Vec<DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
-                .map(|dv| dv.into_iter().map(DiveSessionOutput::from).collect())
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
-    // .map(|dv| dv.into_iter().map(DiveSessionOutput::from).collect())
+    // .map(|dv| dv.into_iter().map(DiveSession::from).collect())
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn dives(
@@ -108,24 +105,24 @@ impl Query {
         ctx: &Context<'_>,
         dive_input: Option<DiveFilter>,
         db_query_dto: Option<QueryParams>,
-    ) -> Result<Vec<DiveOutput>, BigError> {
+    ) -> Result<Vec<Dive>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dives_by_user(&mut conn, user_id, dive_input, db_query_dto)
-                .map(|dv| dv.into_iter().map(DiveOutput::from).collect())
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
-    // LOGGERS
+    // FORMS
 
+    // TODO: Should this return the database obejct?
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn loggers(&self, ctx: &Context<'_>) -> Result<Vec<FormStructure>, BigError> {
+    async fn forms(&self, ctx: &Context<'_>) -> Result<Vec<Form>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
@@ -138,7 +135,7 @@ impl Query {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn logger_entries(
+    async fn form_fields(
         &self,
         ctx: &Context<'_>,
         logger_id: Uuid,
@@ -154,10 +151,10 @@ impl Query {
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
-    // LOGS
+    // COMPLETED FORMS
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn logs(&self, ctx: &Context<'_>) -> Result<Vec<CompletedForm>, BigError> {
+    async fn completed_forms(&self, ctx: &Context<'_>) -> Result<Vec<CompletedForm>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
@@ -192,6 +189,7 @@ impl Mutation {
         .map_err(|e| BigError::DieselInsertError { source: e })
     }
 
+    // TESTING
     #[graphql(guard = "DevelopmentGuard::new()")]
     async fn delete_all_users(&self, ctx: &Context<'_>) -> Result<usize, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -207,7 +205,7 @@ impl Mutation {
 
     // AUTH
     // Must be UNGUARDED?
-    async fn login(&self, ctx: &Context<'_>, login_data: Login) -> Result<UserOutput, BigError> {
+    async fn login(&self, ctx: &Context<'_>, login_data: Login) -> Result<User, BigError> {
         login(ctx, login_data.email, login_data.password).await
     }
 
@@ -273,24 +271,23 @@ impl Mutation {
     // TODOS
     #[graphql(guard = "LoggedInGuard::new()")]
 
-    async fn add_logger(
+    async fn add_form(
         &self,
         ctx: &Context<'_>,
-        logger_data: FormInput,
-        form_input: FormStructure,
-    ) -> Result<FormStructure, BigError> {
-        add_form(ctx, logger_data, form_input).await
+        form_input: FormInput,
+    ) -> Result<FormOutput, BigError> {
+        add_form(ctx, form_input).await
     }
     // update_logger() {}
     // delete_logger() {}
 
     // LOG STUFF
-    async fn add_log(
+    async fn add_completed_form(
         &self,
         ctx: &Context<'_>,
-        log: CompletedFormInput,
-    ) -> Result<FormStructure, BigError> {
-        insert_completed_form(ctx, log).await
+        completed_form_input: CompletedFormInput,
+    ) -> Result<CompletedFormOutput, BigError> {
+        insert_completed_form(ctx, completed_form_input).await
     }
 
     // update_log() {}

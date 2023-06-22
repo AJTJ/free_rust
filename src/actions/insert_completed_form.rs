@@ -1,43 +1,33 @@
-use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
-use crate::diesel::ExpressionMethods;
-use crate::dto::completed_form_dto::{CompletedForm, CompletedFormCreation, CompletedFormInput};
+use crate::actions::get_user_id_from_token_and_session;
+use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
+use crate::dto::completed_form_dto::{
+    CompletedForm, CompletedFormCreation, CompletedFormInput, CompletedFormOutput,
+};
 use crate::dto::completed_form_field_dto::{CompletedFormField, CompletedFormFieldCreation};
-use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
-use crate::dto::form_dto::{Form, FormCreation, FormInput};
-use crate::dto::form_field_dto::FormFieldCreation;
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::conversion_helpers::{id_to_uuid, op_id_to_op_uuid};
-use crate::helpers::form_helper::FormStructure;
-use crate::helpers::token_helpers::get_cookie_from_token;
+
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
-use serde_json::json;
 
 pub async fn insert_completed_form(
     ctx: &Context<'_>,
     completed_form_input: CompletedFormInput,
-) -> Result<(CompletedForm, Vec<CompletedFormField>), BigError> {
-    let converted_input_form = FormStructure::from_input(completed_form_input.form_structure)?;
-    let validated_completed_form = FormStructure::validate_form(&converted_input_form)?;
+) -> Result<CompletedFormOutput, BigError> {
+    let validated_completed_form =
+        FormStructure::validate_form(&completed_form_input.form_structure)?;
 
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-    let new_form_id = id_to_uuid(&completed_form_input.form_id)?;
-    let new_session_id = id_to_uuid(&completed_form_input.session_id)?;
-    let new_original_form_id = op_id_to_op_uuid(&completed_form_input.original_form_id)?;
-    let new_previous_completed_form_id =
-        op_id_to_op_uuid(&completed_form_input.previous_completed_form_id)?;
-
     let created_completed_form = CompletedFormCreation {
         completed_form_name: completed_form_input.completed_form_name,
-        original_form_id: new_original_form_id,
-        previous_completed_form_id: new_previous_completed_form_id,
-        form_id: new_form_id,
-        session_id: new_session_id,
+        original_form_id: completed_form_input.original_form_id,
+        previous_completed_form_id: completed_form_input.previous_completed_form_id,
+        form_id: completed_form_input.form_id,
+        session_id: completed_form_input.session_id,
         user_id,
         created_at: current_stamp,
         updated_at: current_stamp,
@@ -99,5 +89,9 @@ pub async fn insert_completed_form(
     .map_err(|e| BigError::BlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
-    Ok((new_created_form_from_db, all_inserted_completed_form_fields))
+    Ok(CompletedFormOutput {
+        form: new_created_form_from_db,
+        fields: all_inserted_completed_form_fields,
+        form_structure: FormStructureOutput::from(validated_completed_form),
+    })
 }

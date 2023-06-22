@@ -1,5 +1,5 @@
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::{NaiveDateTime, NaiveTime};
 use uuid::Uuid;
 
@@ -27,7 +27,7 @@ pub struct DiveUpdate {
     pub dive_time: Option<i64>,
     pub dive_name: Option<String>,
 
-    pub id: ID,
+    pub id: Uuid,
     pub is_active: Option<bool>,
 }
 
@@ -101,10 +101,10 @@ pub struct DiveFilter {
     pub distance: Option<f64>,
     pub dive_time: Option<NaiveTime>,
     pub dive_name: Option<String>,
-    pub dive_session: Option<ID>,
-    pub user_id: Option<ID>,
+    pub dive_session: Option<Uuid>,
+    pub user_id: Option<Uuid>,
 
-    pub id: Option<ID>,
+    pub id: Option<Uuid>,
     pub is_active: Option<bool>,
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,

@@ -38,6 +38,8 @@ https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-
 ### gql things
 - for partially fallible user-defined-resolvers
   - https://github.com/async-graphql/async-graphql/issues/531
+- Notes on simple object macros
+  - https://docs.rs/async-graphql/latest/async_graphql/derive.SimpleObject.html
 
 ## The Proposed Stack
 - actix-web

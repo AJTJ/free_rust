@@ -1,6 +1,6 @@
 use super::completed_form_dto::CompletedForm;
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -37,8 +37,8 @@ pub struct CompletedFormFieldInput {
     pub field_value_type: String,
 
     // relationships
-    pub completed_form_id: ID,
-    pub user_id: ID,
+    pub completed_form_id: Uuid,
+    pub user_id: Uuid,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -61,7 +61,6 @@ pub struct CompletedFormField {
     #[graphql(skip)]
     pub user_id: Uuid,
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,

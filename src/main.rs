@@ -4,6 +4,7 @@
 extern crate diesel;
 pub mod actions;
 pub mod auth_data;
+pub mod dive_forms;
 pub mod dto;
 pub mod env_data;
 pub mod errors;

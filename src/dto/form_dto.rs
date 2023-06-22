@@ -1,9 +1,9 @@
 use crate::actions::get_form_fields_by_form;
+use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
 use crate::errors::BigError;
-use crate::helpers::form_helper::{FormStructure, FormStructureInput};
 use crate::{graphql_schema::DbPool, schema::forms};
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -14,10 +14,10 @@ use super::query_dto::QueryParams;
 pub struct FormInput {
     pub form_name: String,
     // If this is an "edit", then include the previous form, or this field if the previous form already has it.
-    pub original_form_id: Option<ID>,
+    pub original_form_id: Option<Uuid>,
     // The previous form
-    pub previous_form_id: Option<ID>,
-    pub form_structure_input: FormStructureInput,
+    pub previous_form_id: Option<Uuid>,
+    pub form_structure: FormStructure,
 }
 
 #[derive(Insertable, Debug)]
@@ -49,8 +49,8 @@ pub struct Form {
     pub original_form_id: Option<Uuid>,
     #[graphql(skip)]
     pub previous_form_id: Option<Uuid>,
+
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -83,4 +83,11 @@ impl Form {
         .unwrap()
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
+}
+
+#[derive(SimpleObject)]
+pub struct FormOutput {
+    pub form: Form,
+    pub fields: Vec<FormField>,
+    pub form_structure: FormStructureOutput,
 }

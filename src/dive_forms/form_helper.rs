@@ -1,15 +1,11 @@
 use std::str::FromStr;
 
-use async_graphql::{Enum, InputObject, SimpleObject, ID};
-use chrono::{Duration, NaiveDate, NaiveDateTime};
+use crate::errors::BigError;
+use async_graphql::{Enum, InputObject, SimpleObject};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
 use strum::{Display, EnumString};
 use uuid::Uuid;
-
-use crate::{actions::get_form_by_id, errors::BigError};
-
-use super::conversion_helpers::{id_to_uuid, op_id_to_op_uuid};
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum AllCustomEnums {}
@@ -42,16 +38,26 @@ pub struct FSField {
     pub field_value_type: FieldValueTypes,
 }
 
-// This is principally an input obj, because it has an ID
-#[derive(InputObject, Serialize, Deserialize, Clone)]
-pub struct FormStructureInput {
-    pub form_template_version: Vec<i32>,
-    pub form_id: Option<ID>,
-    pub enums: Option<Vec<EnumLists>>,
-    pub all_fields: Vec<FSField>,
+#[derive(Serialize, Deserialize, Clone, Debug, SimpleObject)]
+pub struct FSFieldOutput {
+    pub field_name: FieldNames,
+    pub field_value: Option<String>,
+    pub category_name: CategoryNames,
+    pub field_value_type: FieldValueTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+impl From<FSField> for FSFieldOutput {
+    fn from(value: FSField) -> Self {
+        FSFieldOutput {
+            field_name: value.field_name,
+            field_value: value.field_value,
+            category_name: value.category_name,
+            field_value_type: value.field_value_type,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, InputObject)]
 pub struct FormStructure {
     pub form_template_version: Vec<i32>,
     pub form_id: Option<Uuid>,
@@ -59,22 +65,59 @@ pub struct FormStructure {
     pub all_fields: Vec<FSField>,
 }
 
-// impl From<FormStructureInput> for FormStructure {
-//     fn from(value: FormStructureInput) -> Self {
-//         let new_form_used = id| async_id_to_uuid(&id)
-//         FormStructure {
-//             form_template_version: value.form_template_version,
-//             form_used: value.form_used.and_then(|),
-//             enums: value.enums,
-//             all_fields: value.all_fields,
-//         }
-//     }
-// }
+#[derive(Serialize, Deserialize, Clone, SimpleObject)]
+pub struct FormStructureOutput {
+    pub form_template_version: Vec<i32>,
+    pub form_id: Option<Uuid>,
+    pub enums: Option<Vec<EnumListsOutput>>,
+    pub all_fields: Vec<FSFieldOutput>,
+}
+
+impl From<FormStructure> for FormStructureOutput {
+    fn from(value: FormStructure) -> Self {
+        let my_enums = match value.enums {
+            Some(e) => Some(
+                e.into_iter()
+                    .map(|e| EnumListsOutput::from(e))
+                    .collect::<Vec<EnumListsOutput>>(),
+            ),
+            None => None,
+        };
+
+        let my_fields = value
+            .all_fields
+            .into_iter()
+            .map(|f| FSFieldOutput::from(f))
+            .collect();
+
+        FormStructureOutput {
+            form_template_version: value.form_template_version,
+            form_id: value.form_id,
+            enums: my_enums,
+            all_fields: my_fields,
+        }
+    }
+}
 
 #[derive(InputObject, Serialize, Deserialize, Clone)]
 pub struct EnumLists {
     field_name: FieldNames,
     enums: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, SimpleObject)]
+pub struct EnumListsOutput {
+    field_name: FieldNames,
+    enums: Vec<String>,
+}
+
+impl From<EnumLists> for EnumListsOutput {
+    fn from(value: EnumLists) -> Self {
+        EnumListsOutput {
+            field_name: value.field_name,
+            enums: value.enums,
+        }
+    }
 }
 
 impl FormStructure {
@@ -110,6 +153,7 @@ impl FormStructure {
                             .is_ok(),
                         FieldValueTypes::CustomEnums => template
                             .enums
+                            .as_ref()
                             .and_then(|e| {
                                 e.iter()
                                     .find(|e| e.field_name == field.field_name)
@@ -145,17 +189,6 @@ impl FormStructure {
             enums: template.enums,
             form_template_version: template.form_template_version,
             all_fields: new_fields,
-        })
-    }
-
-    pub fn from_input(form_input: FormStructureInput) -> Result<FormStructure, BigError> {
-        let new_form_used = op_id_to_op_uuid(&form_input.form_id)?;
-
-        Ok(FormStructure {
-            form_template_version: form_input.form_template_version,
-            form_id: new_form_used,
-            enums: form_input.enums,
-            all_fields: form_input.all_fields,
         })
     }
 
@@ -204,7 +237,7 @@ WHAT IS HAPPENING
 mod tests {
     #[test]
     fn form_lifecycle() {
-        use crate::helpers::form_helper::*;
+        use crate::dive_forms::form_helper::*;
 
         // user gets the latest form template fields and their values etc...
         // crucially this is everything they need to save and use forms

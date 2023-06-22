@@ -1,12 +1,12 @@
 use crate::{
     actions::get_log_entries_by_log,
+    dive_forms::form_helper::{FormStructure, FormStructureOutput},
     errors::BigError,
     graphql_schema::DbPool,
-    helpers::form_helper::{FormStructure, FormStructureInput},
     schema::completed_forms,
 };
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject, ID};
+use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
@@ -15,13 +15,13 @@ use super::{completed_form_field_dto::CompletedFormField, query_dto::QueryParams
 #[derive(InputObject)]
 pub struct CompletedFormInput {
     pub completed_form_name: String,
-    pub form_structure: FormStructureInput,
+    pub form_structure: FormStructure,
 
-    pub form_id: ID,
-    pub original_form_id: Option<ID>,
-    pub previous_completed_form_id: Option<ID>,
-    pub session_id: ID,
-    pub user_id: ID,
+    pub form_id: Uuid,
+    pub original_form_id: Option<Uuid>,
+    pub previous_completed_form_id: Option<Uuid>,
+    pub session_id: Uuid,
+    pub user_id: Uuid,
 }
 
 #[derive(Insertable, Debug)]
@@ -60,7 +60,6 @@ pub struct CompletedForm {
     pub user_id: Uuid,
 
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -91,4 +90,11 @@ impl CompletedForm {
         .map_err(|e| BigError::BlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
+}
+
+#[derive(SimpleObject)]
+pub struct CompletedFormOutput {
+    pub form: CompletedForm,
+    pub fields: Vec<CompletedFormField>,
+    pub form_structure: FormStructureOutput,
 }

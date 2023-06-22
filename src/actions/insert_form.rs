@@ -1,35 +1,26 @@
-use crate::actions::{get_user_id_from_token_and_session, get_user_session_data};
-use crate::diesel::ExpressionMethods;
-use crate::dto::dive_session_dto::{DiveSession, DiveSessionCreation, DiveSessionInput};
-use crate::dto::form_dto::{Form, FormCreation, FormInput};
+use crate::actions::get_user_id_from_token_and_session;
+use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
+use crate::dto::form_dto::{Form, FormCreation, FormInput, FormOutput};
 use crate::dto::form_field_dto::{FormField, FormFieldCreation};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
-use crate::helpers::conversion_helpers::{local_version_to_db_version, op_id_to_op_uuid};
-use crate::helpers::form_helper::FormStructure;
+use crate::helpers::conversion_helpers::local_version_to_db_version;
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 
-pub async fn add_form(
-    ctx: &Context<'_>,
-    form_input: FormInput,
-) -> Result<(Form, Vec<FormField>), BigError> {
-    let converted_input_form = FormStructure::from_input(form_input.form_structure_input)?;
-    let validated_form = FormStructure::validate_form(&converted_input_form)?;
+pub async fn add_form(ctx: &Context<'_>, form_input: FormInput) -> Result<FormOutput, BigError> {
+    let validated_form = FormStructure::validate_form(&form_input.form_structure)?;
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
-
-    let my_original_form_id = op_id_to_op_uuid(&form_input.original_form_id)?;
-    let my_previous_form_id = op_id_to_op_uuid(&form_input.previous_form_id)?;
 
     let created_form = FormCreation {
         form_name: form_input.form_name,
         template_version: local_version_to_db_version(&validated_form.form_template_version),
         user_id,
-        original_form_id: my_original_form_id,
-        previous_form_id: my_previous_form_id,
+        original_form_id: form_input.original_form_id,
+        previous_form_id: form_input.previous_form_id,
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,
@@ -90,7 +81,9 @@ pub async fn add_form(
     .map_err(|e| BigError::BlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
-    // TODO: Insert all these new form fields in the database
-
-    Ok((new_form_from_db, all_inserted_form_fields))
+    Ok(FormOutput {
+        form: new_form_from_db,
+        fields: all_inserted_form_fields,
+        form_structure: FormStructureOutput::from(validated_form),
+    })
 }
