@@ -87,7 +87,7 @@ impl CompletedForm {
                 .map(|v| v.into_iter().map(CompletedFormField::from).collect())
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }

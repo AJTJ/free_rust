@@ -46,7 +46,7 @@ pub async fn insert_completed_form(
         insert_response
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
     // Another approach... or both?!?
@@ -86,7 +86,7 @@ pub async fn insert_completed_form(
         insert_response
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
     Ok(CompletedFormOutput {

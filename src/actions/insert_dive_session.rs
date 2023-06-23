@@ -43,6 +43,6 @@ pub async fn add_dive_session(
         response
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })
 }

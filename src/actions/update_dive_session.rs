@@ -31,7 +31,7 @@ pub async fn update_dive_session(
         update_statement
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselUpdateError { source: e })?;
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -42,7 +42,7 @@ pub async fn update_dive_session(
         get_dive_session_by_id(&mut conn, &my_session_mod_data.id, None)
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselQueryError { source: e });
 
     updated_session

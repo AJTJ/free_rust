@@ -64,7 +64,7 @@ impl FormField {
             get_form_by_id(&mut conn, form_id).map(Form::from)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }

@@ -40,6 +40,6 @@ pub async fn add_dive(
             .get_result::<Dive>(&mut conn)
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })
 }

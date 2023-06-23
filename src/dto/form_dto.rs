@@ -79,7 +79,7 @@ impl Form {
                 .map(|v| v.into_iter().map(FormField::from).collect())
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })
+        .map_err(|e| BigError::ActixBlockingError { source: e })
         .unwrap()
         .map_err(|e| BigError::DieselQueryError { source: e })
     }

@@ -38,7 +38,7 @@ pub async fn add_form(ctx: &Context<'_>, form_input: FormInput) -> Result<FormOu
         insert_response
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
     // Goint the DB route for now
@@ -78,7 +78,7 @@ pub async fn add_form(ctx: &Context<'_>, form_input: FormInput) -> Result<FormOu
         insert_response
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
     Ok(FormOutput {

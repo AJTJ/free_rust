@@ -39,7 +39,7 @@ pub async fn update_user(
             .execute(&mut conn)
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselUpdateError { source: e })?;
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();

@@ -82,7 +82,7 @@ impl CompletedFormField {
             get_completed_form_by_id(&mut conn, completed_form_id).map(CompletedForm::from)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }

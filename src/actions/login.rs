@@ -28,7 +28,7 @@ pub async fn login(
         get_user_with_email(&mut conn, inc_email)
     })
     .await
-    .map_err(|e| BigError::BlockingError { source: e })?;
+    .map_err(|e| BigError::ActixBlockingError { source: e })?;
 
     let return_user = match maybe_user {
         Ok(user) => {

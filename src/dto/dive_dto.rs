@@ -89,7 +89,7 @@ impl Dive {
             get_dive_session_by_id(&mut conn, &session_id, query_params).map(DiveSession::from)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }

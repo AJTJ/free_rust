@@ -9,6 +9,9 @@ use async_graphql::async_trait;
 use async_graphql::dataloader::*;
 use uuid::Uuid;
 
+#[derive(Clone)]
+pub struct WrappedError(BigError);
+
 pub struct DiveSessionsLoader(DbPool);
 
 impl DiveSessionsLoader {
@@ -20,7 +23,7 @@ impl DiveSessionsLoader {
 #[async_trait::async_trait]
 impl Loader<Uuid> for DiveSessionsLoader {
     type Value = DiveSession;
-    type Error = BigError;
+    type Error = WrappedError;
 
     async fn load(&self, keys: &[Uuid]) -> Result<HashMap<Uuid, Self::Value>, Self::Error> {
         let output = web::block(move || {
@@ -28,8 +31,8 @@ impl Loader<Uuid> for DiveSessionsLoader {
             get_dive_sessions_by_id(&mut conn, keys)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
-        .map_err(|e| BigError::DieselInsertError { source: e })?;
+        .map_err(|e| WrappedError(BigError::ActixBlockingError { source: e }))?
+        .map_err(|e| WrappedError(BigError::DieselInsertError { source: e }))?;
 
         // it seems like it is required to return a hashmap?
         let m: HashMap<Uuid, DiveSession>;

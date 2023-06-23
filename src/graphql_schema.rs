@@ -63,7 +63,7 @@ impl Query {
             users.load::<User>(&mut conn)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -108,7 +108,7 @@ impl Query {
             get_user_with_email(&mut conn, email)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -140,7 +140,7 @@ impl Query {
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -161,7 +161,7 @@ impl Query {
             get_dives_by_user(&mut conn, user_id, dive_input, db_query_dto)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -177,7 +177,7 @@ impl Query {
             get_forms_by_user_id(&mut conn, user_id, None)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -194,7 +194,7 @@ impl Query {
             get_form_fields_by_form(&mut conn, &logger_id, &user_id, None)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -209,7 +209,7 @@ impl Query {
             get_completed_forms_by_user_id(&mut conn, user_id, None)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
@@ -232,7 +232,7 @@ impl Mutation {
             insert_user(&mut conn, user_data)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselInsertError { source: e })
     }
 
@@ -246,7 +246,7 @@ impl Mutation {
             diesel::delete(users).execute(&mut conn)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselDeleteError { source: e })
     }
 
@@ -291,7 +291,7 @@ impl Mutation {
             diesel::delete(dive_sessions).execute(&mut conn)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselDeleteError { source: e })
     }
 
@@ -355,7 +355,7 @@ impl Mutation {
             diesel::delete(dives).execute(&mut conn)
         })
         .await
-        .map_err(|e| BigError::BlockingError { source: e })?
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselDeleteError { source: e })
     }
 }
