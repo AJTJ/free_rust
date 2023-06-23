@@ -29,11 +29,13 @@ where
             // this should return the `first` amount of items after the `after` createdAt date
             let vec_of_items = db_retrieval_fn(after, first);
 
-            // for pagination purposes, I do need the "start" and "end" to generate the pages for gql
-            // how does one do that without retrieving everything in the first place?
-            // can the db_retrieval_fn get the total length of my query before pagination?
-
-            let mut connection = Connection::new(true, true);
+            let mut connection = Connection::new(
+                // for pagination purposes, I do need the "start" and "end" for here
+                // how does one do that without retrieving everything from the db in the first place?
+                // can the db_retrieval_fn get the total length of my query before pagination?
+                true, /* should tell if there was a previous page */
+                true, /* should tell if there's a next page */
+            );
             connection.edges.extend(
                 vec_of_items
                     .into_iter()
