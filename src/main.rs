@@ -8,6 +8,7 @@ pub mod dive_forms;
 pub mod dto;
 pub mod env_data;
 pub mod errors;
+pub mod graphql_query;
 pub mod graphql_schema;
 pub mod guards;
 pub mod helpers;
