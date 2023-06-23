@@ -15,7 +15,7 @@ use snafu::prelude::*;
 use thiserror::Error as ThisError;
 use uuid::Error as UuidError;
 
-#[derive(Debug, Snafu, Clone)]
+#[derive(Debug, Snafu)]
 pub enum BigError {
     // ACTIX
     #[snafu(display("web::block error: {}", source))]
