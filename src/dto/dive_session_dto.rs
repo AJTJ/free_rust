@@ -43,7 +43,7 @@ pub struct DiveSessionCreation {
 }
 
 // Matches the database object 1:1
-#[derive(Queryable, SimpleObject)]
+#[derive(Queryable, SimpleObject, Clone)]
 // #[graphql(complex)]
 pub struct DiveSession {
     pub start_time: NaiveDateTime,

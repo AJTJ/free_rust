@@ -4,6 +4,7 @@
 extern crate diesel;
 pub mod actions;
 pub mod auth_data;
+pub mod data_loaders;
 pub mod dive_forms;
 pub mod dto;
 pub mod env_data;
@@ -17,13 +18,16 @@ pub mod token_source;
 
 use actix_web::http::header::{HeaderMap, AUTHORIZATION, COOKIE};
 use actix_web::middleware::Logger;
+use actix_web::rt;
 use actix_web::web::Data;
 use actix_web::{guard, http, web, HttpRequest, Result};
 use actix_web::{App, HttpResponse, HttpServer};
+use async_graphql::dataloader::DataLoader;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptySubscription, Schema, ID};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth_data::SharedRedisType;
+use data_loaders::DiveSessionsLoader;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
@@ -113,6 +117,7 @@ async fn main() -> std::io::Result<()> {
         .data(shared_client)
         .data(pool)
         .data(env_vars)
+        .data(DataLoader::new(DiveSessionsLoader::new(pool), rt::spawn))
         .finish();
 
     // println!("{}", &schema.sdl());

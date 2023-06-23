@@ -5,15 +5,14 @@ use crate::{
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 
-pub fn get_dive_session_by_id(
+pub fn get_dive_sessions_by_id(
     conn: &mut PgConnection,
-    input_session_id: &Uuid,
-    db_query_ob: Option<QueryParams>,
-) -> diesel::QueryResult<DiveSession> {
+    input_session_ids: &[Uuid],
+) -> diesel::QueryResult<Vec<DiveSession>> {
     use crate::schema::dive_sessions::dsl::{created_at, dive_sessions, id as session_id};
 
     dive_sessions
-        .filter(session_id.eq(&input_session_id))
+        .filter(session_id.eq_any(&input_session_ids.to_vec()))
         .order(created_at)
-        .get_result::<DiveSession>(conn)
+        .get_results::<DiveSession>(conn)
 }

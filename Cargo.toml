@@ -29,7 +29,7 @@ diesel = { version = "2.1.0", features = ["postgres", "r2d2", "numeric", "chrono
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 
 # graphql
-async-graphql = {version = "5.0.9", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log", "uuid08"]}
+async-graphql = {version = "5.0.9", features = ["tracing", "apollo_tracing", "uuid", "chrono", "log", "uuid08", "dataloader"]}
 async-graphql-actix-web = "5.0.9"
 
 # devtools

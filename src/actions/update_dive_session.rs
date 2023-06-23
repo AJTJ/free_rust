@@ -42,7 +42,7 @@ pub async fn update_dive_session(
         get_dive_session_by_id(&mut conn, &my_session_mod_data.id, None)
     })
     .await
-    .expect("web::block error here?")
+    .map_err(|e| BigError::BlockingError { source: e })?
     .map_err(|e| BigError::DieselQueryError { source: e });
 
     updated_session
