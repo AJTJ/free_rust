@@ -29,10 +29,13 @@ impl Loader<Uuid> for DiveSessionsLoader {
         })
         .await
         .map_err(|e| BigError::BlockingError { source: e })?
-        .map_err(|e| BigError::DieselInsertError { source: e });
+        .map_err(|e| BigError::DieselInsertError { source: e })?;
 
-        // the problem here is that output is a Result<VecDiveSession ...>
-        // and not the HashMap that i think is required
-        output
+        // it seems like it is required to return a hashmap?
+        let m: HashMap<Uuid, DiveSession>;
+        for d in output.into_iter() {
+            m.insert(d.id, d);
+        }
+        Ok(m)
     }
 }
