@@ -1,18 +1,11 @@
-use std::{
-    fmt::{self, Display},
-    io::Error,
-    num::ParseIntError,
-    result::Er,
-};
-
-use actix_web::{cookie::ParseError as CookieParseError, error::BlockingError, HttpResponse};
+use actix_web::{cookie::ParseError as CookieParseError, error::BlockingError};
 use async_graphql::Error as AsyncError;
 use chrono::ParseError as ChronoParseError;
 use diesel::result::Error as DieselError;
 use redis::RedisError;
 use serde_json::Error as SerdeError;
 use snafu::prelude::*;
-use thiserror::Error as ThisError;
+use std::num::ParseIntError;
 use uuid::Error as UuidError;
 
 #[derive(Debug, Snafu)]
@@ -75,12 +68,6 @@ pub enum BigError {
 
     #[snafu(display("Fields not matching"))]
     FormValueNotMatching,
-}
-
-#[derive(Debug, Snafu, Clone)]
-pub enum DieselErrors {
-    #[snafu(display("QueryError: {}", source))]
-    QueryError { source: DieselError },
 }
 
 // #[derive(Debug)]

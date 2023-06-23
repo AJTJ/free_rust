@@ -115,9 +115,12 @@ async fn main() -> std::io::Result<()> {
     // graphql schema builder
     let schema = Schema::build(Query, Mutation, EmptySubscription)
         .data(shared_client)
-        .data(pool)
+        .data(pool.clone())
         .data(env_vars)
-        .data(DataLoader::new(DiveSessionsLoader::new(pool), rt::spawn))
+        .data(DataLoader::new(
+            DiveSessionsLoader::new(pool.clone()),
+            rt::spawn,
+        ))
         .finish();
 
     // println!("{}", &schema.sdl());

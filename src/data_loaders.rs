@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::{
     actions::get_dive_sessions_by_id, dto::dive_session_dto::DiveSession, errors::BigError,
@@ -7,10 +8,9 @@ use crate::{
 use actix_web::web;
 use async_graphql::async_trait;
 use async_graphql::dataloader::*;
+use async_graphql::Error;
+use serde_json::to_vec;
 use uuid::Uuid;
-
-#[derive(Clone)]
-pub struct WrappedError(BigError);
 
 pub struct DiveSessionsLoader(DbPool);
 
@@ -23,19 +23,21 @@ impl DiveSessionsLoader {
 #[async_trait::async_trait]
 impl Loader<Uuid> for DiveSessionsLoader {
     type Value = DiveSession;
-    type Error = WrappedError;
+    type Error = Arc<BigError>;
 
     async fn load(&self, keys: &[Uuid]) -> Result<HashMap<Uuid, Self::Value>, Self::Error> {
+        let pool = self.0.clone();
+        let my_keys = keys.to_vec();
         let output = web::block(move || {
-            let mut conn = self.0.get().unwrap();
-            get_dive_sessions_by_id(&mut conn, keys)
+            let mut conn = pool.get().unwrap();
+            get_dive_sessions_by_id(&mut conn, &my_keys[..])
         })
         .await
-        .map_err(|e| WrappedError(BigError::ActixBlockingError { source: e }))?
-        .map_err(|e| WrappedError(BigError::DieselInsertError { source: e }))?;
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
+        .map_err(|e| BigError::DieselInsertError { source: e })?;
 
         // it seems like it is required to return a hashmap?
-        let m: HashMap<Uuid, DiveSession>;
+        let mut m: HashMap<Uuid, DiveSession> = HashMap::new();
         for d in output.into_iter() {
             m.insert(d.id, d);
         }
