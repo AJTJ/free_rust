@@ -10,10 +10,13 @@ pub fn get_dive_session_by_id(
     input_session_id: &Uuid,
     db_query_ob: Option<QueryParams>,
 ) -> diesel::QueryResult<DiveSession> {
-    use crate::schema::dive_sessions::dsl::{dive_sessions, id as session_id};
+    use crate::schema::dive_sessions::dsl::{created_at, dive_sessions, id as session_id};
 
-    dive_sessions
+    let q = dive_sessions
         .filter(session_id.eq(&input_session_id))
-        .limit(1)
-        .get_result::<DiveSession>(conn)
+        .order(created_at);
+
+    let x = w.get_result::<DiveSession>(conn);
+
+    x
 }

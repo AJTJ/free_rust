@@ -1,5 +1,7 @@
 use async_graphql::*;
 use async_graphql::{types::connection::*, Context, EmptySubscription, Object, Schema};
+use diesel::query_dsl::methods::FilterDsl;
+use diesel::QueryDsl;
 use tracing_subscriber::registry::SpanData;
 use uuid::Uuid;
 
@@ -7,7 +9,8 @@ pub trait HasID {
     fn id(&self) -> String;
 }
 
-pub async fn gql_query<T>(
+pub async fn gql_query<O, T>(
+    ctx: &Context<'_>,
     // This is an opaque string of the "createdAt" data
     after: Option<String>,
     // DELAYING THIS before: Option<String>,
@@ -15,10 +18,13 @@ pub async fn gql_query<T>(
     first: Option<i32>,
     // DELAYING THIS last: Option<i 32>,
     // this function will implement postgres queries
-    db_retrieval_fn: &dyn Fn(Option<String>, Option<usize>) -> Vec<T>,
-) -> Result<Connection<String, T, EmptyFields, EmptyFields>>
+    db_retrieval_fn: &dyn Fn(&Context<'_>, T, Uuid, Option<String>, Option<usize>) -> Vec<O>,
+    table: T,
+    user_id: Uuid,
+) -> Result<Connection<String, O, EmptyFields, EmptyFields>>
 where
-    T: OutputType + HasID,
+    O: OutputType + HasID,
+    T: QueryDsl,
 {
     query(
         after,
@@ -27,7 +33,7 @@ where
         None,
         |after: Option<String>, before, first, last| async move {
             // this should return the `first` amount of items after the `after` createdAt date
-            let vec_of_items = db_retrieval_fn(after, first);
+            let vec_of_items = db_retrieval_fn(ctx, table, user_id, after, first);
 
             let mut connection = Connection::new(
                 // for pagination purposes, I do need the "start" and "end" for here
@@ -46,3 +52,29 @@ where
     )
     .await
 }
+
+// pub fn query_wrapper<T, O>(
+//     ctx: &Context<'_>,
+//     table: T,
+//     user_id: Uuid,
+//     after: Option<String>,
+//     first: Option<usize>,
+// ) -> usize
+// where
+//     O: OutputType + HasID,
+//     T: FilterDsl<O>,
+// {
+//     let first = match first {
+//         Some(v) => std::cmp::max(v, 100),
+//         None => 100,
+//     };
+
+//     // This could be done outside
+//     let q = table.filter(table.user_id.eq(user_id));
+
+//     if let Some(a) = after {};
+
+//     q = q.limit(first);
+
+//     42
+// }
