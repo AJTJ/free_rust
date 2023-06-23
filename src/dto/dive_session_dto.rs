@@ -90,7 +90,7 @@ impl DiveSession {
     }
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Clone)]
 pub struct DiveSessionFilter {
     pub session_id: Option<Uuid>,
     pub start_time: Option<NaiveDateTime>,

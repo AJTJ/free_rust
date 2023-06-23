@@ -9,6 +9,7 @@ use std::num::ParseIntError;
 use uuid::Error as UuidError;
 
 #[derive(Debug, Snafu)]
+#[snafu(visibility(pub(crate)))]
 pub enum BigError {
     // ACTIX
     #[snafu(display("web::block error: {}", source))]
@@ -26,6 +27,10 @@ pub enum BigError {
 
     #[snafu(display("No session_id on Token"))]
     NoSessionIDOnToken,
+
+    // OTHER ASYNC
+    #[snafu(display("AsyncQueryError: {}", source))]
+    AsyncQueryError { source: AsyncError },
 
     // Uuid
     #[snafu(display("Uuid Error: {}", source))]

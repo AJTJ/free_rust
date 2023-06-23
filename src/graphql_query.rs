@@ -1,31 +1,24 @@
+use crate::errors::BigError;
+use async_graphql::types::connection::*;
 use async_graphql::*;
-use async_graphql::{types::connection::*, Context, EmptySubscription, Object, Schema};
-use diesel::query_dsl::methods::FilterDsl;
-use diesel::QueryDsl;
 use futures_util::Future;
-use tracing_subscriber::registry::SpanData;
 use uuid::Uuid;
 
-use crate::errors::BigError;
+// This is an opaque string of the "createdAt" data
+// DELAYING THIS before: Option<String>,
+// EX: the first 10 of something
+// DELAYING THIS last: Option<i 32>,
+// this function will implement postgres queries
 
-pub trait HasID {
-    fn id(&self) -> String;
-}
-
-pub async fn gql_query<O, T>(
-    // This is an opaque string of the "createdAt" data
+pub async fn gql_query<
+    O: OutputType,
+    R: Future<Output = Result<Vec<(String, O)>, BigError>>,
+    F: Fn(Option<String>, Option<usize>) -> R,
+>(
     after: Option<String>,
-    // DELAYING THIS before: Option<String>,
-    // EX: the first 10 of something
     first: Option<i32>,
-    // DELAYING THIS last: Option<i 32>,
-    // this function will implement postgres queries
-    db_retrieval_closure: &dyn Fn(Option<String>, Option<usize>) -> Vec<O>,
-) -> Result<Connection<String, O, EmptyFields, EmptyFields>>
-where
-    O: OutputType + HasID,
-    T: QueryDsl,
-{
+    db_retrieval_closure: F,
+) -> Result<Connection<String, O, EmptyFields, EmptyFields>> {
     query(
         after,
         None,
@@ -33,19 +26,16 @@ where
         None,
         |after: Option<String>, before, first, last| async move {
             // this should return the `first` amount of items after the `after` createdAt date
-            let vec_of_items = db_retrieval_closure(after, first);
+            let vec_of_items = db_retrieval_closure(after, first).await?;
+            // TODO: the queries need to return tuples with their ids or I need to implement a new `gql_query` for every type that uses it.
+            // not sure which one makes the most sense rn.
+            // TODO: the queries need to return a minimum of pagination information
 
-            let mut connection = Connection::new(
-                // for pagination purposes, I do need the "start" and "end" for here
-                // how does one do that without retrieving everything from the db in the first place?
-                // can the db_retrieval_closure get the total length of my query before pagination?
-                true, /* should tell if there was a previous page */
-                true, /* should tell if there's a next page */
-            );
+            let mut connection = Connection::new(true, true);
             connection.edges.extend(
                 vec_of_items
                     .into_iter()
-                    .map(|n| Edge::with_additional_fields(n.id(), n, EmptyFields)),
+                    .map(|(u, o)| Edge::with_additional_fields(u, o, EmptyFields)),
             );
             Ok::<_, async_graphql::Error>(connection)
         },
