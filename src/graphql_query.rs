@@ -2,15 +2,17 @@ use async_graphql::*;
 use async_graphql::{types::connection::*, Context, EmptySubscription, Object, Schema};
 use diesel::query_dsl::methods::FilterDsl;
 use diesel::QueryDsl;
+use futures_util::Future;
 use tracing_subscriber::registry::SpanData;
 use uuid::Uuid;
+
+use crate::errors::BigError;
 
 pub trait HasID {
     fn id(&self) -> String;
 }
 
 pub async fn gql_query<O, T>(
-    ctx: &Context<'_>,
     // This is an opaque string of the "createdAt" data
     after: Option<String>,
     // DELAYING THIS before: Option<String>,
@@ -18,9 +20,7 @@ pub async fn gql_query<O, T>(
     first: Option<i32>,
     // DELAYING THIS last: Option<i 32>,
     // this function will implement postgres queries
-    db_retrieval_fn: &dyn Fn(&Context<'_>, T, Uuid, Option<String>, Option<usize>) -> Vec<O>,
-    table: T,
-    user_id: Uuid,
+    db_retrieval_closure: &dyn Fn(Option<String>, Option<usize>) -> Vec<O>,
 ) -> Result<Connection<String, O, EmptyFields, EmptyFields>>
 where
     O: OutputType + HasID,
@@ -33,12 +33,12 @@ where
         None,
         |after: Option<String>, before, first, last| async move {
             // this should return the `first` amount of items after the `after` createdAt date
-            let vec_of_items = db_retrieval_fn(ctx, table, user_id, after, first);
+            let vec_of_items = db_retrieval_closure(after, first);
 
             let mut connection = Connection::new(
                 // for pagination purposes, I do need the "start" and "end" for here
                 // how does one do that without retrieving everything from the db in the first place?
-                // can the db_retrieval_fn get the total length of my query before pagination?
+                // can the db_retrieval_closure get the total length of my query before pagination?
                 true, /* should tell if there was a previous page */
                 true, /* should tell if there's a next page */
             );

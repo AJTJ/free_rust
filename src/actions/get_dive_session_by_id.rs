@@ -14,9 +14,8 @@ pub fn get_dive_session_by_id(
 
     let q = dive_sessions
         .filter(session_id.eq(&input_session_id))
-        .order(created_at);
+        .order(created_at)
+        .get_result::<DiveSession>(conn);
 
-    let x = w.get_result::<DiveSession>(conn);
-
-    x
+    q
 }

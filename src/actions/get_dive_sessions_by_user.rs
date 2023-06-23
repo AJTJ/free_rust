@@ -4,7 +4,9 @@ use crate::{
         dive_session_dto::{DiveSession, DiveSessionFilter},
         query_dto::QueryParams,
     },
+    graphql_query::gql_query,
 };
+use async_graphql::Context;
 use diesel::{PgConnection, QueryDsl, QueryResult, RunQueryDsl};
 use uuid::Uuid;
 

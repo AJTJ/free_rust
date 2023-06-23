@@ -122,6 +122,19 @@ impl Query {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
+        // CLOSURE IDEAS
+        // let my_closure = async move |after: Option<String>,
+        //                              first: Option<usize>|
+        //             -> Result<Vec<DiveSession>, BigError> {
+        //     web::block(move || {
+        //         let mut conn = pool_ctx.get().unwrap();
+        //         get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
+        //     })
+        //     .await
+        //     .map_err(|e| BigError::BlockingError { source: e })?
+        //     .map_err(|e| BigError::DieselQueryError { source: e })
+        // };
+
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
             get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
