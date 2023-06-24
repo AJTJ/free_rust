@@ -1,9 +1,5 @@
 --
 form_template_version: 1.0.0,
-all enums:
-
-all_categories:
-  - General
 
 all_fields:
   GeneralFeeling

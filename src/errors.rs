@@ -22,11 +22,12 @@ pub enum BigError {
     #[snafu(display("No Cookie present: {}", error.message))]
     AsyncIncorrectCookie { error: AsyncError },
 
-    #[snafu(display("Error parsing cookie val: {}", source))]
-    SerdeParsingCookieVal { source: SerdeError },
-
     #[snafu(display("No session_id on Token"))]
     NoSessionIDOnToken,
+
+    // SERDE
+    #[snafu(display("Serde Parse Error: {}", source))]
+    SerdeParseError { source: SerdeError },
 
     // Chrono
     #[snafu(display("No session_id on Token"))]
