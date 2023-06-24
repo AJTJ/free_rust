@@ -46,12 +46,12 @@ impl Guard for LoggedInGuard {
     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
         match get_cookie_from_token(ctx) {
             Ok(c) => {
-                info!("The cookie struct in guard: {c:?}");
+                // info!("The cookie struct in guard: {c:?}");
 
                 if let Some(session_id) = c.encoded_session_id {
                     match get_user_session_data(ctx, session_id).await {
                         Ok(s) => {
-                            info!("The session data in guard: {s:?}");
+                            // info!("The session data in guard: {s:?}");
                             // TODO Need to check that the token hasn't expired
                             // TODO Should I extend the token's lifetime if it hasn't expired?
                             Ok(())

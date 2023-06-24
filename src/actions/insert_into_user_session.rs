@@ -1,4 +1,4 @@
-use crate::auth_data::{SessionData, SharedRedisType};
+use crate::auth_data::{RedisPool, SessionData};
 // use actix_session::Session;
 use actix_web::web;
 use async_graphql::Context;
@@ -9,16 +9,12 @@ pub async fn add_to_user_session(
     session_data: SessionData,
     encoded_session_id: String,
 ) {
-    let session_arc = ctx.data::<SharedRedisType>().unwrap().clone();
+    let redis_pool = ctx.data::<RedisPool>().unwrap().clone();
 
     web::block(move || {
-        let redis_server = session_arc.lock().expect("error locking the redis mutex");
+        let mut redis_conn = redis_pool.get().unwrap();
 
-        let mut connection = redis_server
-            .get_connection()
-            .expect("error connecting to redis_server");
-
-        connection
+        redis_conn
             .set::<String, SessionData, bool>(encoded_session_id, session_data)
             .expect("should have updated teh session data");
     })

@@ -1,4 +1,5 @@
 use chrono::NaiveDateTime;
+use r2d2::Pool;
 use redis::{from_redis_value, Client, FromRedisValue, RedisResult, ToRedisArgs};
 use serde::{Deserialize, Serialize};
 use std::string::String;
@@ -8,7 +9,7 @@ use uuid::Uuid;
 pub type UniversalIdType = [u8; 32];
 
 // REDIS THINGS
-pub type SharedRedisType = Arc<Mutex<Client>>;
+pub type RedisPool = Pool<Client>;
 
 #[derive(Serialize, Deserialize)]
 pub struct RedisKeyType(String);

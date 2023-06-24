@@ -19,7 +19,8 @@ send_wrapper = "0.6.0"
 # actix-session = {version = "0.7.2", features= ["redis-actor-session"]}
 rust-argon2 = "1.0"
 base64 = "0.21.2"
-redis = { version = "0.23.0", features = ["tokio-comp"] }
+redis = { version = "0.23.0", features = ["tokio-comp", "r2d2"] }
+r2d2 = "0.8.10"
 # cookie = "0.17.0"
 # redis-derive = "0.1.7"
 # actix-identity = "0.5.2"

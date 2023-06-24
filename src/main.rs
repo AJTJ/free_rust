@@ -20,25 +20,23 @@ use actix_web::http::header::{HeaderMap, AUTHORIZATION, COOKIE};
 use actix_web::middleware::Logger;
 use actix_web::rt;
 use actix_web::web::Data;
-use actix_web::{guard, http, web, HttpRequest, Result};
+use actix_web::{guard, web, HttpRequest, Result};
 use actix_web::{App, HttpResponse, HttpServer};
 use async_graphql::dataloader::DataLoader;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{EmptySubscription, Schema, ID};
+use async_graphql::{EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use auth_data::SharedRedisType;
+use auth_data::RedisPool;
 use data_loaders::DiveSessionsLoader;
 use diesel::pg::PgConnection;
-use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
 use env_data::SharedVars;
 use graphql_schema::{DbPool, DiveQLSchema, Mutation, Query};
-use helpers::token_helpers::CUSTOM_HEADER;
+use r2d2;
 use redis::Client;
 use std::env;
 use std::sync::{Arc, Mutex};
 use token_source::Token;
-use uuid::Uuid;
 
 // tracing
 use tracing::{info, Level};
@@ -89,12 +87,11 @@ async fn main() -> std::io::Result<()> {
     let redis_url = env::var("REDIS_URL").expect("no redis URL");
     let environment = env::var("ENVIRONMENT").expect("no environment variable");
 
-    // R2D2 pool
-    let manager = ConnectionManager::<PgConnection>::new(db_url);
-
-    let pool: DbPool = Pool::builder()
+    // Pooled database
+    let db_connection_manager = diesel::r2d2::ConnectionManager::<PgConnection>::new(db_url);
+    let pooled_database: DbPool = diesel::r2d2::Pool::builder()
         // .max_size(1)
-        .build(manager)
+        .build(db_connection_manager)
         .expect("Failed to create pool.");
 
     // Tracing
@@ -106,21 +103,21 @@ async fn main() -> std::io::Result<()> {
 
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    let client = Client::open(redis_url).expect("failure starting redis server");
-
-    let shared_client: SharedRedisType = Arc::new(Mutex::new(client));
+    // REDIS
+    let redis_client = Client::open(redis_url).expect("failure starting redis server");
+    let redis_pool = r2d2::Pool::new(redis_client).unwrap();
 
     let env_vars = SharedVars { environment };
 
     // graphql schema builder
     let schema = Schema::build(Query, Mutation, EmptySubscription)
-        .data(shared_client)
-        .data(pool.clone())
-        .data(env_vars)
+        .data(redis_pool)
         .data(DataLoader::new(
-            DiveSessionsLoader::new(pool.clone()),
+            DiveSessionsLoader::new(pooled_database.clone()),
             rt::spawn,
         ))
+        .data(pooled_database.clone())
+        .data(env_vars)
         .finish();
 
     // println!("{}", &schema.sdl());

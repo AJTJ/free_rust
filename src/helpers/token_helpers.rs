@@ -56,7 +56,6 @@ pub fn get_cookie_from_token(ctx: &Context<'_>) -> Result<CookieStruct, BigError
 
     match token {
         Ok(token) => {
-            info!("{token:?}");
             let c = Cookie::parse::<&str>(token.0.as_str())
                 .map_err(|e| BigError::WrongCookieString { source: e })?;
 
