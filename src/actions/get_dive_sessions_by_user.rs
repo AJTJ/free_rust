@@ -5,7 +5,9 @@ use crate::{
         query_dto::QueryParams,
     },
     errors::{BigError, ChronoParseSnafu, DieselQuerySnafu},
+    graphql_query::gql_query,
 };
+use async_graphql::Context;
 use chrono::NaiveDateTime;
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
@@ -19,12 +21,7 @@ pub fn get_dive_sessions_by_user(
 ) -> Result<Vec<(String, DiveSession)>, BigError> {
     use crate::schema::dive_sessions::dsl::{created_at, dive_sessions, user_id};
 
-    let after = match query_params.after {
-        Some(e) => Some(e.parse::<NaiveDateTime>().context(ChronoParseSnafu)),
-        None => None,
-    };
-
-    let query = dive_sessions
+    let mut query = dive_sessions
         .filter(user_id.eq(&input_user_id))
         .into_boxed();
 
@@ -40,6 +37,6 @@ pub fn get_dive_sessions_by_user(
 
     Ok(res
         .into_iter()
-        .map(|d| (d.id.to_string(), d))
+        .map(|d| (d.created_at.to_string(), d))
         .collect::<Vec<(String, DiveSession)>>())
 }

@@ -86,7 +86,7 @@ impl Query {
     async fn dive_sessions(
         &self,
         ctx: &Context<'_>,
-        dive_session_input: Option<DiveSessionFilter>,
+        dive_session_filter: Option<DiveSessionFilter>,
         query_params: QueryParams,
     ) -> Result<Connection<String, DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -94,12 +94,17 @@ impl Query {
 
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
-            let dive_session_input = dive_session_input.clone();
+            let dive_session_filter = dive_session_filter.clone();
             let pool_ctx = pool_ctx.clone();
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, query_params)
+                    get_dive_sessions_by_user(
+                        &mut conn,
+                        &user_id,
+                        dive_session_filter,
+                        query_params,
+                    )
                 })
                 .await
                 .context(ActixBlockingSnafu)?
@@ -165,16 +170,29 @@ impl Query {
     // COMPLETED FORMS
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn completed_forms(&self, ctx: &Context<'_>) -> Result<Vec<CompletedForm>, BigError> {
+    async fn completed_forms(
+        &self,
+        ctx: &Context<'_>,
+        query_params: QueryParams,
+    ) -> Result<Connection<String, CompletedForm>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            get_completed_forms_by_user_id(&mut conn, user_id, None)
-        })
-        .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselQueryError { source: e })
+
+        let my_closure = move |query_params: QueryParams| {
+            let query_params = query_params.clone();
+            let pool_ctx = pool_ctx.clone();
+            async move {
+                web::block(move || {
+                    let mut conn = pool_ctx.get().unwrap();
+                    get_completed_forms_by_user_id(&mut conn, user_id, query_params)
+                })
+                .await
+                .map_err(|e| BigError::ActixBlockingError { source: e })?
+            }
+        };
+
+        let query_response = gql_query(query_params, &my_closure).await;
+        query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]

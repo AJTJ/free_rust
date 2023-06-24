@@ -1,5 +1,5 @@
 use crate::{
-    actions::get_log_entries_by_log,
+    actions::get_completed_form_fields_by_c_form,
     dive_forms::form_helper::{FormStructure, FormStructureOutput},
     errors::BigError,
     graphql_schema::DbPool,
@@ -75,15 +75,13 @@ impl CompletedForm {
     async fn completed_form_fields(
         &self,
         ctx: &Context<'_>,
-        db_query_dto: Option<QueryParams>,
+        // db_query_dto: Option<QueryParams>,
     ) -> Result<Vec<CompletedFormField>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
         let log_id = self.id;
-
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_log_entries_by_log(&mut conn, &log_id, db_query_dto)
+            get_completed_form_fields_by_c_form(&mut conn, &log_id)
                 .map(|v| v.into_iter().map(CompletedFormField::from).collect())
         })
         .await

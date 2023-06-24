@@ -28,7 +28,7 @@ mod update_dive_session;
 mod update_user;
 
 pub use get_completed_form_by_id::get_completed_form_by_id;
-pub use get_completed_form_fields_by_c_form::get_log_entries_by_log;
+pub use get_completed_form_fields_by_c_form::get_completed_form_fields_by_c_form;
 pub use get_completed_forms_by_user_id::get_completed_forms_by_user_id;
 pub use get_dive_by_id::get_dive_by_id;
 pub use get_dive_session_by_id::get_dive_session_by_id;

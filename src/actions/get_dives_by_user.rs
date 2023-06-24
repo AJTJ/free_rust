@@ -18,6 +18,5 @@ pub fn get_dives_by_user(
 
     dives
         .filter(user_id.eq(&input_user_id))
-        .limit(db_query_ob.and_then(|q| q.limit).unwrap_or(10) as i64)
         .get_results::<Dive>(conn)
 }
