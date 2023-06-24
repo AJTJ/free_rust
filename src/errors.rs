@@ -20,7 +20,7 @@ pub enum BigError {
     WrongCookieString { source: CookieParseError },
 
     #[snafu(display("No Cookie present: {}", error.message))]
-    IncorrectCookie { error: AsyncError },
+    AsyncIncorrectCookie { error: AsyncError },
 
     #[snafu(display("Error parsing cookie val: {}", source))]
     SerdeParsingCookieVal { source: SerdeError },
@@ -28,9 +28,13 @@ pub enum BigError {
     #[snafu(display("No session_id on Token"))]
     NoSessionIDOnToken,
 
+    // Chrono
+    #[snafu(display("No session_id on Token"))]
+    ChronoSessionError { source: ChronoParseError },
+
     // OTHER ASYNC
-    #[snafu(display("AsyncQueryError: {}", source))]
-    AsyncQueryError { source: AsyncError },
+    #[snafu(display("AsyncQueryError: {}", error.message))]
+    AsyncQueryError { error: AsyncError },
 
     // Uuid
     #[snafu(display("Uuid Error: {}", source))]

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::errors::ActixBlockingSnafu;
 use crate::{
     actions::get_dive_sessions_by_id, dto::dive_session_dto::DiveSession, errors::BigError,
     graphql_schema::DbPool,
@@ -8,8 +9,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::async_trait;
 use async_graphql::dataloader::*;
-use async_graphql::Error;
-use serde_json::to_vec;
+use snafu::ResultExt;
 use uuid::Uuid;
 
 pub struct DiveSessionsLoader(DbPool);
@@ -33,8 +33,7 @@ impl Loader<Uuid> for DiveSessionsLoader {
             get_dive_sessions_by_id(&mut conn, &my_keys[..])
         })
         .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselInsertError { source: e })?;
+        .context(ActixBlockingSnafu)??;
 
         // it seems like it is required to return a hashmap?
         let mut m: HashMap<Uuid, DiveSession> = HashMap::new();

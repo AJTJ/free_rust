@@ -18,7 +18,6 @@ use crate::dto::auth_dto::Login;
 use crate::dto::completed_form_dto::CompletedForm;
 use crate::dto::completed_form_dto::CompletedFormInput;
 use crate::dto::completed_form_dto::CompletedFormOutput;
-use crate::dto::completed_form_field_dto::CompletedFormField;
 use crate::dto::dive_dto::Dive;
 use crate::dto::dive_dto::DiveFilter;
 use crate::dto::dive_dto::DiveInput;
@@ -34,7 +33,6 @@ use crate::dto::form_field_dto::FormField;
 use crate::dto::query_dto::QueryParams;
 use crate::dto::user_dto::{User, UserInput};
 use crate::errors::AsyncQuerySnafu;
-use crate::errors::DieselQuerySnafu;
 use crate::errors::{ActixBlockingSnafu, BigError};
 use crate::graphql_query::gql_query;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
@@ -72,39 +70,6 @@ impl Query {
         .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
-    // async fn numbers(
-    //     &self,
-    //     after: Option<String>,
-    //     before: Option<String>,
-    //     first: Option<i32>,
-    //     last: Option<i32>,
-    // ) -> Result<Connection<usize, i32, EmptyFields, EmptyFields>> {
-    //     query(
-    //         after,
-    //         before,
-    //         first,
-    //         last,
-    //         |after, before, first, last| async move {
-    //             let mut start = after.map(|after| after + 1).unwrap_or(0);
-    //             let mut end = before.unwrap_or(10000);
-    //             if let Some(first) = first {
-    //                 end = (start + first).min(end);
-    //             }
-    //             if let Some(last) = last {
-    //                 start = if last > end - start { end } else { end - last };
-    //             }
-    //             let mut connection = Connection::new(start > 0, end < 10000);
-    //             connection.edges.extend(
-    //                 (start..end)
-    //                     .into_iter()
-    //                     .map(|n| Edge::with_additional_fields(n, n as i32, EmptyFields)),
-    //             );
-    //             Ok::<_, async_graphql::Error>(connection)
-    //         },
-    //     )
-    //     .await
-    // }
-
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn user(&self, ctx: &Context<'_>, email: String) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -122,49 +87,28 @@ impl Query {
         &self,
         ctx: &Context<'_>,
         dive_session_input: Option<DiveSessionFilter>,
-        query_params: Option<QueryParams>,
-        after: Option<String>,
-        first: Option<i32>,
-    ) -> Result<Connection<String, Vec<DiveSession>>, BigError> {
+        query_params: QueryParams,
+    ) -> Result<Connection<String, DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
 
-        // CLOSURE IDEAS
-
-        let my_closure = move |after: Option<String>, first: Option<usize>| {
+        let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
             let dive_session_input = dive_session_input.clone();
             let pool_ctx = pool_ctx.clone();
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    // TODO: Update the query to accept after and first
-                    // TODO: Update the query to either return tuple ids or something else.
                     get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, query_params)
                 })
                 .await
                 .context(ActixBlockingSnafu)?
-                .context(DieselQuerySnafu)
             }
         };
 
-        let query_response = gql_query(after, first, &my_closure).await;
-
-        query_response.context(AsyncQuerySnafu)
+        let query_response = gql_query(query_params, &my_closure).await;
+        query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
-
-    // unimplemented!()
-
-    // web::block(move || {
-    //     let mut conn = pool_ctx.get().unwrap();
-    //     get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, db_query_dto)
-    // })
-    // .await
-    // .map_err(|e| BigError::ActixBlockingError { source: e })?
-    // .map_err(|e| BigError::DieselQueryError { source: e })
-    // }
-
-    // .map(|dv| dv.into_iter().map(DiveSession::from).collect())
 
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn dives(
@@ -378,40 +322,4 @@ impl Mutation {
         .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselDeleteError { source: e })
     }
-}
-
-#[graphql(guard = "LoggedInGuard::new()")]
-async fn dive_sessions(
-    &self,
-    ctx: &Context<'_>,
-    dive_session_input: Option<DiveSessionFilter>,
-    query_params: Option<QueryParams>,
-    after: Option<String>,
-    first: Option<i32>,
-) -> Result<Connection<String, Vec<DiveSession>>, BigError> {
-    let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-    let user_id = get_user_id_from_token_and_session(ctx).await?;
-
-    // CLOSURE IDEAS
-
-    let my_closure = move |after: Option<String>, first: Option<usize>| {
-        let query_params = query_params.clone();
-        let dive_session_input = dive_session_input.clone();
-        let pool_ctx = pool_ctx.clone();
-        async move {
-            web::block(move || {
-                let mut conn = pool_ctx.get().unwrap();
-                // TODO: Update the query to accept after and first
-                // TODO: Update the query to either return tuple ids or something else.
-                get_dive_sessions_by_user(&mut conn, &user_id, dive_session_input, query_params)
-            })
-            .await
-            .context(ActixBlockingSnafu)?
-            .context(DieselQuerySnafu)
-        }
-    };
-
-    let query_response = gql_query(after, first, &my_closure).await;
-
-    query_response.context(AsyncQuerySnafu)
 }
