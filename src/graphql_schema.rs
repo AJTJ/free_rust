@@ -5,6 +5,7 @@ use crate::actions::get_completed_forms_by_user_id;
 use crate::actions::get_dive_sessions_by_user;
 use crate::actions::get_dives_by_user;
 use crate::actions::get_form_fields_by_form;
+use crate::actions::get_form_structures;
 use crate::actions::get_forms_by_user_id;
 use crate::actions::get_user_id_from_token_and_session;
 use crate::actions::get_user_with_email;
@@ -14,6 +15,8 @@ use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
+use crate::dive_forms::form_helper::FormStructure;
+use crate::dive_forms::form_helper::FormStructureOutput;
 use crate::dto::auth_dto::Login;
 use crate::dto::completed_form_dto::CompletedForm;
 use crate::dto::completed_form_dto::CompletedFormInput;
@@ -136,6 +139,11 @@ impl Query {
 
     // FORMS
 
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn form_structures(&self, _ctx: &Context<'_>) -> FormStructureOutput {
+        get_form_structures()
+    }
+
     // TODO: Should this return the database obejct?
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn forms(&self, ctx: &Context<'_>) -> Result<Vec<Form>, BigError> {
@@ -196,7 +204,7 @@ impl Query {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn guarded_route(&self, ctx: &Context<'_>) -> f64 {
+    async fn guarded_route(&self, _ctx: &Context<'_>) -> f64 {
         // Ok("Made it".to_string())
         let mut rng = rand::thread_rng();
         let y: f64 = rng.gen();

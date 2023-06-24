@@ -210,13 +210,13 @@ impl FormStructure {
         }
     }
     // TODO: Probably get this from JSON/DOCUMENTATION files
-    pub fn get_latest_form_template() -> FormStructure {
-        FormStructure {
+    pub fn get_latest_form_template() -> FormStructureOutput {
+        FormStructureOutput {
             form_template_version: vec![1, 0, 0],
             form_id: None,
             enums: None,
             all_fields: vec![
-                (FSField {
+                (FSFieldOutput {
                     field_value: None,
                     field_name: FieldNames::GeneralFeeling,
                     category_name: CategoryNames::General,

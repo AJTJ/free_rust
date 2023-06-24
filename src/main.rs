@@ -69,10 +69,10 @@ async fn index(
     let mut request = gql_req.into_inner();
 
     // THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
-    let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
-    info!("AUTH HEADER: {:?}", auth_header_value);
-    let cookie_header_value = http_req.headers().get(http::header::COOKIE);
-    info!("COOKIE HEADER: {:?}", cookie_header_value);
+    // let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
+    // info!("AUTH HEADER: {:?}", auth_header_value);
+    // let cookie_header_value = http_req.headers().get(http::header::COOKIE);
+    // info!("COOKIE HEADER: {:?}", cookie_header_value);
     // info!("auth_header_value: {auth_header_value:?}");
 
     if let Some(token) = get_token_from_headers(http_req.headers()) {

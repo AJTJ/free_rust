@@ -43,7 +43,7 @@ pub struct CompletedFormCreation {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
-// #[graphql(complex)]
+#[graphql(complex)]
 pub struct CompletedForm {
     pub completed_form_name: Option<String>,
     pub template_version: Vec<Option<i32>>,
