@@ -27,7 +27,7 @@ pub struct FormFieldCreation {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject)]
+#[derive(Queryable, SimpleObject, Clone)]
 #[graphql(complex)]
 pub struct FormField {
     pub item_order: Option<i32>,
@@ -42,7 +42,6 @@ pub struct FormField {
     #[graphql(skip)]
     pub user_id: Uuid,
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,

@@ -37,7 +37,7 @@ pub struct FormCreation {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject)]
+#[derive(Queryable, SimpleObject, Clone)]
 #[graphql(complex)]
 pub struct Form {
     pub form_name: String,
@@ -85,9 +85,8 @@ impl Form {
     }
 }
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct FormOutput {
     pub form: Form,
-    pub fields: Vec<FormField>,
     pub form_structure: FormStructureOutput,
 }

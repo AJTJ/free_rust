@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::dto::query_dto::QueryParams;
 use crate::errors::BigError;
 use async_graphql::types::connection::*;
@@ -20,6 +18,7 @@ pub async fn gql_query<
         query_params.first.and_then(|n| Some(n as i32)),
         None,
         |after: Option<String>, _before, first, _last| async move {
+            // NOTE: The String is the Opaque string, representing the Date rn.
             let vec_of_items = db_retrieval_closure(QueryParams { after, first }).await?;
             let mut connection = Connection::new(true, true);
             connection.edges.extend(

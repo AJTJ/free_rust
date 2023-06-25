@@ -1,9 +1,14 @@
 use std::str::FromStr;
 
-use crate::errors::BigError;
+use crate::dto::completed_form_dto::CompletedForm;
+use crate::dto::completed_form_field_dto::CompletedFormField;
+use crate::dto::form_dto::{Form, FormOutput};
+use crate::dto::form_field_dto::FormField;
+use crate::errors::{BigError, StrumParseSnafu};
 use async_graphql::{Enum, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use snafu::ResultExt;
 use strum::IntoEnumIterator;
 use strum::{Display, EnumIter, EnumString};
 use uuid::Uuid;
@@ -89,6 +94,34 @@ pub struct FSFieldOutput {
     pub field_value: Option<String>,
     pub category_name: CategoryNames,
     pub field_value_type: FieldValueTypes,
+}
+
+impl FSFieldOutput {
+    pub fn from_form_field(f: &FormField) -> Result<Self, BigError> {
+        let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
+        let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
+        let field_value_type =
+            FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
+        Ok(FSFieldOutput {
+            field_name,
+            field_value: f.field_value.clone(),
+            category_name: cat_name,
+            field_value_type,
+        })
+    }
+
+    pub fn from_completed_form_field(f: &CompletedFormField) -> Result<Self, BigError> {
+        let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
+        let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
+        let field_value_type =
+            FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
+        Ok(FSFieldOutput {
+            field_name,
+            field_value: f.field_value.clone(),
+            category_name: cat_name,
+            field_value_type,
+        })
+    }
 }
 
 impl From<FSField> for FSFieldOutput {
@@ -344,6 +377,80 @@ impl FormStructure {
                 }),
             ],
         }
+    }
+
+    pub fn construct_from_form(
+        forms: Vec<Form>,
+        fields: Vec<FormField>,
+    ) -> Result<Vec<FormOutput>, BigError> {
+        let form_structure_outputs = forms
+            .iter()
+            .map(|form| {
+                let my_fields = fields
+                    .iter()
+                    .filter(|f| f.form_id == form.id)
+                    .cloned()
+                    .collect::<Vec<FormField>>();
+
+                // TODO: This should get by the version number eventually
+                let structure = FormStructure::get_latest_form_template();
+
+                let version = form.template_version.iter().map(|n| n.unwrap()).collect();
+
+                let all_fields = my_fields
+                    .iter()
+                    .map(|f| FSFieldOutput::from_form_field(f))
+                    .collect::<Result<Vec<FSFieldOutput>, BigError>>()?;
+
+                Ok(FormOutput {
+                    form: form.clone(),
+                    form_structure: FormStructureOutput {
+                        form_template_version: version,
+                        form_id: Some(form.id),
+                        enums: structure.enums,
+                        all_fields,
+                    },
+                })
+            })
+            .collect::<Result<Vec<FormOutput>, BigError>>();
+        form_structure_outputs
+    }
+
+    pub fn construct_from_completed_form(
+        forms: Vec<CompletedForm>,
+        fields: Vec<CompletedFormField>,
+    ) -> Result<Vec<(String, FormStructureOutput)>, BigError> {
+        let form_structure_outputs = forms
+            .iter()
+            .map(|form| {
+                let fields = fields
+                    .iter()
+                    .filter(|f| f.completed_form_id == form.id)
+                    .cloned()
+                    .collect::<Vec<CompletedFormField>>();
+
+                // TODO: This should get by the version number eventually
+                let structure = FormStructure::get_latest_form_template();
+
+                let version = form.template_version.iter().map(|n| n.unwrap()).collect();
+
+                let all_fields = fields
+                    .iter()
+                    .map(|f| FSFieldOutput::from_completed_form_field(f))
+                    .collect::<Result<Vec<FSFieldOutput>, BigError>>()?;
+
+                Ok((
+                    form.created_at.to_string(),
+                    FormStructureOutput {
+                        form_template_version: version,
+                        form_id: Some(form.id),
+                        enums: structure.enums,
+                        all_fields,
+                    },
+                ))
+            })
+            .collect::<Result<Vec<(String, FormStructureOutput)>, BigError>>();
+        form_structure_outputs
     }
 }
 

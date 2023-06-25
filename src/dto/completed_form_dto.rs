@@ -42,7 +42,7 @@ pub struct CompletedFormCreation {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject, Debug)]
+#[derive(Queryable, SimpleObject, Clone)]
 #[graphql(complex)]
 pub struct CompletedForm {
     pub completed_form_name: Option<String>,
@@ -90,9 +90,8 @@ impl CompletedForm {
     }
 }
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct CompletedFormOutput {
     pub form: CompletedForm,
-    pub fields: Vec<CompletedFormField>,
     pub form_structure: FormStructureOutput,
 }

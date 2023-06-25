@@ -15,12 +15,9 @@ use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
-use crate::dive_forms::form_helper::FormStructure;
 use crate::dive_forms::form_helper::FormStructureOutput;
 use crate::dto::auth_dto::Login;
-use crate::dto::completed_form_dto::CompletedForm;
 use crate::dto::completed_form_dto::CompletedFormInput;
-use crate::dto::completed_form_dto::CompletedFormOutput;
 use crate::dto::dive_dto::Dive;
 use crate::dto::dive_dto::DiveFilter;
 use crate::dto::dive_dto::DiveInput;
@@ -29,13 +26,11 @@ use crate::dto::dive_session_dto::DiveSession;
 use crate::dto::dive_session_dto::DiveSessionFilter;
 use crate::dto::dive_session_dto::DiveSessionInput;
 use crate::dto::dive_session_dto::DiveSessionUpdate;
-use crate::dto::form_dto::Form;
 use crate::dto::form_dto::FormInput;
 use crate::dto::form_dto::FormOutput;
 use crate::dto::form_field_dto::FormField;
 use crate::dto::query_dto::QueryParams;
 use crate::dto::user_dto::{User, UserInput};
-use crate::errors::AsyncQuerySnafu;
 use crate::errors::{ActixBlockingSnafu, BigError};
 use crate::graphql_query::gql_query;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
@@ -46,7 +41,6 @@ use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
 use rand::prelude::*;
-use snafu::prelude::*;
 use snafu::ResultExt;
 use uuid::Uuid;
 
@@ -144,9 +138,8 @@ impl Query {
         get_form_structures()
     }
 
-    // TODO: Should this return the database obejct?
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn forms(&self, ctx: &Context<'_>) -> Result<Vec<Form>, BigError> {
+    async fn forms(&self, ctx: &Context<'_>) -> Result<Vec<FormOutput>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
@@ -155,7 +148,6 @@ impl Query {
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselQueryError { source: e })
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
@@ -176,13 +168,12 @@ impl Query {
     }
 
     // COMPLETED FORMS
-
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn completed_forms(
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
-    ) -> Result<Connection<String, CompletedForm>, BigError> {
+    ) -> Result<Connection<String, FormStructureOutput>, BigError> {
         let user_id = get_user_id_from_token_and_session(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -312,7 +303,7 @@ impl Mutation {
         &self,
         ctx: &Context<'_>,
         form_input: FormInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<FormStructureOutput, BigError> {
         add_form(ctx, form_input).await
     }
     // update_logger() {}
@@ -323,7 +314,7 @@ impl Mutation {
         &self,
         ctx: &Context<'_>,
         completed_form_input: CompletedFormInput,
-    ) -> Result<CompletedFormOutput, BigError> {
+    ) -> Result<FormStructureOutput, BigError> {
         insert_completed_form(ctx, completed_form_input).await
     }
 

@@ -1,8 +1,6 @@
 use crate::actions::get_user_id_from_token_and_session;
 use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
-use crate::dto::completed_form_dto::{
-    CompletedForm, CompletedFormCreation, CompletedFormInput, CompletedFormOutput,
-};
+use crate::dto::completed_form_dto::{CompletedForm, CompletedFormCreation, CompletedFormInput};
 use crate::dto::completed_form_field_dto::{CompletedFormField, CompletedFormFieldCreation};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
@@ -15,7 +13,7 @@ use diesel::RunQueryDsl;
 pub async fn insert_completed_form(
     ctx: &Context<'_>,
     completed_form_input: CompletedFormInput,
-) -> Result<CompletedFormOutput, BigError> {
+) -> Result<FormStructureOutput, BigError> {
     let validated_completed_form =
         FormStructure::validate_form(&completed_form_input.form_structure)?;
 
@@ -89,9 +87,11 @@ pub async fn insert_completed_form(
     .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
-    Ok(CompletedFormOutput {
-        form: new_created_form_from_db,
-        fields: all_inserted_completed_form_fields,
-        form_structure: FormStructureOutput::from(validated_completed_form),
-    })
+    // Ok(CompletedFormOutput {
+    //     form: new_created_form_from_db,
+    //     fields: all_inserted_completed_form_fields,
+    //     form_structure: FormStructureOutput::from(validated_completed_form),
+    // })
+
+    Ok(FormStructureOutput::from(validated_completed_form))
 }

@@ -6,6 +6,7 @@ use redis::RedisError;
 use serde_json::Error as SerdeError;
 use snafu::prelude::*;
 use std::num::ParseIntError;
+use strum::ParseError as StrumParseError;
 use uuid::Error as UuidError;
 
 #[derive(Debug, Snafu)]
@@ -44,6 +45,12 @@ pub enum BigError {
     // other parsing
     #[snafu(display("ParseIntError: {}", source))]
     ParseIntError { source: ParseIntError },
+
+    #[snafu(display("StrumParseError: {}", source))]
+    StrumParseError { source: StrumParseError },
+
+    #[snafu(display("VersionParsingError"))]
+    VersionParsingError,
 
     #[snafu(display("ParseError: {}", source))]
     ChronoParseError { source: ChronoParseError },

@@ -1,6 +1,6 @@
 use crate::actions::get_user_id_from_token_and_session;
 use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
-use crate::dto::form_dto::{Form, FormCreation, FormInput, FormOutput};
+use crate::dto::form_dto::{Form, FormCreation, FormInput};
 use crate::dto::form_field_dto::{FormField, FormFieldCreation};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
@@ -10,7 +10,10 @@ use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 
-pub async fn add_form(ctx: &Context<'_>, form_input: FormInput) -> Result<FormOutput, BigError> {
+pub async fn add_form(
+    ctx: &Context<'_>,
+    form_input: FormInput,
+) -> Result<FormStructureOutput, BigError> {
     let validated_form = FormStructure::validate_form(&form_input.form_structure)?;
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
@@ -81,9 +84,10 @@ pub async fn add_form(ctx: &Context<'_>, form_input: FormInput) -> Result<FormOu
     .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
-    Ok(FormOutput {
-        form: new_form_from_db,
-        fields: all_inserted_form_fields,
-        form_structure: FormStructureOutput::from(validated_form),
-    })
+    // Ok(FormOutput {
+    //     form: new_form_from_db,
+    //     fields: all_inserted_form_fields,
+    //     form_structure: FormStructureOutput::from(validated_form),
+    // })
+    Ok(FormStructureOutput::from(validated_form))
 }

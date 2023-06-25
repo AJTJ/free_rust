@@ -46,7 +46,7 @@ pub struct CompletedFormFieldInput {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject, Debug)]
+#[derive(Queryable, SimpleObject, Debug, Clone)]
 #[graphql(complex)]
 pub struct CompletedFormField {
     pub item_order: Option<i32>,
