@@ -11,7 +11,7 @@ use super::form_dto::Form;
 #[derive(Insertable, Debug)]
 #[diesel(table_name = form_fields)]
 pub struct FormFieldCreation {
-    pub item_order: Option<i32>,
+    pub field_order: Option<i32>,
 
     pub field_name: String,
     pub field_value: Option<String>,
@@ -30,7 +30,7 @@ pub struct FormFieldCreation {
 #[derive(Queryable, SimpleObject, Clone)]
 #[graphql(complex)]
 pub struct FormField {
-    pub item_order: Option<i32>,
+    pub field_order: Option<i32>,
     // field data
     pub field_name: String,
     pub field_value: Option<String>,

@@ -51,7 +51,7 @@ pub async fn add_form(
         .enumerate()
         .map(|(i, c)| {
             let le = FormFieldCreation {
-                item_order: Some(i.try_into().unwrap()),
+                field_order: Some(i.try_into().unwrap()),
 
                 field_name: c.field_name.to_string(),
                 field_value: c.field_value.clone(),

@@ -35,6 +35,8 @@ pub struct EnumAndNumberStruct {
 
 #[derive(Enum, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Debug, EnumString, Display)]
 pub enum FieldNames {
+    // FormRelated
+    CompletedFormName,
     // InWater
     MaxDepth,
     MaxDepthWithDiscipline,
@@ -58,6 +60,7 @@ pub enum FieldNames {
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq)]
 pub enum CategoryNames {
+    FormRelated,
     General,
     Environment,
     InWater,
@@ -82,6 +85,7 @@ pub enum Disciplines {
 
 #[derive(InputObject, Serialize, Deserialize, Clone, Debug)]
 pub struct FSField {
+    pub field_order: Option<i32>,
     pub field_name: FieldNames,
     pub field_value: Option<String>,
     pub category_name: CategoryNames,
@@ -90,6 +94,7 @@ pub struct FSField {
 
 #[derive(Serialize, Deserialize, Clone, Debug, SimpleObject)]
 pub struct FSFieldOutput {
+    pub field_order: Option<i32>,
     pub field_name: FieldNames,
     pub field_value: Option<String>,
     pub category_name: CategoryNames,
@@ -103,6 +108,7 @@ impl FSFieldOutput {
         let field_value_type =
             FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
         Ok(FSFieldOutput {
+            field_order: f.field_order,
             field_name,
             field_value: f.field_value.clone(),
             category_name: cat_name,
@@ -116,6 +122,7 @@ impl FSFieldOutput {
         let field_value_type =
             FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
         Ok(FSFieldOutput {
+            field_order: f.field_order,
             field_name,
             field_value: f.field_value.clone(),
             category_name: cat_name,
@@ -127,6 +134,7 @@ impl FSFieldOutput {
 impl From<FSField> for FSFieldOutput {
     fn from(value: FSField) -> Self {
         FSFieldOutput {
+            field_order: value.field_order,
             field_name: value.field_name,
             field_value: value.field_value,
             category_name: value.category_name,
@@ -138,6 +146,7 @@ impl From<FSField> for FSFieldOutput {
 impl From<FSFieldOutput> for FSField {
     fn from(value: FSFieldOutput) -> Self {
         FSField {
+            field_order: value.field_order,
             field_name: value.field_name,
             field_value: value.field_value,
             category_name: value.category_name,
@@ -364,16 +373,25 @@ impl FormStructure {
             }]),
             all_fields: vec![
                 (FSFieldOutput {
+                    field_order: None,
                     field_value: None,
                     field_name: FieldNames::GeneralFeeling,
                     category_name: CategoryNames::General,
                     field_value_type: FieldValueTypes::Number,
                 }),
                 (FSFieldOutput {
+                    field_order: None,
                     field_value: None,
                     field_name: FieldNames::MaxDepthWithDiscipline,
                     category_name: CategoryNames::InWater,
                     field_value_type: FieldValueTypes::EnumANDNumber,
+                }),
+                (FSFieldOutput {
+                    field_order: None,
+                    field_value: None,
+                    field_name: FieldNames::CompletedFormName,
+                    category_name: CategoryNames::FormRelated,
+                    field_value_type: FieldValueTypes::Text,
                 }),
             ],
         }
@@ -476,6 +494,7 @@ mod tests {
             form_id: None,
             enums: None,
             all_fields: vec![FSField {
+                field_order: Some(1),
                 field_value: None,
                 field_name: FieldNames::GeneralFeeling,
                 category_name: CategoryNames::General,
@@ -492,6 +511,7 @@ mod tests {
             form_id: None,
             enums: None,
             all_fields: vec![FSField {
+                field_order: Some(1),
                 field_value: Some("100".to_string()),
                 field_name: FieldNames::GeneralFeeling,
                 category_name: CategoryNames::General,

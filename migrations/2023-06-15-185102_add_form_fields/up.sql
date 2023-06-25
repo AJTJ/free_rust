@@ -1,6 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE form_fields (
-  item_order INTEGER,
+  field_order INTEGER,
   -- field data
   field_name TEXT NOT NULL,
   field_value TEXT,

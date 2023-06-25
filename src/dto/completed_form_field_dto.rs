@@ -12,7 +12,7 @@ use crate::{
 #[derive(Insertable, Debug)]
 #[diesel(table_name = completed_form_fields)]
 pub struct CompletedFormFieldCreation {
-    pub item_order: Option<i32>,
+    pub field_order: Option<i32>,
 
     pub field_name: String,
     pub field_value: Option<String>,
@@ -29,7 +29,7 @@ pub struct CompletedFormFieldCreation {
 
 #[derive(InputObject)]
 pub struct CompletedFormFieldInput {
-    pub item_order: Option<i32>,
+    pub field_order: Option<i32>,
     // field data
     pub field_name: String,
     pub field_value: Option<String>,
@@ -49,7 +49,7 @@ pub struct CompletedFormFieldInput {
 #[derive(Queryable, SimpleObject, Debug, Clone)]
 #[graphql(complex)]
 pub struct CompletedFormField {
-    pub item_order: Option<i32>,
+    pub field_order: Option<i32>,
     // field data
     pub field_name: String,
     pub field_value: Option<String>,

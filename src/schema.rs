@@ -2,7 +2,7 @@
 
 diesel::table! {
     completed_form_fields (id) {
-        item_order -> Nullable<Int4>,
+        field_order -> Nullable<Int4>,
         field_name -> Text,
         field_value -> Nullable<Text>,
         category_name -> Text,
@@ -71,7 +71,7 @@ diesel::table! {
 
 diesel::table! {
     form_fields (id) {
-        item_order -> Nullable<Int4>,
+        field_order -> Nullable<Int4>,
         field_name -> Text,
         field_value -> Nullable<Text>,
         category_name -> Text,
