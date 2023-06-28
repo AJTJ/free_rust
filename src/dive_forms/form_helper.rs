@@ -1,16 +1,13 @@
-use std::str::FromStr;
-
 use crate::dto::completed_form_dto::CompletedForm;
 use crate::dto::completed_form_field_dto::CompletedFormField;
 use crate::dto::form_dto::{Form, FormOutput};
 use crate::dto::form_field_dto::FormField;
-use crate::errors::{BigError, StrumParseSnafu};
-use async_graphql::{Enum, InputObject, SimpleObject};
+use crate::errors::BigError;
+use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use snafu::ResultExt;
+use std::str::FromStr;
 use strum::IntoEnumIterator;
-use strum::{Display, EnumIter, EnumString};
 use uuid::Uuid;
 
 #[derive(InputObject, Serialize, Deserialize, Clone, Debug)]
@@ -278,14 +275,12 @@ impl From<EnumListsOutput> for EnumLists {
 
 impl FormStructure {
     /*
-    the user is creating or editin a form, and we replace it with our own preset values
-       TODO: Versioning
-       - if the user is updating an old form that uses an older form template, we need to take that into account.
+        ALL form validation concerns happen here. Otherwise we are dealing with strings.
+        This does make me think that JSON might be more applicable.
+        Already this feels a lot better though.
     */
     pub fn validate_form(&self) -> Result<FormStructure, BigError> {
-        use crate::dive_forms::current_form::{
-            AllEnums, CategoryNames, DisciplinesEnum, FieldNames, FieldValueTypes,
-        };
+        use crate::dive_forms::current_form::{AllEnums, DisciplinesEnum, FieldValueTypes};
         let template = FormStructure::get_latest_form_template();
 
         let mut new_fields = vec![];
@@ -396,8 +391,9 @@ impl FormStructure {
         })
     }
 
-    // TODO: Probably get this from JSON/DOCUMENTATION files
     pub fn get_latest_form_template() -> FormStructureOutput {
+        // Only use locally scoped variables
+        // Client should ONLY receive strings. No enums.
         use crate::dive_forms::current_form::{
             AllEnums, CategoryNames, DisciplinesEnum, FieldNames, FieldValueTypes,
         };
