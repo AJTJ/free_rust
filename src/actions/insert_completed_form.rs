@@ -59,7 +59,7 @@ pub async fn insert_completed_form(
                 field_name: c.field_name.to_string(),
                 field_value: c.field_value.clone(),
                 category_name: c.category_name.to_string(),
-                field_value_type: c.field_value_type.to_string(),
+                field_value_type: c.field_value_type.iter().map(|t| t.to_string()).collect(),
 
                 completed_form_id: new_created_form_from_db.id,
                 user_id,

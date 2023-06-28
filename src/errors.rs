@@ -75,6 +75,9 @@ pub enum BigError {
     #[snafu(display("Delete Error: {}", source))]
     DieselDeleteError { source: DieselError },
 
+    #[snafu(display("Incorrect DB values error: "))]
+    DieselIncorrectDBValues,
+
     // LOGIN
     #[snafu(display("incorrect password"))]
     WrongPassword,
@@ -83,8 +86,8 @@ pub enum BigError {
     #[snafu(display("Fields not matching"))]
     FormFieldNotMatching,
 
-    #[snafu(display("Fields not matching"))]
-    FormValueNotMatching,
+    #[snafu(display("Fields not matching: {}", val))]
+    FormValueNotMatching { val: String },
 }
 
 // #[derive(Debug)]

@@ -4,9 +4,9 @@ diesel::table! {
     completed_form_fields (id) {
         field_order -> Nullable<Int4>,
         field_name -> Text,
-        field_value -> Nullable<Text>,
+        field_value -> Nullable<Array<Nullable<Text>>>,
         category_name -> Text,
-        field_value_type -> Text,
+        field_value_type -> Array<Nullable<Text>>,
         completed_form_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
@@ -73,9 +73,9 @@ diesel::table! {
     form_fields (id) {
         field_order -> Nullable<Int4>,
         field_name -> Text,
-        field_value -> Nullable<Text>,
+        field_value -> Nullable<Array<Nullable<Text>>>,
         category_name -> Text,
-        field_value_type -> Text,
+        field_value_type -> Array<Nullable<Text>>,
         form_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,

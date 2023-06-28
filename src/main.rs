@@ -16,17 +16,21 @@ pub mod helpers;
 pub mod schema;
 pub mod token_source;
 
-use actix_web::http::header::{HeaderMap, AUTHORIZATION, COOKIE};
-use actix_web::middleware::Logger;
-use actix_web::rt;
-use actix_web::web::Data;
-use actix_web::{guard, web, HttpRequest, Result};
-use actix_web::{App, HttpResponse, HttpServer};
-use async_graphql::dataloader::DataLoader;
-use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{EmptySubscription, Schema};
+use actix_web::{
+    guard,
+    http::header::{HeaderMap, AUTHORIZATION, COOKIE},
+    middleware::{self, Logger},
+    rt,
+    web::{self, Data},
+    App, HttpRequest, HttpResponse, HttpServer, Result,
+};
+
+use async_graphql::{
+    dataloader::DataLoader,
+    http::{playground_source, GraphQLPlaygroundConfig},
+    EmptySubscription, Schema,
+};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use auth_data::RedisPool;
 use data_loaders::DiveSessionsLoader;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
@@ -35,14 +39,11 @@ use graphql_schema::{DbPool, DiveQLSchema, Mutation, Query};
 use r2d2;
 use redis::Client;
 use std::env;
-use std::sync::{Arc, Mutex};
 use token_source::Token;
 
 // tracing
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-
-use crate::helpers::token_helpers::TOKEN_NAME;
 
 async fn index_playground() -> Result<HttpResponse> {
     let source = playground_source(GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"));
@@ -118,6 +119,7 @@ async fn main() -> std::io::Result<()> {
         ))
         .data(pooled_database.clone())
         .data(env_vars)
+        .limit_depth(5)
         .finish();
 
     // println!("{}", &schema.sdl());
@@ -126,6 +128,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(middleware::Compress::default())
             .app_data(Data::new(schema.clone()))
             .wrap(Logger::default())
             .service(web::resource("/").guard(guard::Get()).to(index_playground))

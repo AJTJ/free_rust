@@ -22,6 +22,7 @@ pub struct CookieStruct {
     pub encoded_session_id: Option<String>,
 }
 
+// TODO: Should AUTHORIZATION tokens and COOKIES have expiries built-in?
 pub fn create_cookie<'c>(encoded_session_id: String) -> Cookie<'c> {
     let cookie_struct = CookieStruct {
         encoded_session_id: Some(encoded_session_id),

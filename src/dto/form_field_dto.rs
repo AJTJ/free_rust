@@ -14,9 +14,9 @@ pub struct FormFieldCreation {
     pub field_order: Option<i32>,
 
     pub field_name: String,
-    pub field_value: Option<String>,
+    pub field_value: Option<Vec<String>>,
     pub category_name: String,
-    pub field_value_type: String,
+    pub field_value_type: Vec<String>,
 
     pub form_id: Uuid,
     pub user_id: Uuid,
@@ -33,9 +33,9 @@ pub struct FormField {
     pub field_order: Option<i32>,
     // field data
     pub field_name: String,
-    pub field_value: Option<String>,
+    pub field_value: Option<Vec<Option<String>>>,
     pub category_name: String,
-    pub field_value_type: String,
+    pub field_value_type: Vec<Option<String>>,
     // relationships
     #[graphql(skip)]
     pub form_id: Uuid,

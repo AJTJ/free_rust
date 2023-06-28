@@ -23,7 +23,6 @@ pub enum FieldValueTypes {
     Timestamp,
     Interval,
     Text,
-    EnumANDNumber,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -87,46 +86,107 @@ pub enum Disciplines {
 pub struct FSField {
     pub field_order: Option<i32>,
     pub field_name: FieldNames,
-    pub field_value: Option<String>,
+    pub field_value: Option<Vec<String>>,
     pub category_name: CategoryNames,
-    pub field_value_type: FieldValueTypes,
+    pub field_value_type: Vec<FieldValueTypes>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, SimpleObject)]
 pub struct FSFieldOutput {
     pub field_order: Option<i32>,
     pub field_name: FieldNames,
-    pub field_value: Option<String>,
+    pub field_value: Option<Vec<String>>,
     pub category_name: CategoryNames,
-    pub field_value_type: FieldValueTypes,
+    pub field_value_type: Vec<FieldValueTypes>,
 }
 
 impl FSFieldOutput {
     pub fn from_form_field(f: &FormField) -> Result<Self, BigError> {
         let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
         let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
-        let field_value_type =
-            FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
+
+        // let field_value_type =
+        //     FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
+
+        let my_field_value = &f
+            .field_value
+            .clone()
+            .map(|v| {
+                v.into_iter()
+                    .map(|maybe_str| {
+                        if let Some(x) = maybe_str {
+                            Ok(x)
+                        } else {
+                            Err(BigError::DieselIncorrectDBValues)
+                        }
+                    })
+                    .collect::<Result<Vec<String>, BigError>>()
+            })
+            .transpose()?;
+
+        let my_field_value_types = &f
+            .field_value_type
+            .clone()
+            .into_iter()
+            .map(|maybe_str| {
+                if let Some(x) = maybe_str {
+                    FieldValueTypes::from_str(&x).context(StrumParseSnafu)
+                } else {
+                    Err(BigError::DieselIncorrectDBValues)
+                }
+            })
+            .collect::<Result<Vec<FieldValueTypes>, BigError>>()?;
+
         Ok(FSFieldOutput {
             field_order: f.field_order,
             field_name,
-            field_value: f.field_value.clone(),
+            field_value: my_field_value.clone(),
             category_name: cat_name,
-            field_value_type,
+            field_value_type: my_field_value_types.clone(),
         })
     }
 
     pub fn from_completed_form_field(f: &CompletedFormField) -> Result<Self, BigError> {
         let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
         let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
-        let field_value_type =
-            FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
+        // let field_value_type =
+        //     FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
+
+        let my_field_value = &f
+            .field_value
+            .clone()
+            .map(|v| {
+                v.into_iter()
+                    .map(|maybe_str| {
+                        if let Some(x) = maybe_str {
+                            Ok(x)
+                        } else {
+                            Err(BigError::DieselIncorrectDBValues)
+                        }
+                    })
+                    .collect::<Result<Vec<String>, BigError>>()
+            })
+            .transpose()?;
+
+        let my_field_value_types = &f
+            .field_value_type
+            .clone()
+            .into_iter()
+            .map(|maybe_str| {
+                if let Some(x) = maybe_str {
+                    FieldValueTypes::from_str(&x).context(StrumParseSnafu)
+                } else {
+                    Err(BigError::DieselIncorrectDBValues)
+                }
+            })
+            .collect::<Result<Vec<FieldValueTypes>, BigError>>()?;
+
         Ok(FSFieldOutput {
             field_order: f.field_order,
             field_name,
-            field_value: f.field_value.clone(),
+            field_value: my_field_value.clone(),
             category_name: cat_name,
-            field_value_type,
+            field_value_type: my_field_value_types.clone(),
         })
     }
 }
@@ -278,65 +338,41 @@ impl FormStructure {
                     return Err(BigError::FormFieldNotMatching);
                 }
 
-                if let Some(val) = &field.field_value {
-                    let val_ok = match field.field_value_type {
-                        FieldValueTypes::Number => val
-                            .parse::<i32>()
-                            .map_err(|e| BigError::ParseIntError { source: e })
-                            .is_ok(),
-                        FieldValueTypes::Enum => template
-                            .enums
-                            .as_ref()
-                            .and_then(|e| {
-                                e.iter()
-                                    .find(|e| e.field_name == field.field_name)
-                                    .and_then(|e| Some(e.enums.contains(&val)))
-                            })
-                            .is_some(),
+                if let Some(all_values) = &field.field_value {
+                    for (field_value, field_type) in
+                        all_values.iter().zip(field.field_value_type.iter())
+                    {
+                        let val_ok = match field_type {
+                            FieldValueTypes::Number => field_value
+                                .parse::<i32>()
+                                .map_err(|e| BigError::ParseIntError { source: e })
+                                .is_ok(),
+                            FieldValueTypes::Enum => template
+                                .enums
+                                .as_ref()
+                                .and_then(|e| {
+                                    e.iter()
+                                        .find(|e| e.field_name == field.field_name)
+                                        .and_then(|e| Some(e.enums.contains(&field_value)))
+                                })
+                                .is_some(),
 
-                        FieldValueTypes::Timestamp => NaiveDateTime::from_str(&val)
-                            .map_err(|e| BigError::ChronoParseError { source: e })
-                            .is_ok(),
-                        FieldValueTypes::Interval => val
-                            .parse::<u64>()
-                            .map_err(|e| BigError::ParseIntError { source: e })
-                            .is_ok(),
-                        FieldValueTypes::Text => true,
-                        FieldValueTypes::EnumANDNumber => {
-                            let struct_val = serde_json::from_str::<EnumAndNumberStruct>(&val)
-                                .map_err(|e| BigError::SerdeParseError { source: e });
-
-                            match struct_val {
-                                Ok(struct_val) => {
-                                    let enum_res = template
-                                        .enums
-                                        .as_ref()
-                                        .and_then(|e| {
-                                            e.iter()
-                                                .find(|e| e.field_name == field.field_name)
-                                                .and_then(|e| {
-                                                    Some(e.enums.contains(&struct_val.enum_type))
-                                                })
-                                        })
-                                        .is_some();
-
-                                    let number_res = struct_val
-                                        .number_value
-                                        .parse::<i32>()
-                                        .map_err(|e| BigError::ParseIntError { source: e })
-                                        .is_ok();
-
-                                    enum_res || number_res
-                                }
-                                Err(_) => false,
-                            }
+                            FieldValueTypes::Timestamp => NaiveDateTime::from_str(&field_value)
+                                .map_err(|e| BigError::ChronoParseError { source: e })
+                                .is_ok(),
+                            FieldValueTypes::Interval => field_value
+                                .parse::<u64>()
+                                .map_err(|e| BigError::ParseIntError { source: e })
+                                .is_ok(),
+                            FieldValueTypes::Text => true,
+                        };
+                        if !val_ok {
+                            return Err(BigError::FormValueNotMatching {
+                                val: field_value.clone(),
+                            });
                         }
-                    };
-                    if !val_ok {
-                        return Err(BigError::FormValueNotMatching);
                     }
                 }
-
                 // push the input form to the new fields, thus keeping the value if it is completed
                 new_fields.push(field.clone())
             } else {
@@ -377,21 +413,21 @@ impl FormStructure {
                     field_value: None,
                     field_name: FieldNames::GeneralFeeling,
                     category_name: CategoryNames::General,
-                    field_value_type: FieldValueTypes::Number,
+                    field_value_type: vec![FieldValueTypes::Number],
                 }),
                 (FSFieldOutput {
                     field_order: None,
                     field_value: None,
                     field_name: FieldNames::MaxDepthWithDiscipline,
                     category_name: CategoryNames::InWater,
-                    field_value_type: FieldValueTypes::EnumANDNumber,
+                    field_value_type: vec![FieldValueTypes::Number, FieldValueTypes::Enum],
                 }),
                 (FSFieldOutput {
                     field_order: None,
                     field_value: None,
                     field_name: FieldNames::CompletedFormName,
                     category_name: CategoryNames::FormRelated,
-                    field_value_type: FieldValueTypes::Text,
+                    field_value_type: vec![FieldValueTypes::Text],
                 }),
             ],
         }
@@ -435,9 +471,9 @@ impl FormStructure {
     }
 
     pub fn construct_from_completed_form(
-        forms: Vec<CompletedForm>,
-        fields: Vec<CompletedFormField>,
-    ) -> Result<Vec<(String, FormStructureOutput)>, BigError> {
+        forms: &Vec<CompletedForm>,
+        fields: &Vec<CompletedFormField>,
+    ) -> Result<Vec<FormStructureOutput>, BigError> {
         let form_structure_outputs = forms
             .iter()
             .map(|form| {
@@ -457,17 +493,14 @@ impl FormStructure {
                     .map(|f| FSFieldOutput::from_completed_form_field(f))
                     .collect::<Result<Vec<FSFieldOutput>, BigError>>()?;
 
-                Ok((
-                    form.created_at.to_string(),
-                    FormStructureOutput {
-                        form_template_version: version,
-                        form_id: Some(form.id),
-                        enums: structure.enums,
-                        all_fields,
-                    },
-                ))
+                Ok(FormStructureOutput {
+                    form_template_version: version,
+                    form_id: Some(form.id),
+                    enums: structure.enums,
+                    all_fields,
+                })
             })
-            .collect::<Result<Vec<(String, FormStructureOutput)>, BigError>>();
+            .collect::<Result<Vec<FormStructureOutput>, BigError>>();
         form_structure_outputs
     }
 }
@@ -484,45 +517,75 @@ mod tests {
     fn form_lifecycle() {
         use crate::dive_forms::form_helper::*;
 
-        // user gets the latest form template fields and their values etc...
-        // crucially this is everything they need to save and use forms
-        let json_form = FormStructure::get_latest_form_template();
+        // // user gets the latest form template fields and their values etc...
+        // // crucially this is everything they need to save and use forms
+        // let json_form = FormStructure::get_latest_form_template();
 
-        // client returns a custom form
-        let custom_form = FormStructure {
-            form_template_version: vec![1, 0, 0],
-            form_id: None,
-            enums: None,
-            all_fields: vec![FSField {
-                field_order: Some(1),
-                field_value: None,
-                field_name: FieldNames::GeneralFeeling,
-                category_name: CategoryNames::General,
-                field_value_type: FieldValueTypes::Number,
-            }],
-        };
+        // // client returns a custom form
+        // let custom_form = FormStructure {
+        //     form_template_version: vec![1, 0, 0],
+        //     form_id: None,
+        //     enums: None,
+        //     all_fields: vec![FSField {
+        //         field_order: Some(1),
+        //         field_value: None,
+        //         field_name: FieldNames::GeneralFeeling,
+        //         category_name: CategoryNames::General,
+        //         field_value_type: FieldValueTypes::Number,
+        //     }],
+        // };
 
-        // get new form based on the enums from the client
-        let validated_new_form = custom_form.validate_form();
+        // // get new form based on the enums from the client
+        // let validated_new_form = custom_form.validate_form();
 
-        // they create a completed form with it
-        let completed_form = FormStructure {
-            form_template_version: vec![1, 0, 0],
-            form_id: None,
-            enums: None,
-            all_fields: vec![FSField {
-                field_order: Some(1),
-                field_value: Some("100".to_string()),
-                field_name: FieldNames::GeneralFeeling,
-                category_name: CategoryNames::General,
-                field_value_type: FieldValueTypes::Number,
-            }],
-        };
+        // // they create a completed form with it
+        // let completed_form = FormStructure {
+        //     form_template_version: vec![1, 0, 0],
+        //     form_id: None,
+        //     enums: None,
+        //     all_fields: vec![FSField {
+        //         field_order: Some(1),
+        //         field_value: Some("100".to_string()),
+        //         field_name: FieldNames::GeneralFeeling,
+        //         category_name: CategoryNames::General,
+        //         field_value_type: FieldValueTypes::Number,
+        //     }],
+        // };
 
-        // this new form is validated
+        // // this new form is validated
 
-        let validated_completed_form = completed_form.validate_form().unwrap();
+        // let validated_completed_form = completed_form.validate_form().unwrap();
 
         // and is then stored in the database
     }
 }
+
+// FieldValueTypes::EnumANDNumber => {
+//     let struct_val = serde_json::from_str::<EnumAndNumberStruct>(&val)
+//         .map_err(|e| BigError::SerdeParseError { source: e });
+
+//     match struct_val {
+//         Ok(struct_val) => {
+//             let enum_res = template
+//                 .enums
+//                 .as_ref()
+//                 .and_then(|e| {
+//                     e.iter()
+//                         .find(|e| e.field_name == field.field_name)
+//                         .and_then(|e| {
+//                             Some(e.enums.contains(&struct_val.enum_type))
+//                         })
+//                 })
+//                 .is_some();
+
+//             let number_res = struct_val
+//                 .number_value
+//                 .parse::<i32>()
+//                 .map_err(|e| BigError::ParseIntError { source: e })
+//                 .is_ok();
+
+//             enum_res || number_res
+//         }
+//         Err(_) => false,
+//     }
+// }
