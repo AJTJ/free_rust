@@ -119,7 +119,7 @@ async fn main() -> std::io::Result<()> {
         ))
         .data(pooled_database.clone())
         .data(env_vars)
-        .limit_depth(5)
+        .limit_depth(8)
         .finish();
 
     // println!("{}", &schema.sdl());

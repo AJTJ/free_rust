@@ -13,97 +13,28 @@ use strum::IntoEnumIterator;
 use strum::{Display, EnumIter, EnumString};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
-pub enum AllCustomEnums {}
-
-#[derive(Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq)]
-pub enum FieldValueTypes {
-    Number,
-    Enum,
-    Timestamp,
-    Interval,
-    Text,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct EnumAndNumberStruct {
-    number_value: String,
-    enum_value: String,
-    enum_type: String,
-}
-
-#[derive(Enum, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Debug, EnumString, Display)]
-pub enum FieldNames {
-    // FormRelated
-    CompletedFormName,
-    // InWater
-    MaxDepth,
-    MaxDepthWithDiscipline,
-    WarmUp,
-    Injury,
-    // General
-    GeneralFeeling,
-    EqualizationEase,
-    // Health
-    Condition,
-    Congestion,
-    // Environment
-    Visibility,
-    CurrentStrength,
-    WindStrength,
-    WaveStrength,
-    Rain,
-    AirTemp,
-    WaterTemp,
-}
-
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq)]
-pub enum CategoryNames {
-    FormRelated,
-    General,
-    Environment,
-    InWater,
-    Health,
-    // pre dive
-    Exertion,
-    Sleep,
-    Food,
-    PreviousDay,
-}
-
-#[derive(
-    Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq, EnumIter,
-)]
-pub enum Disciplines {
-    CWT,
-    CNF,
-    FIM,
-    DNF,
-    STA,
-}
-
 #[derive(InputObject, Serialize, Deserialize, Clone, Debug)]
 pub struct FSField {
     pub field_order: Option<i32>,
-    pub field_name: FieldNames,
+    pub field_name: String,
     pub field_value: Option<Vec<String>>,
-    pub category_name: CategoryNames,
-    pub field_value_type: Vec<FieldValueTypes>,
+    pub category_name: String,
+    pub field_value_type: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, SimpleObject)]
 pub struct FSFieldOutput {
     pub field_order: Option<i32>,
-    pub field_name: FieldNames,
+    pub field_name: String,
     pub field_value: Option<Vec<String>>,
-    pub category_name: CategoryNames,
-    pub field_value_type: Vec<FieldValueTypes>,
+    pub category_name: String,
+    pub field_value_type: Vec<String>,
 }
 
 impl FSFieldOutput {
     pub fn from_form_field(f: &FormField) -> Result<Self, BigError> {
-        let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
-        let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
+        // let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
+        // let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
 
         // let field_value_type =
         //     FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
@@ -130,25 +61,26 @@ impl FSFieldOutput {
             .into_iter()
             .map(|maybe_str| {
                 if let Some(x) = maybe_str {
-                    FieldValueTypes::from_str(&x).context(StrumParseSnafu)
+                    // FieldValueTypes::from_str(&x).context(StrumParseSnafu)
+                    Ok(x)
                 } else {
                     Err(BigError::DieselIncorrectDBValues)
                 }
             })
-            .collect::<Result<Vec<FieldValueTypes>, BigError>>()?;
+            .collect::<Result<Vec<String>, BigError>>()?;
 
         Ok(FSFieldOutput {
             field_order: f.field_order,
-            field_name,
+            field_name: f.field_name.clone(),
             field_value: my_field_value.clone(),
-            category_name: cat_name,
+            category_name: f.category_name.clone(),
             field_value_type: my_field_value_types.clone(),
         })
     }
 
     pub fn from_completed_form_field(f: &CompletedFormField) -> Result<Self, BigError> {
-        let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
-        let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
+        // let cat_name = CategoryNames::from_str(&f.category_name).context(StrumParseSnafu)?;
+        // let field_name = FieldNames::from_str(&f.field_name).context(StrumParseSnafu)?;
         // let field_value_type =
         //     FieldValueTypes::from_str(&f.field_value_type).context(StrumParseSnafu)?;
 
@@ -174,18 +106,19 @@ impl FSFieldOutput {
             .into_iter()
             .map(|maybe_str| {
                 if let Some(x) = maybe_str {
-                    FieldValueTypes::from_str(&x).context(StrumParseSnafu)
+                    // FieldValueTypes::from_str(&x).context(StrumParseSnafu)
+                    Ok(x)
                 } else {
                     Err(BigError::DieselIncorrectDBValues)
                 }
             })
-            .collect::<Result<Vec<FieldValueTypes>, BigError>>()?;
+            .collect::<Result<Vec<String>, BigError>>()?;
 
         Ok(FSFieldOutput {
             field_order: f.field_order,
-            field_name,
+            field_name: f.field_name.clone(),
             field_value: my_field_value.clone(),
-            category_name: cat_name,
+            category_name: f.category_name.clone(),
             field_value_type: my_field_value_types.clone(),
         })
     }
@@ -215,11 +148,22 @@ impl From<FSFieldOutput> for FSField {
     }
 }
 
+// #[derive(Serialize, Deserialize, Clone, InputObject)]
+// pub struct FormStructure {
+//     pub form_template_version: Vec<i32>,
+//     pub form_id: Option<Uuid>,
+//     pub enums: Option<Vec<EnumLists>>,
+//     pub all_fields: Vec<FSField>,
+// }
+
 #[derive(Serialize, Deserialize, Clone, InputObject)]
 pub struct FormStructure {
     pub form_template_version: Vec<i32>,
     pub form_id: Option<Uuid>,
-    pub enums: Option<Vec<EnumLists>>,
+    pub field_names: Vec<String>,
+    pub category_names: Vec<String>,
+    pub field_value_types: Vec<String>,
+    pub enums: Vec<EnumLists>,
     pub all_fields: Vec<FSField>,
 }
 
@@ -227,20 +171,28 @@ pub struct FormStructure {
 pub struct FormStructureOutput {
     pub form_template_version: Vec<i32>,
     pub form_id: Option<Uuid>,
-    pub enums: Option<Vec<EnumListsOutput>>,
+    pub field_names: Vec<String>,
+    pub category_names: Vec<String>,
+    pub field_value_types: Vec<String>,
+    pub enums: Vec<EnumListsOutput>,
     pub all_fields: Vec<FSFieldOutput>,
 }
 
 impl From<FormStructure> for FormStructureOutput {
     fn from(value: FormStructure) -> Self {
-        let my_enums = match value.enums {
-            Some(e) => Some(
-                e.into_iter()
-                    .map(|e| EnumListsOutput::from(e))
-                    .collect::<Vec<EnumListsOutput>>(),
-            ),
-            None => None,
-        };
+        // let my_enums = match value.enums {
+        //     Some(e) => Some(
+        //         e.into_iter()
+        //             .map(|e| EnumListsOutput::from(e))
+        //             .collect::<Vec<EnumListsOutput>>(),
+        //     ),
+        //     None => None,
+        // };
+        let my_enums = value
+            .enums
+            .into_iter()
+            .map(|e| EnumListsOutput::from(e))
+            .collect::<Vec<EnumListsOutput>>();
 
         let my_fields = value
             .all_fields
@@ -251,6 +203,9 @@ impl From<FormStructure> for FormStructureOutput {
         FormStructureOutput {
             form_template_version: value.form_template_version,
             form_id: value.form_id,
+            field_names: value.field_names,
+            category_names: value.category_names,
+            field_value_types: value.field_value_types,
             enums: my_enums,
             all_fields: my_fields,
         }
@@ -259,14 +214,19 @@ impl From<FormStructure> for FormStructureOutput {
 
 impl From<FormStructureOutput> for FormStructure {
     fn from(value: FormStructureOutput) -> Self {
-        let my_enums = match value.enums {
-            Some(e) => Some(
-                e.into_iter()
-                    .map(|e| EnumLists::from(e))
-                    .collect::<Vec<EnumLists>>(),
-            ),
-            None => None,
-        };
+        // let my_enums = match value.enums {
+        //     Some(e) => Some(
+        //         e.into_iter()
+        //             .map(|e| EnumLists::from(e))
+        //             .collect::<Vec<EnumLists>>(),
+        //     ),
+        //     None => None,
+        // };
+        let my_enums = value
+            .enums
+            .into_iter()
+            .map(|e| EnumLists::from(e))
+            .collect::<Vec<EnumLists>>();
 
         let my_fields = value
             .all_fields
@@ -277,28 +237,31 @@ impl From<FormStructureOutput> for FormStructure {
         FormStructure {
             form_template_version: value.form_template_version,
             form_id: value.form_id,
+            field_names: value.field_names,
+            category_names: value.category_names,
+            field_value_types: value.field_value_types,
             enums: my_enums,
             all_fields: my_fields,
         }
     }
 }
 
-#[derive(InputObject, Serialize, Deserialize, Clone)]
+#[derive(InputObject, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct EnumLists {
-    field_name: FieldNames,
+    enum_name: String,
     enums: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, SimpleObject)]
+#[derive(Serialize, Deserialize, Clone, SimpleObject, PartialEq, Eq)]
 pub struct EnumListsOutput {
-    field_name: FieldNames,
+    enum_name: String,
     enums: Vec<String>,
 }
 
 impl From<EnumLists> for EnumListsOutput {
     fn from(value: EnumLists) -> Self {
         EnumListsOutput {
-            field_name: value.field_name,
+            enum_name: value.enum_name,
             enums: value.enums,
         }
     }
@@ -307,7 +270,7 @@ impl From<EnumLists> for EnumListsOutput {
 impl From<EnumListsOutput> for EnumLists {
     fn from(value: EnumListsOutput) -> Self {
         EnumLists {
-            field_name: value.field_name,
+            enum_name: value.enum_name,
             enums: value.enums,
         }
     }
@@ -320,18 +283,44 @@ impl FormStructure {
        - if the user is updating an old form that uses an older form template, we need to take that into account.
     */
     pub fn validate_form(&self) -> Result<FormStructure, BigError> {
-        let template = FormStructure::get_versioned_form_template(&self.form_template_version);
+        use crate::dive_forms::current_form::{
+            AllEnums, CategoryNames, DisciplinesEnum, FieldNames, FieldValueTypes,
+        };
+        let template = FormStructure::get_latest_form_template();
 
         let mut new_fields = vec![];
 
+        // compare the category, field_names, enums and field_value_types
+        if self.field_names != template.field_names
+            || self.category_names != template.category_names
+            || self.field_value_types != template.field_value_types
+            || self
+                .enums
+                .clone()
+                .into_iter()
+                .map(|e| EnumListsOutput::from(e))
+                .collect::<Vec<EnumListsOutput>>()
+                != template.enums
+        {
+            return Err(BigError::FormFieldNotMatching);
+        }
+
         for field in &self.all_fields {
-            // check that there is a related template field
+            // Check that the category name and field name is valid against the templates options
+            if !template.category_names.contains(&field.category_name)
+                || !template.field_names.contains(&field.field_name)
+            {
+                return Err(BigError::FormFieldNotMatching);
+            }
+
+            // check that there is a related template field (also checking the field_name)
             let template_field = template
                 .all_fields
                 .iter()
                 .find(|e| e.field_name == field.field_name);
 
             if let Some(template_field) = template_field {
+                // check if the category and value types are equal
                 if template_field.category_name != field.category_name
                     || template_field.field_value_type != field.field_value_type
                 {
@@ -342,30 +331,40 @@ impl FormStructure {
                     for (field_value, field_type) in
                         all_values.iter().zip(field.field_value_type.iter())
                     {
-                        let val_ok = match field_type {
-                            FieldValueTypes::Number => field_value
-                                .parse::<i32>()
-                                .map_err(|e| BigError::ParseIntError { source: e })
-                                .is_ok(),
-                            FieldValueTypes::Enum => template
-                                .enums
-                                .as_ref()
-                                .and_then(|e| {
-                                    e.iter()
-                                        .find(|e| e.field_name == field.field_name)
-                                        .and_then(|e| Some(e.enums.contains(&field_value)))
-                                })
-                                .is_some(),
-
-                            FieldValueTypes::Timestamp => NaiveDateTime::from_str(&field_value)
-                                .map_err(|e| BigError::ChronoParseError { source: e })
-                                .is_ok(),
-                            FieldValueTypes::Interval => field_value
-                                .parse::<u64>()
-                                .map_err(|e| BigError::ParseIntError { source: e })
-                                .is_ok(),
-                            FieldValueTypes::Text => true,
+                        let val_ok = match FieldValueTypes::from_str(&field_type) {
+                            Ok(field_type) => match field_type {
+                                FieldValueTypes::Number => field_value
+                                    .parse::<i32>()
+                                    .map_err(|e| BigError::ParseIntError { source: e })
+                                    .is_ok(),
+                                // FieldValueTypes::Enum => template
+                                //     .enums
+                                //     .as_ref()
+                                //     .and_then(|e| {
+                                //         e.iter()
+                                //             .find(|e| e.enum_name == field.enum_name)
+                                //             .and_then(|e| Some(e.enums.contains(&field_value)))
+                                //     })
+                                //     .is_some(),
+                                FieldValueTypes::Timestamp => NaiveDateTime::from_str(&field_value)
+                                    .map_err(|e| BigError::ChronoParseError { source: e })
+                                    .is_ok(),
+                                FieldValueTypes::Interval => field_value
+                                    .parse::<u64>()
+                                    .map_err(|e| BigError::ParseIntError { source: e })
+                                    .is_ok(),
+                                FieldValueTypes::Text => true,
+                            },
+                            Err(_) => match AllEnums::from_str(&field_type) {
+                                Ok(field_type) => match field_type {
+                                    AllEnums::DisciplinesEnum => {
+                                        DisciplinesEnum::from_str(&field_value).is_ok()
+                                    }
+                                },
+                                Err(_) => false,
+                            },
                         };
+
                         if !val_ok {
                             return Err(BigError::FormValueNotMatching {
                                 val: field_value.clone(),
@@ -384,56 +383,72 @@ impl FormStructure {
         // Does this make sense?
         Ok(FormStructure {
             form_id: self.form_id.clone(),
-            enums: template.enums,
+            field_names: template.field_names,
+            category_names: template.category_names,
+            field_value_types: template.field_value_types,
+            enums: template
+                .enums
+                .into_iter()
+                .map(|e| EnumLists::from(e))
+                .collect::<Vec<EnumLists>>(),
             form_template_version: template.form_template_version,
             all_fields: new_fields,
         })
     }
 
     // TODO: Probably get this from JSON/DOCUMENTATION files
-    pub fn get_versioned_form_template(version: &Vec<i32>) -> FormStructure {
-        // SHOULD DO A SEARCH HERE OF ALL THE FORMS
-        let output = Self::get_latest_form_template();
-        output.into()
-    }
-    // TODO: Probably get this from JSON/DOCUMENTATION files
     pub fn get_latest_form_template() -> FormStructureOutput {
+        use crate::dive_forms::current_form::{
+            AllEnums, CategoryNames, DisciplinesEnum, FieldNames, FieldValueTypes,
+        };
         FormStructureOutput {
             form_template_version: vec![1, 0, 0],
             form_id: None,
-            enums: Some(vec![EnumListsOutput {
-                field_name: FieldNames::MaxDepthWithDiscipline,
-                enums: Disciplines::iter()
+            field_names: FieldNames::iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<String>>(),
+            category_names: CategoryNames::iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<String>>(),
+            field_value_types: FieldValueTypes::iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<String>>(),
+            enums: vec![EnumListsOutput {
+                enum_name: AllEnums::DisciplinesEnum.to_string(),
+                enums: DisciplinesEnum::iter()
                     .map(|e| e.to_string())
                     .collect::<Vec<String>>(),
-            }]),
+            }],
             all_fields: vec![
                 (FSFieldOutput {
                     field_order: None,
                     field_value: None,
-                    field_name: FieldNames::GeneralFeeling,
-                    category_name: CategoryNames::General,
-                    field_value_type: vec![FieldValueTypes::Number],
+                    field_name: FieldNames::GeneralFeeling.to_string(),
+                    category_name: CategoryNames::General.to_string(),
+                    field_value_type: vec![FieldValueTypes::Number.to_string()],
                 }),
                 (FSFieldOutput {
                     field_order: None,
                     field_value: None,
-                    field_name: FieldNames::MaxDepthWithDiscipline,
-                    category_name: CategoryNames::InWater,
-                    field_value_type: vec![FieldValueTypes::Number, FieldValueTypes::Enum],
+                    field_name: FieldNames::MaxDepthWithDiscipline.to_string(),
+                    category_name: CategoryNames::InWater.to_string(),
+                    field_value_type: vec![
+                        FieldValueTypes::Number.to_string(),
+                        AllEnums::DisciplinesEnum.to_string(),
+                    ],
                 }),
                 (FSFieldOutput {
                     field_order: None,
                     field_value: None,
-                    field_name: FieldNames::CompletedFormName,
-                    category_name: CategoryNames::FormRelated,
-                    field_value_type: vec![FieldValueTypes::Text],
+                    field_name: FieldNames::CompletedFormName.to_string(),
+                    category_name: CategoryNames::FormRelated.to_string(),
+                    field_value_type: vec![FieldValueTypes::Text.to_string()],
                 }),
             ],
         }
     }
 
-    pub fn construct_from_form(
+    pub fn construct_from_forms(
         forms: Vec<Form>,
         fields: Vec<FormField>,
     ) -> Result<Vec<FormOutput>, BigError> {
@@ -461,6 +476,9 @@ impl FormStructure {
                     form_structure: FormStructureOutput {
                         form_template_version: version,
                         form_id: Some(form.id),
+                        field_names: structure.field_names,
+                        category_names: structure.category_names,
+                        field_value_types: structure.field_value_types,
                         enums: structure.enums,
                         all_fields,
                     },
@@ -470,7 +488,7 @@ impl FormStructure {
         form_structure_outputs
     }
 
-    pub fn construct_from_completed_form(
+    pub fn construct_from_completed_forms(
         forms: &Vec<CompletedForm>,
         fields: &Vec<CompletedFormField>,
     ) -> Result<Vec<FormStructureOutput>, BigError> {
@@ -496,6 +514,9 @@ impl FormStructure {
                 Ok(FormStructureOutput {
                     form_template_version: version,
                     form_id: Some(form.id),
+                    field_names: structure.field_names,
+                    category_names: structure.category_names,
+                    field_value_types: structure.field_value_types,
                     enums: structure.enums,
                     all_fields,
                 })
@@ -515,7 +536,7 @@ WHAT IS HAPPENING
 mod tests {
     #[test]
     fn form_lifecycle() {
-        use crate::dive_forms::form_helper::*;
+        // use crate::dive_forms::form_helper::*;
 
         // // user gets the latest form template fields and their values etc...
         // // crucially this is everything they need to save and use forms
@@ -588,4 +609,38 @@ mod tests {
 //         }
 //         Err(_) => false,
 //     }
+// }
+
+// FormStructureOutput {
+//     form_template_version: vec![1, 0, 0],
+//     form_id: None,
+//     enums: Some(vec![EnumListsOutput {
+//         field_name: FieldNames::MaxDepthWithDiscipline,
+//         enums: Disciplines::iter()
+//             .map(|e| e.to_string())
+//             .collect::<Vec<String>>(),
+//     }]),
+//     all_fields: vec![
+//         (FSFieldOutput {
+//             field_order: None,
+//             field_value: None,
+//             field_name: FieldNames::GeneralFeeling,
+//             category_name: CategoryNames::General,
+//             field_value_type: vec![FieldValueTypes::Number],
+//         }),
+//         (FSFieldOutput {
+//             field_order: None,
+//             field_value: None,
+//             field_name: FieldNames::MaxDepthWithDiscipline,
+//             category_name: CategoryNames::InWater,
+//             field_value_type: vec![FieldValueTypes::Number, FieldValueTypes::Enum],
+//         }),
+//         (FSFieldOutput {
+//             field_order: None,
+//             field_value: None,
+//             field_name: FieldNames::CompletedFormName,
+//             category_name: CategoryNames::FormRelated,
+//             field_value_type: vec![FieldValueTypes::Text],
+//         }),
+//     ],
 // }

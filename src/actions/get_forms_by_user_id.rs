@@ -31,5 +31,5 @@ pub fn get_forms_by_user_id(
         .get_results::<FormField>(conn)
         .context(DieselQuerySnafu)?;
 
-    FormStructure::construct_from_form(my_forms, my_form_fields)
+    FormStructure::construct_from_forms(my_forms, my_form_fields)
 }

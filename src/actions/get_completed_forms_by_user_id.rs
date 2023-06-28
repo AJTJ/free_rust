@@ -55,7 +55,7 @@ pub fn get_completed_forms_by_user_id(
         .get_results::<CompletedFormField>(conn)
         .context(DieselQuerySnafu)?;
 
-    let res = FormStructure::construct_from_completed_form(&my_completed_forms, &my_form_fields)?;
+    let res = FormStructure::construct_from_completed_forms(&my_completed_forms, &my_form_fields)?;
 
     let mut connection = Connection::new(query_params.after.is_some(), res.len() > desired_count);
     connection.edges.extend(
