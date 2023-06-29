@@ -23,7 +23,8 @@
 `docker run --name free-rust-postgres -e POSTGRES_PASSWORD=mysecretpassword -dp 5432:5432 postgres`
 - ensure you have postgres installed on your machine (diesel-cli requires)
 - install diesel-cli `cargo install diesel_cli --no-default-features --features postgres`
-- `echo DATABASE_URL=postgres://postgres:mysecretpassword@localhost/free-rust-postgres > .env`
+
+## Once server image is loaded
 - `diesel setup` to set up database
 - run `diesel migration run` while in the repo to build database
 - start/compile the server with `cargo run`
