@@ -5,8 +5,10 @@ use crate::guards::{DevelopmentGuard, LoggedInGuard};
 
 use super::form_1::{FormInputV1, FormOutputV1};
 
+#[derive(Default)]
 pub struct Query;
 
+#[derive(Default)]
 pub struct Mutation;
 
 #[Object]

@@ -112,7 +112,7 @@ async fn main() -> std::io::Result<()> {
     let env_vars = SharedVars { environment };
 
     // graphql schema builder
-    let schema = Schema::build(Query, Mutation, EmptySubscription)
+    let schema = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .extension(Tracing)
         .data(redis_pool)
         .data(DataLoader::new(
