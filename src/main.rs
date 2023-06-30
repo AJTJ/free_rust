@@ -27,6 +27,7 @@ use actix_web::{
 
 use async_graphql::{
     dataloader::DataLoader,
+    extensions::Tracing,
     http::{playground_source, GraphQLPlaygroundConfig},
     EmptySubscription, Schema,
 };
@@ -112,6 +113,7 @@ async fn main() -> std::io::Result<()> {
 
     // graphql schema builder
     let schema = Schema::build(Query, Mutation, EmptySubscription)
+        .extension(Tracing)
         .data(redis_pool)
         .data(DataLoader::new(
             DiveSessionsLoader::new(pooled_database.clone()),

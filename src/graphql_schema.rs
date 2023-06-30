@@ -16,6 +16,10 @@ use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
 use crate::dive_forms::form_helper::FormStructureOutput;
+use crate::dive_forms::new_form_idea::FormInput1_0_0;
+use crate::dive_forms::new_form_idea_2::FormInput2_0_0;
+use crate::dive_forms::using_new_form::FormInput as TestFormInput;
+use crate::dive_forms::using_new_form::FormTrait;
 use crate::dto::auth_dto::Login;
 use crate::dto::completed_form_dto::CompletedFormInput;
 use crate::dto::dive_dto::Dive;
@@ -35,8 +39,10 @@ use crate::errors::{ActixBlockingSnafu, BigError};
 use crate::graphql_query::gql_query;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
 use actix_web::web;
-use async_graphql::*;
+// use async_graphql::async_trait::async_trait;
+use async_graphql::InputType;
 use async_graphql::{types::connection::*, Context, EmptySubscription, Object, Schema};
+use async_trait::async_trait;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
@@ -339,4 +345,28 @@ impl Mutation {
         .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselDeleteError { source: e })
     }
+
+    // async fn add_test_form_v_1_0_0(&self, input: TestFormInput<FormInput1_0_0>) -> i32 {
+    //     42
+    // }
+    // async fn add_test_form_v_2_0_0(&self, input: TestFormInput<FormInput2_0_0>) -> i32 {
+    //     42
+    // }
 }
+
+// #[async_trait]
+// pub trait DealsWithForms<T: FormTrait + InputType> {
+//     async fn add_test_form(&self, input_form: TestFormInput<T>) -> i32
+//     where
+//         T: 'async_trait;
+// }
+
+// #[async_trait]
+// impl<T: FormTrait + InputType + Send> DealsWithForms<T> for Mutation {
+//     async fn add_test_form(&self, input_form: TestFormInput<T>) -> i32
+//     where
+//         T: 'async_trait,
+//     {
+//         42
+//     }
+// }
