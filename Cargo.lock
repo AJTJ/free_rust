@@ -1014,7 +1014,6 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-graphql-actix-web",
- "async-trait",
  "base64 0.21.2",
  "bb8",
  "chrono",

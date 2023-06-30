@@ -1,8 +1,0 @@
-{
-  "form_teplate_version": "1.0.0",
-  "all_fields": {
-    "field_name": "GeneralFeeling",
-    "field_value_type": "Number",
-    "another": true
-  }
-}

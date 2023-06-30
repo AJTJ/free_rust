@@ -1,8 +1,0 @@
---
-form_template_version: 1.0.0,
-
-all_fields:
-  GeneralFeeling
-    category_name: al
-    field_value_type: Number
-

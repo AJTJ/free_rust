@@ -15,11 +15,15 @@ use crate::actions::login;
 use crate::actions::logout;
 use crate::actions::update_dive;
 use crate::actions::update_dive_session;
+use crate::dive_forms::form_1::FormInputV1;
+use crate::dive_forms::form_1::FormOutputV1;
 use crate::dive_forms::form_helper::FormStructureOutput;
-use crate::dive_forms::new_form_idea::FormInput1_0_0;
-use crate::dive_forms::new_form_idea_2::FormInput2_0_0;
-use crate::dive_forms::using_new_form::FormInput as TestFormInput;
-use crate::dive_forms::using_new_form::FormTrait;
+use crate::dive_forms::form_trait::FormInputNew;
+use crate::dive_forms::form_trait::FormTrait;
+use crate::dive_forms::helpers::AllFormVersions;
+use crate::dive_forms::helpers::AllFormVersionsInput;
+use crate::dive_forms::helpers::FormVersion;
+use crate::dive_forms::resolvers::{Mutation as FormMutation, Query as FormQuery};
 use crate::dto::auth_dto::Login;
 use crate::dto::completed_form_dto::CompletedFormInput;
 use crate::dto::dive_dto::Dive;
@@ -39,10 +43,8 @@ use crate::errors::{ActixBlockingSnafu, BigError};
 use crate::graphql_query::gql_query;
 use crate::guards::{DevelopmentGuard, LoggedInGuard};
 use actix_web::web;
-// use async_graphql::async_trait::async_trait;
-use async_graphql::InputType;
+use async_graphql::MergedObject;
 use async_graphql::{types::connection::*, Context, EmptySubscription, Object, Schema};
-use async_trait::async_trait;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::RunQueryDsl;
@@ -51,13 +53,21 @@ use snafu::ResultExt;
 use uuid::Uuid;
 
 pub type DiveQLSchema = Schema<Query, Mutation, EmptySubscription>;
-pub struct Query;
-pub struct Mutation;
+
+#[derive(MergedObject, Default)]
+pub struct Query(FormQuery, RootQuery);
+#[derive(Default)]
+pub struct RootQuery;
+
+#[derive(MergedObject, Default)]
+pub struct Mutation(RootMutation, FormMutation);
+#[derive(Default)]
+pub struct RootMutation;
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[Object]
-impl Query {
+impl RootQuery {
     // UNGUARDED - for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
     async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
@@ -210,7 +220,7 @@ impl Query {
 }
 
 #[Object]
-impl Mutation {
+impl RootMutation {
     // Must be UNGUARDED?
     async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();

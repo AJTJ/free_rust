@@ -1,18 +1,21 @@
-use crate::dive_forms::new_form_idea::FormInput1_0_0;
-use crate::dive_forms::new_form_idea_2::FormInput2_0_0;
-use crate::{dive_forms::new_form_idea, errors::BigError};
+use crate::dive_forms::form_1::FormInputV1;
+use crate::errors::BigError;
 use async_graphql::{InputObject, InputType, OutputType, SimpleObject};
 use serde::{Deserialize, Serialize};
+
+use super::helpers::FormVersion;
 pub trait FormTrait {
     fn return_form(&self) -> Self;
+    fn validate_form(&self) -> Self;
+    fn get_template() -> Self;
 }
 
 #[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
-pub struct FormOutput<T: FormTrait + OutputType> {
+pub struct FormOutputNew<T: FormTrait + OutputType> {
     inner: T,
 }
 
-impl<T: FormTrait + OutputType> FormOutput<T> {
+impl<T: FormTrait + OutputType> FormOutputNew<T> {
     // would this be necessary?
     pub fn validate_form(&self) -> Result<T, BigError> {
         // let versioned = self.get_versioned_template(&self);
@@ -21,7 +24,7 @@ impl<T: FormTrait + OutputType> FormOutput<T> {
         unimplemented!()
     }
 
-    pub fn get_versioned_template(&self) -> T {
+    pub fn get_template(version: FormVersion) -> T {
         // Some way to return a template of a form
         // how would this happen?
         unimplemented!()
@@ -34,13 +37,12 @@ impl<T: FormTrait + OutputType> FormOutput<T> {
 }
 
 #[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
-#[graphql(concrete(name = "FormInput1_0_0", params(FormInput1_0_0)))]
-#[graphql(concrete(name = "FormInput2_0_0", params(FormInput2_0_0)))]
-pub struct FormInput<T: FormTrait + InputType> {
-    inner: T,
+#[graphql(concrete(name = "FormInputV_1", params(FormInputV1)))]
+pub struct FormInputNew<T: FormTrait + InputType> {
+    pub inner: T,
 }
 
-impl<T: FormTrait + InputType> FormInput<T> {
+impl<T: FormTrait + InputType> FormInputNew<T> {
     // would this be necessary?
     pub fn validate_form(&self) -> Result<T, BigError> {
         // let versioned = self.get_versioned_template(&self);
