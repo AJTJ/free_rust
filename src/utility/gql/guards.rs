@@ -3,7 +3,7 @@ use tracing::info;
 
 use crate::{
     actions::get_user_session_data, env_data::DEV_ENV,
-    helpers::token_helpers::get_cookie_from_token, token_source::Token, SharedVars,
+    helpers::token_helpers::get_cookie_from_token, SharedVars,
 };
 
 #[derive(Eq, PartialEq, Copy, Clone)]
