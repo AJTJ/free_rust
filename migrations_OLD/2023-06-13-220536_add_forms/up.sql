@@ -1,12 +1,11 @@
 -- Your SQL goes here
-CREATE TABLE log_category_entries (
-  -- entry_specific_data
-  -- NOTE: Is this table even necessary?
-  item_order INTEGER,
-  -- relationship data
-  -- For getting the category info
-  logger_category_type_id uuid NOT NULL REFERENCES logger_category_types (id),
+CREATE TABLE forms (
+  form_name TEXT NOT NULL,
+  template_version int [] NOT NULL,
+  -- relationships
   user_id uuid NOT NULL REFERENCES users (id),
+  original_form_id uuid REFERENCES forms(id),
+  previous_form_id uuid REFERENCES forms(id),
   -- default data
   id uuid DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP NOT NULL,
@@ -15,4 +14,4 @@ CREATE TABLE log_category_entries (
   archived_at TIMESTAMP,
   archived_by uuid,
   PRIMARY KEY (id)
-)
+);
