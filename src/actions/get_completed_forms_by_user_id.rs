@@ -1,7 +1,7 @@
-use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
-use crate::dto::completed_form_dto::CompletedForm;
+use crate::apnea_forms::form_helper::{FormStructure, FormStructureOutput};
 use crate::dto::completed_form_field_dto::CompletedFormField;
 use crate::dto::query_dto::QueryParams;
+use crate::dto::report_dto::CompletedForm;
 use crate::errors::{BigError, DieselQuerySnafu};
 use crate::{
     diesel::{BoolExpressionMethods, ExpressionMethods},

@@ -1,4 +1,4 @@
-use crate::{diesel::ExpressionMethods, dto::completed_form_dto::CompletedForm};
+use crate::{diesel::ExpressionMethods, dto::report_dto::CompletedForm};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 

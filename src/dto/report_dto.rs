@@ -1,6 +1,6 @@
 use crate::{
     actions::get_completed_form_fields_by_c_form,
-    dive_forms::form_helper::{FormStructure, FormStructureOutput},
+    apnea_forms::form_helper::{FormStructure, FormStructureOutput},
     errors::BigError,
     graphql_schema::DbPool,
     schema::completed_forms,

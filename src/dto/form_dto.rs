@@ -1,5 +1,5 @@
 use crate::actions::get_form_fields_by_form;
-use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
+use crate::apnea_forms::form_helper::{FormStructure, FormStructureOutput};
 use crate::errors::BigError;
 use crate::{graphql_schema::DbPool, schema::forms};
 use actix_web::web;

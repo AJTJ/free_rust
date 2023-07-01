@@ -2,7 +2,7 @@ use async_graphql::{Enum, InputObject, SimpleObject};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString};
 
-use crate::{dive_forms::helpers::AllFormsOutput, errors::BigError};
+use crate::{apnea_forms::helpers::AllFormsOutput, errors::BigError};
 
 use super::enums::{DisciplinesEnum, WildlifeEnumV1};
 

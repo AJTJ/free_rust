@@ -1,5 +1,5 @@
 use crate::actions::get_form_fields_by_form;
-use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
+use crate::apnea_forms::form_helper::{FormStructure, FormStructureOutput};
 use crate::dto::form_dto::FormOutput;
 use crate::dto::form_field_dto::FormField;
 use crate::dto::query_dto::QueryParams;

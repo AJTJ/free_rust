@@ -1,7 +1,7 @@
 use crate::actions::get_user_id_from_token_and_session;
-use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
-use crate::dto::completed_form_dto::{CompletedForm, CompletedFormCreation, CompletedFormInput};
+use crate::apnea_forms::form_helper::{FormStructure, FormStructureOutput};
 use crate::dto::completed_form_field_dto::{CompletedFormField, CompletedFormFieldCreation};
+use crate::dto::report_dto::{CompletedForm, CompletedFormCreation, CompletedFormInput};
 use crate::errors::BigError;
 use crate::graphql_schema::DbPool;
 

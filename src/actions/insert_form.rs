@@ -1,5 +1,5 @@
 use crate::actions::get_user_id_from_token_and_session;
-use crate::dive_forms::form_helper::{FormStructure, FormStructureOutput};
+use crate::apnea_forms::form_helper::{FormStructure, FormStructureOutput};
 use crate::dto::form_dto::{Form, FormCreation, FormInput};
 use crate::dto::form_field_dto::{FormField, FormFieldCreation};
 use crate::errors::BigError;

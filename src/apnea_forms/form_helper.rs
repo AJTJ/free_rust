@@ -1,7 +1,7 @@
-use crate::dto::completed_form_dto::CompletedForm;
 use crate::dto::completed_form_field_dto::CompletedFormField;
 use crate::dto::form_dto::{Form, FormOutput};
 use crate::dto::form_field_dto::FormField;
+use crate::dto::report_dto::CompletedForm;
 use crate::errors::BigError;
 use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
@@ -280,7 +280,7 @@ impl FormStructure {
         Already this feels a lot better though.
     */
     pub fn validate_form(&self) -> Result<FormStructure, BigError> {
-        use crate::dive_forms::current_form::{AllEnums, DisciplinesEnum, FieldValueTypes};
+        use crate::apnea_forms::current_form::{AllEnums, DisciplinesEnum, FieldValueTypes};
         let template = FormStructure::get_latest_form_template();
 
         let mut new_fields = vec![];
@@ -394,7 +394,7 @@ impl FormStructure {
     pub fn get_latest_form_template() -> FormStructureOutput {
         // Only use locally scoped variables
         // Client should ONLY receive strings. No enums.
-        use crate::dive_forms::current_form::{
+        use crate::apnea_forms::current_form::{
             AllEnums, CategoryNames, DisciplinesEnum, FieldNames, FieldValueTypes,
         };
         FormStructureOutput {
