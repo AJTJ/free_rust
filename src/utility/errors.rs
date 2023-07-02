@@ -30,6 +30,9 @@ pub enum BigError {
     #[snafu(display("Serde Parse Error: {}", source))]
     SerdeParseError { source: SerdeError },
 
+    #[snafu(display("Serde Serialize Error: {}", source))]
+    SerdeSerializeError { source: SerdeError },
+
     // Chrono
     #[snafu(display("No session_id on Token"))]
     ChronoSessionError { source: ChronoParseError },

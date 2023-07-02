@@ -1,8 +1,16 @@
-use async_graphql::{Enum, InputObject, SimpleObject};
+use async_graphql::{Context, Enum, InputObject, SimpleObject};
 use serde::{Deserialize, Serialize};
+use snafu::ResultExt;
 use strum::{Display, EnumIter, EnumString};
+use uuid::Uuid;
 
-use crate::{apnea_forms::helpers::AllFormsOutput, errors::BigError};
+use crate::{
+    apnea_forms::{
+        actions::insert_report::insert_report, dto::report_dto::ReportInput,
+        helpers::AllFormsOutput,
+    },
+    utility::errors::{BigError, SerdeSerializeSnafu},
+};
 
 use super::enums::{DisciplinesEnum, WildlifeEnumV1};
 
@@ -145,15 +153,44 @@ impl From<FormInputV1> for FormOutputV1 {
 // Logic
 
 impl FormOutputV1 {
-    pub fn add_new_form(&self) -> Result<AllFormsOutput, BigError> {
+    pub async fn insert_form(&self, ctx: &Context<'_>) -> Result<AllFormsOutput, BigError> {
         // TODO: perform validation
         // TODO: Add to database
         Ok(AllFormsOutput::V1(self.clone()))
     }
 
-    pub fn add_new_report(&self) -> Result<AllFormsOutput, BigError> {
-        // TODO: perform validation
-        // TODO: Add to database
-        Ok(AllFormsOutput::V1(self.clone()))
+    pub async fn modify_form(
+        &self,
+        ctx: &Context<'_>,
+        previous_form_id: Uuid,
+    ) -> Result<AllFormsOutput, BigError> {
+        // TODO: get previous form, apply modifications/changes
+        // TODO: update database
+        unimplemented!()
+    }
+
+    pub async fn insert_report(
+        &self,
+        ctx: &Context<'_>,
+        report_input: ReportInput,
+    ) -> Result<AllFormsOutput, BigError> {
+        // TODO: perform validation?
+
+        let json_data = serde_json::to_value(&self).context(SerdeSerializeSnafu)?;
+        let report = insert_report(ctx, report_input, json_data, 1).await?;
+        let output_form =
+            serde_json::from_value::<Self>(report.report_data).context(SerdeSerializeSnafu)?;
+
+        Ok(AllFormsOutput::V1(output_form))
+    }
+
+    pub async fn modify_report(
+        &self,
+        ctx: &Context<'_>,
+        previous_report_id: Uuid,
+    ) -> Result<AllFormsOutput, BigError> {
+        // TODO: get previous report, apply modifications/changes
+        // TODO: update database
+        unimplemented!()
     }
 }

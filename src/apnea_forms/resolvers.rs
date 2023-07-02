@@ -1,8 +1,19 @@
+use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
+use uuid::Uuid;
 
-use crate::utility::gql::{errors::BigError, guards::LoggedInGuard};
+use crate::{
+    auth::actions::get_user_id_from_token_and_session,
+    graphql_schema::DbPool,
+    utility::{
+        errors::BigError,
+        gql::{graphql_query::gql_query, guards::LoggedInGuard, query_dto::QueryParams},
+    },
+};
 
 use super::{
+    actions::get_reports::get_reports,
+    dto::report_dto::ReportInput,
     formV1::form::FormOutputV1,
     helpers::{AllFormsInput, AllFormsOutput},
 };
@@ -16,7 +27,11 @@ pub struct Mutation;
 #[Object]
 impl Query {
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn get_forms_new(&self, _ctx: &Context<'_>) -> Result<Vec<AllFormsOutput>, BigError> {
+    async fn forms(
+        &self,
+        ctx: &Context<'_>,
+        query_params: QueryParams,
+    ) -> Result<Vec<AllFormsOutput>, BigError> {
         // TODO: Query the database and get a `Vec<AllFormsOutput>`
         // Does it need to be validated in the process?
         // TODO: Add pagination and dataloader
@@ -25,15 +40,59 @@ impl Query {
 
     // they simply get all the forms they want
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn get_completed_forms_new(
+    async fn reports(
         &self,
-        _ctx: &Context<'_>,
-    ) -> Result<Vec<AllFormsOutput>, BigError> {
+        ctx: &Context<'_>,
+        query_params: QueryParams,
+    ) -> Result<Connection<String, AllFormsOutput>, BigError> {
         // TODO: Query the database and get a `Vec<AllFormsOutput>`
-        // Does it need to be validated in the process?
-        // TODO: Add pagination and dataloader
-        unimplemented!()
+        // TODO: Add dataloader?
+
+        let user_id = get_user_id_from_token_and_session(ctx).await?;
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let my_closure = move |query_params: QueryParams| {
+            let query_params = query_params.clone();
+            let pool_ctx = pool_ctx.clone();
+            async move {
+                web::block(move || {
+                    let mut conn = pool_ctx.get().unwrap();
+                    get_reports(&mut conn, user_id, query_params)
+                })
+                .await
+                .map_err(|e| BigError::ActixBlockingError { source: e })?
+            }
+        };
+
+        let query_response = gql_query(query_params, &my_closure).await;
+        query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
+
+    // #[graphql(guard = "LoggedInGuard::new()")]
+    // async fn completed_forms(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     query_params: QueryParams,
+    // ) -> Result<Connection<String, FormStructureOutput>, BigError> {
+    //     let user_id = get_user_id_from_token_and_session(ctx).await?;
+    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+    //     let my_closure = move |query_params: QueryParams| {
+    //         let query_params = query_params.clone();
+    //         let pool_ctx = pool_ctx.clone();
+    //         async move {
+    //             web::block(move || {
+    //                 let mut conn = pool_ctx.get().unwrap();
+    //                 get_completed_forms_by_user_id(&mut conn, user_id, query_params)
+    //             })
+    //             .await
+    //             .map_err(|e| BigError::ActixBlockingError { source: e })?
+    //         }
+    //     };
+
+    //     let query_response = gql_query(query_params, &my_closure).await;
+    //     query_response.map_err(|e| BigError::AsyncQueryError { error: e })
+    // }
 }
 
 #[Object]
@@ -41,26 +100,63 @@ impl Mutation {
     // add one get one
     // MODIFY/ARCHIVE WOULD BE VERY SIMILAR
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn add_new_form(
+    async fn insert_form(
         &self,
-        _ctx: &Context<'_>,
+        ctx: &Context<'_>,
         forms_input: AllFormsInput,
     ) -> Result<AllFormsOutput, BigError> {
         match forms_input {
-            AllFormsInput::V1(v1) => FormOutputV1::from(v1).add_new_form(),
+            AllFormsInput::V1(v1) => FormOutputV1::from(v1).insert_form(ctx).await,
+        }
+    }
+
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn modify_form(
+        &self,
+        ctx: &Context<'_>,
+        previous_form_id: Uuid,
+        forms_input: AllFormsInput,
+    ) -> Result<AllFormsOutput, BigError> {
+        match forms_input {
+            AllFormsInput::V1(v1) => {
+                FormOutputV1::from(v1)
+                    .modify_form(ctx, previous_form_id)
+                    .await
+            }
         }
     }
 
     // add a new one
     // MODIFY/ARCHIVE WOULD BE VERY SIMILAR
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn add_completed_form_new(
+    async fn insert_report(
         &self,
-        _ctx: &Context<'_>,
+        ctx: &Context<'_>,
+        forms_input: AllFormsInput,
+        report_input: ReportInput,
+    ) -> Result<AllFormsOutput, BigError> {
+        match forms_input {
+            AllFormsInput::V1(v1) => {
+                FormOutputV1::from(v1)
+                    .insert_report(ctx, report_input)
+                    .await
+            }
+        }
+    }
+
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn modify_report(
+        &self,
+        ctx: &Context<'_>,
+        previous_report_id: Uuid,
         forms_input: AllFormsInput,
     ) -> Result<AllFormsOutput, BigError> {
         match forms_input {
-            AllFormsInput::V1(v1) => FormOutputV1::from(v1).add_new_report(),
+            AllFormsInput::V1(v1) => {
+                FormOutputV1::from(v1)
+                    .modify_form(ctx, previous_report_id)
+                    .await
+            }
         }
     }
 }

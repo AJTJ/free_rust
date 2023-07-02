@@ -1,5 +1,5 @@
 use crate::{
-    apnea_sessions::actions::get_dives_by_session, graphql_schema::DbPool, schema::dive_sessions,
+    apnea_sessions::actions::get_dives, graphql_schema::DbPool, schema::dive_sessions,
     utility::gql::query_dto::QueryParams,
 };
 use actix_web::web;
@@ -7,7 +7,7 @@ use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObje
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
-use super::dive_dto::{Dive, DiveFilter};
+use super::dive_dto::{Dive, DiveFilter, DiveRetrievalData};
 
 #[derive(InputObject)]
 pub struct DiveSessionInput {
@@ -80,7 +80,12 @@ impl DiveSession {
 
         let dives = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dives_by_session(&mut conn, session_id, dive_query, db_query_dto)
+            get_dives(
+                &mut conn,
+                DiveRetrievalData::Session(session_id),
+                dive_query,
+                db_query_dto,
+            )
         })
         .await
         .expect("error in dive sessions web::block")

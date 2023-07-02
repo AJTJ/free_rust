@@ -1,7 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE reports (
-  report_name TEXT,
-  report_version int [] NOT NULL,
+  report_version int NOT NULL,
   report_data jsonb NOT NULL,
   -- relationships
   form_id uuid NOT NULL REFERENCES forms (id),

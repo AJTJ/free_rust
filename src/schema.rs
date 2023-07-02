@@ -52,8 +52,7 @@ diesel::table! {
 
 diesel::table! {
     reports (id) {
-        report_name -> Nullable<Text>,
-        report_version -> Array<Nullable<Int4>>,
+        report_version -> Int4,
         report_data -> Jsonb,
         form_id -> Uuid,
         original_form_id -> Nullable<Uuid>,

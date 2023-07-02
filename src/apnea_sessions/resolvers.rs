@@ -1,10 +1,10 @@
 use super::{
     actions::{
-        add_dive_session, get_dive_sessions_by_user, get_dives_by_user, update_dive,
+        add_dive_session, get_dive_sessions_by_user, get_dives, insert_dive, update_dive,
         update_dive_session,
     },
     dto::{
-        dive_dto::{Dive, DiveFilter, DiveInput, DiveUpdate},
+        dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
         dive_session_dto::{DiveSession, DiveSessionFilter, DiveSessionInput, DiveSessionUpdate},
     },
 };
@@ -23,6 +23,8 @@ use crate::{
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
 use diesel::RunQueryDsl;
+use snafu::OptionExt;
+use snafu::ResultExt;
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -77,7 +79,12 @@ impl Query {
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dives_by_user(&mut conn, user_id, dive_input, db_query_dto)
+            get_dives(
+                &mut conn,
+                DiveRetrievalData::User(user_id),
+                dive_input,
+                db_query_dto,
+            )
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?
@@ -127,7 +134,7 @@ impl Mutation {
         dive_session_id: Uuid,
         dive_input: DiveInput,
     ) -> Result<Dive, BigError> {
-        add_dive(ctx, dive_session_id, dive_input).await
+        insert_dive(ctx, dive_session_id, dive_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]

@@ -6,7 +6,7 @@ use crate::{
     utility::{errors::BigError, gql::query_dto::QueryParams},
 };
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, InputObject, OneofObject, SimpleObject};
 use chrono::{NaiveDateTime, NaiveTime};
 use uuid::Uuid;
 
@@ -109,4 +109,10 @@ pub struct DiveFilter {
     pub is_active: Option<bool>,
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
+}
+
+// #[derive(OneofObject)]
+pub enum DiveRetrievalData {
+    Session(Uuid),
+    User(Uuid),
 }
