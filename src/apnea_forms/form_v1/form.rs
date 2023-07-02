@@ -168,7 +168,32 @@ impl From<CongestionInputV1> for CongestionOutputV1 {
     }
 }
 
-// Forms
+// VISIBILITY
+
+#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+struct VisibilityInputV1 {
+    value: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+struct VisibilityOutputV1 {
+    value: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+impl From<VisibilityInputV1> for VisibilityOutputV1 {
+    fn from(value: VisibilityInputV1) -> Self {
+        VisibilityOutputV1 {
+            value: value.value,
+            field_order: value.field_order,
+        }
+    }
+}
+
+// FORMS
 
 #[derive(Serialize, Deserialize, InputObject, Clone)]
 pub struct FormInputV1 {
@@ -178,6 +203,7 @@ pub struct FormInputV1 {
     discipline_and_max_depth: Option<Vec<DisciplineAndMaxDepthInputV1>>,
     max_depth: Option<MaxDepthInputV1>,
     congestion: Option<CongestionInputV1>,
+    visibility: Option<VisibilityInputV1>,
 }
 
 #[derive(Serialize, Deserialize, SimpleObject, Clone)]
@@ -188,6 +214,7 @@ pub struct FormOutputV1 {
     discipline_and_max_depth: Option<Vec<DisciplineAndMaxDepthOutputV1>>,
     max_depth: Option<MaxDepthOutputV1>,
     congestion: Option<CongestionOutputV1>,
+    visibility: Option<VisibilityOutputV1>,
 }
 
 impl From<FormInputV1> for FormOutputV1 {
@@ -200,6 +227,7 @@ impl From<FormInputV1> for FormOutputV1 {
             .and_then(|x| Some(x.into_iter().map(|x| x.into()).collect()));
         let max_depth = value.max_depth.and_then(|x| Some(x.into()));
         let congestion = value.congestion.and_then(|x| Some(x.into()));
+        let visibility = value.visibility.and_then(|x| Some(x.into()));
         FormOutputV1 {
             report_name,
             wildlife,
@@ -207,6 +235,7 @@ impl From<FormInputV1> for FormOutputV1 {
             discipline_and_max_depth,
             max_depth,
             congestion,
+            visibility,
         }
     }
 }
