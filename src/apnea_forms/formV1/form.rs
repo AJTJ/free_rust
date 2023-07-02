@@ -6,8 +6,9 @@ use uuid::Uuid;
 
 use crate::{
     apnea_forms::{
-        actions::insert_report::insert_report, dto::report_dto::ReportInput,
-        helpers::AllFormsOutput,
+        actions::{insert_form::insert_form, insert_report::insert_report},
+        dto::{form_dto::FormDetailsInput, report_dto::ReportDetailsInput},
+        helpers::FormOutput,
     },
     utility::errors::{BigError, SerdeSerializeSnafu},
 };
@@ -153,17 +154,21 @@ impl From<FormInputV1> for FormOutputV1 {
 // Logic
 
 impl FormOutputV1 {
-    pub async fn insert_form(&self, ctx: &Context<'_>) -> Result<AllFormsOutput, BigError> {
+    pub async fn insert_form(
+        &self,
+        ctx: &Context<'_>,
+        form_input: FormDetailsInput,
+    ) -> Result<FormOutput, BigError> {
         // TODO: perform validation
-        // TODO: Add to database
-        Ok(AllFormsOutput::V1(self.clone()))
+        let form = insert_form(ctx, form_input, FormOutput::V1(self.clone())).await?;
+        Ok(form.form_data)
     }
 
     pub async fn modify_form(
         &self,
         ctx: &Context<'_>,
         previous_form_id: Uuid,
-    ) -> Result<AllFormsOutput, BigError> {
+    ) -> Result<FormOutput, BigError> {
         // TODO: get previous form, apply modifications/changes
         // TODO: update database
         unimplemented!()
@@ -172,23 +177,18 @@ impl FormOutputV1 {
     pub async fn insert_report(
         &self,
         ctx: &Context<'_>,
-        report_input: ReportInput,
-    ) -> Result<AllFormsOutput, BigError> {
+        report_input: ReportDetailsInput,
+    ) -> Result<FormOutput, BigError> {
         // TODO: perform validation?
-
-        let json_data = serde_json::to_value(&self).context(SerdeSerializeSnafu)?;
-        let report = insert_report(ctx, report_input, json_data, 1).await?;
-        let output_form =
-            serde_json::from_value::<Self>(report.report_data).context(SerdeSerializeSnafu)?;
-
-        Ok(AllFormsOutput::V1(output_form))
+        let report = insert_report(ctx, report_input, FormOutput::V1(self.clone())).await?;
+        Ok(report.report_data)
     }
 
     pub async fn modify_report(
         &self,
         ctx: &Context<'_>,
         previous_report_id: Uuid,
-    ) -> Result<AllFormsOutput, BigError> {
+    ) -> Result<FormOutput, BigError> {
         // TODO: get previous report, apply modifications/changes
         // TODO: update database
         unimplemented!()

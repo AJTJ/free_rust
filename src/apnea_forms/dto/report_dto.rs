@@ -1,12 +1,12 @@
-use crate::{graphql_schema::DbPool, schema::reports};
-use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, SimpleObject};
+use crate::{apnea_forms::helpers::FormOutput, schema::reports};
+
+use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
 use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(InputObject)]
-pub struct ReportInput {
+pub struct ReportDetailsInput {
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
     pub previous_report_id: Option<Uuid>,
@@ -23,8 +23,8 @@ pub struct ReportOutput {
     pub user_id: Uuid,
 }
 
-impl From<ReportInput> for ReportOutput {
-    fn from(value: ReportInput) -> Self {
+impl From<ReportDetailsInput> for ReportOutput {
+    fn from(value: ReportDetailsInput) -> Self {
         ReportOutput {
             form_id: value.form_id,
             original_form_id: value.original_form_id,
@@ -38,7 +38,6 @@ impl From<ReportInput> for ReportOutput {
 #[derive(Insertable, Debug)]
 #[diesel(table_name = reports)]
 pub struct ReportCreation {
-    pub report_version: i32,
     pub report_data: Value,
 
     pub form_id: Uuid,
@@ -55,10 +54,8 @@ pub struct ReportCreation {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Clone)]
-// #[graphql(complex)]
 pub struct Report {
-    pub report_version: i32,
-    pub report_data: Value,
+    pub report_data: FormOutput,
     // relationships
     #[graphql(skip)]
     pub form_id: Uuid,

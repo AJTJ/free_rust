@@ -1,26 +1,26 @@
-use crate::apnea_forms::dto::form_dto::{Form, FormCreation, FormInput};
+use crate::apnea_forms::dto::form_dto::{Form, FormCreation, FormDetailsInput};
+use crate::apnea_forms::helpers::FormOutput;
 use crate::auth::actions::get_user_id_from_token_and_session;
 use crate::graphql_schema::DbPool;
-use crate::utility::errors::BigError;
+use crate::utility::errors::{BigError, SerdeSerializeSnafu};
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
-use serde_json::Value;
+use serde_json;
+use snafu::ResultExt;
 
 pub async fn insert_form(
     ctx: &Context<'_>,
-    form_input: FormInput,
-    form_data: Value,
-    form_version: i32,
+    form_input: FormDetailsInput,
+    form_data: FormOutput,
 ) -> Result<Form, BigError> {
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
     let created_form = FormCreation {
         form_name: form_input.form_name,
-        form_version,
-        form_data,
+        form_data: serde_json::to_value(form_data).context(SerdeSerializeSnafu)?,
         user_id,
         original_form_id: form_input.original_form_id,
         previous_form_id: form_input.previous_form_id,

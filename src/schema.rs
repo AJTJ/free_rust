@@ -36,7 +36,6 @@ diesel::table! {
 diesel::table! {
     forms (id) {
         form_name -> Text,
-        form_version -> Int4,
         form_data -> Jsonb,
         user_id -> Uuid,
         original_form_id -> Nullable<Uuid>,
@@ -52,7 +51,6 @@ diesel::table! {
 
 diesel::table! {
     reports (id) {
-        report_version -> Int4,
         report_data -> Jsonb,
         form_id -> Uuid,
         original_form_id -> Nullable<Uuid>,

@@ -1,28 +1,29 @@
 use crate::{
-    apnea_forms::dto::report_dto::{Report, ReportCreation, ReportInput},
+    apnea_forms::{
+        dto::report_dto::{Report, ReportCreation, ReportDetailsInput},
+        helpers::FormOutput,
+    },
     auth::actions::get_user_id_from_token_and_session,
     graphql_schema::DbPool,
-    utility::errors::BigError,
+    utility::errors::{BigError, SerdeSerializeSnafu},
 };
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 use serde_json::Value;
+use snafu::ResultExt;
 
 pub async fn insert_report(
     ctx: &Context<'_>,
-    report_input: ReportInput,
-    report_data: Value,
-    report_version: i32,
+    report_input: ReportDetailsInput,
+    report_data: FormOutput,
 ) -> Result<Report, BigError> {
     let current_stamp = Utc::now().naive_utc();
     let user_id = get_user_id_from_token_and_session(ctx).await?;
 
     let created_report = ReportCreation {
-        report_version,
-        report_data,
-
+        report_data: serde_json::to_value(report_data).context(SerdeSerializeSnafu)?,
         original_form_id: report_input.original_form_id,
         previous_report_id: report_input.previous_report_id,
         form_id: report_input.form_id,

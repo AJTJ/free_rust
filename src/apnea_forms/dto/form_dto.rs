@@ -1,4 +1,4 @@
-use crate::schema::forms;
+use crate::{apnea_forms::helpers::FormOutput, schema::forms};
 
 use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveDateTime;
@@ -6,7 +6,7 @@ use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(InputObject)]
-pub struct FormInput {
+pub struct FormDetailsInput {
     pub form_name: String,
 
     pub original_form_id: Option<Uuid>,
@@ -17,7 +17,6 @@ pub struct FormInput {
 #[diesel(table_name = forms)]
 pub struct FormCreation {
     pub form_name: String,
-    pub form_version: i32,
     pub form_data: Value,
 
     // relationships
@@ -36,8 +35,7 @@ pub struct FormCreation {
 // #[graphql(complex)]
 pub struct Form {
     pub form_name: String,
-    pub form_version: i32,
-    pub form_data: Value,
+    pub form_data: FormOutput,
     // relationship data
     #[graphql(skip)]
     pub user_id: Uuid,

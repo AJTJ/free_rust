@@ -1,7 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE forms (
   form_name TEXT NOT NULL,
-  form_version int NOT NULL,
   form_data jsonb NOT NULL,
   -- relationships
   user_id uuid NOT NULL REFERENCES users (id),

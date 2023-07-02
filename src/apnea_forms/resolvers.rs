@@ -13,9 +13,9 @@ use crate::{
 
 use super::{
     actions::get_reports::get_reports,
-    dto::report_dto::ReportInput,
+    dto::{form_dto::FormDetailsInput, report_dto::ReportDetailsInput},
     formV1::form::FormOutputV1,
-    helpers::{AllFormsInput, AllFormsOutput},
+    helpers::{FormInput, FormOutput},
 };
 
 #[derive(Default)]
@@ -31,7 +31,7 @@ impl Query {
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
-    ) -> Result<Vec<AllFormsOutput>, BigError> {
+    ) -> Result<Vec<FormOutput>, BigError> {
         // TODO: Query the database and get a `Vec<AllFormsOutput>`
         // Does it need to be validated in the process?
         // TODO: Add pagination and dataloader
@@ -44,7 +44,7 @@ impl Query {
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
-    ) -> Result<Connection<String, AllFormsOutput>, BigError> {
+    ) -> Result<Connection<String, FormOutput>, BigError> {
         // TODO: Query the database and get a `Vec<AllFormsOutput>`
         // TODO: Add dataloader?
 
@@ -103,10 +103,15 @@ impl Mutation {
     async fn insert_form(
         &self,
         ctx: &Context<'_>,
-        forms_input: AllFormsInput,
-    ) -> Result<AllFormsOutput, BigError> {
-        match forms_input {
-            AllFormsInput::V1(v1) => FormOutputV1::from(v1).insert_form(ctx).await,
+        form_details_input: FormDetailsInput,
+        form_input: FormInput,
+    ) -> Result<FormOutput, BigError> {
+        match form_input {
+            FormInput::V1(v1) => {
+                FormOutputV1::from(v1)
+                    .insert_form(ctx, form_details_input)
+                    .await
+            }
         }
     }
 
@@ -115,10 +120,10 @@ impl Mutation {
         &self,
         ctx: &Context<'_>,
         previous_form_id: Uuid,
-        forms_input: AllFormsInput,
-    ) -> Result<AllFormsOutput, BigError> {
-        match forms_input {
-            AllFormsInput::V1(v1) => {
+        form_input: FormInput,
+    ) -> Result<FormOutput, BigError> {
+        match form_input {
+            FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
                     .modify_form(ctx, previous_form_id)
                     .await
@@ -132,13 +137,13 @@ impl Mutation {
     async fn insert_report(
         &self,
         ctx: &Context<'_>,
-        forms_input: AllFormsInput,
-        report_input: ReportInput,
-    ) -> Result<AllFormsOutput, BigError> {
-        match forms_input {
-            AllFormsInput::V1(v1) => {
+        report_details_input: ReportDetailsInput,
+        report_input: FormInput,
+    ) -> Result<FormOutput, BigError> {
+        match report_input {
+            FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
-                    .insert_report(ctx, report_input)
+                    .insert_report(ctx, report_details_input)
                     .await
             }
         }
@@ -149,10 +154,10 @@ impl Mutation {
         &self,
         ctx: &Context<'_>,
         previous_report_id: Uuid,
-        forms_input: AllFormsInput,
-    ) -> Result<AllFormsOutput, BigError> {
+        forms_input: FormInput,
+    ) -> Result<FormOutput, BigError> {
         match forms_input {
-            AllFormsInput::V1(v1) => {
+            FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
                     .modify_form(ctx, previous_report_id)
                     .await
