@@ -31,13 +31,13 @@ use snafu::ResultExt;
 use uuid::Uuid;
 
 #[derive(Default)]
-pub struct Query;
+pub struct ApneaSessionsQuery;
 
 #[derive(Default)]
-pub struct Mutation;
+pub struct ApneaSessionsMutation;
 
 #[Object]
-impl Query {
+impl ApneaSessionsQuery {
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn dive_sessions(
         &self,
@@ -96,7 +96,7 @@ impl Query {
 }
 
 #[Object]
-impl Mutation {
+impl ApneaSessionsMutation {
     // DIVE SESSION
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn add_dive_session(

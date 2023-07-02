@@ -1,7 +1,6 @@
-use crate::{apnea_forms::actions::get_forms::get_forms, utility::errors::DieselQuerySnafu};
+use crate::apnea_forms::actions::get_forms::get_forms;
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
-use snafu::ResultExt;
 use uuid::Uuid;
 
 use crate::{
@@ -16,18 +15,18 @@ use crate::{
 use super::{
     actions::get_reports::get_reports,
     dto::{form_dto::FormDetailsInput, report_dto::ReportDetailsInput},
-    formV1::form::{self, FormOutputV1},
+    form_v1::form::{self, FormOutputV1},
     helpers::{FormInput, FormOutput},
 };
 
 #[derive(Default)]
-pub struct Query;
+pub struct ApneaFormsQuery;
 
 #[derive(Default)]
-pub struct Mutation;
+pub struct ApneaFormsMutation;
 
 #[Object]
-impl Query {
+impl ApneaFormsQuery {
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn forms(
         &self,
@@ -81,7 +80,7 @@ impl Query {
 }
 
 #[Object]
-impl Mutation {
+impl ApneaFormsMutation {
     // add one get one
     // MODIFY/ARCHIVE WOULD BE VERY SIMILAR
     #[graphql(guard = "LoggedInGuard::new()")]

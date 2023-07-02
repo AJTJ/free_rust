@@ -18,13 +18,13 @@ use super::{
 };
 
 #[derive(Default)]
-pub struct Query;
+pub struct AuthQuery;
 
 #[derive(Default)]
-pub struct Mutation;
+pub struct AuthMutation;
 
 #[Object]
-impl Query {
+impl AuthQuery {
     #[graphql(guard = "DevelopmentGuard::new()")]
     async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -53,7 +53,7 @@ impl Query {
 }
 
 #[Object]
-impl Mutation {
+impl AuthMutation {
     // Must be UNGUARDED?
     async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();

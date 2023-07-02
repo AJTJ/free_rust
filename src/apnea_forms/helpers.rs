@@ -7,7 +7,7 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::formV1::form::{FormInputV1, FormOutputV1};
+use super::form_v1::form::{FormInputV1, FormOutputV1};
 
 // NOTE: This is only for receiving from the client
 #[derive(OneofObject)]
