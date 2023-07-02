@@ -1,7 +1,6 @@
 use async_graphql::{types::connection::*, Context, Object};
 
-use crate::errors::BigError;
-use crate::guards::LoggedInGuard;
+use crate::utility::gql::{errors::BigError, guards::LoggedInGuard};
 
 use super::{
     formV1::form::FormOutputV1,

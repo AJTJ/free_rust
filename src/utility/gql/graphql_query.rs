@@ -1,8 +1,10 @@
-use crate::dto::query_dto::QueryParams;
-use crate::errors::BigError;
 use async_graphql::types::connection::*;
 use async_graphql::*;
 use futures_util::Future;
+
+use crate::utility::errors::BigError;
+
+use super::query_dto::QueryParams;
 
 pub async fn gql_query<
     O: OutputType,

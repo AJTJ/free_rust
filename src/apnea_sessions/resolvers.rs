@@ -1,12 +1,29 @@
-use async_graphql::{types::connection::*, Context, Object};
-
-use crate::errors::BigError;
-use crate::guards::LoggedInGuard;
-
 use super::{
-    formV1::form::FormOutputV1,
-    helpers::{AllFormsInput, AllFormsOutput},
+    actions::{
+        add_dive_session, get_dive_sessions_by_user, get_dives_by_user, update_dive,
+        update_dive_session,
+    },
+    dto::{
+        dive_dto::{Dive, DiveFilter, DiveInput, DiveUpdate},
+        dive_session_dto::{DiveSession, DiveSessionFilter, DiveSessionInput, DiveSessionUpdate},
+    },
 };
+use crate::{
+    auth::actions::get_user_id_from_token_and_session,
+    graphql_schema::DbPool,
+    utility::{
+        errors::{ActixBlockingSnafu, BigError},
+        gql::{
+            graphql_query::gql_query,
+            guards::{DevelopmentGuard, LoggedInGuard},
+            query_dto::QueryParams,
+        },
+    },
+};
+use actix_web::web;
+use async_graphql::{types::connection::*, Context, Object};
+use diesel::RunQueryDsl;
+use uuid::Uuid;
 
 #[derive(Default)]
 pub struct Query;
@@ -25,7 +42,6 @@ impl Query {
     ) -> Result<Connection<String, DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_token_and_session(ctx).await?;
-
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
             let dive_session_filter = dive_session_filter.clone();

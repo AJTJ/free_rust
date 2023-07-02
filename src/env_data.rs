@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub struct SharedVars {
+pub struct SharedEnvVars {
     pub environment: String,
 }
 

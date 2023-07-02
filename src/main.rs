@@ -2,21 +2,13 @@
 #[macro_use]
 // mods
 extern crate diesel;
-pub mod actions;
 pub mod apnea_forms;
 pub mod apnea_sessions;
 pub mod auth;
-pub mod auth_data;
-pub mod data_loaders;
-pub mod dto;
 pub mod env_data;
-pub mod errors;
-pub mod graphql_query;
 pub mod graphql_schema;
-pub mod guards;
-pub mod helpers;
 pub mod schema;
-pub mod token_source;
+pub mod utility;
 
 use actix_web::{
     guard,
@@ -27,6 +19,7 @@ use actix_web::{
     App, HttpRequest, HttpResponse, HttpServer, Result,
 };
 
+use crate::apnea_sessions::data_loaders::DiveSessionsLoader;
 use async_graphql::{
     dataloader::DataLoader,
     extensions::Tracing,
@@ -34,15 +27,14 @@ use async_graphql::{
     EmptySubscription, Schema,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use data_loaders::DiveSessionsLoader;
+use auth::utility::{auth_data::RedisPool, token_source::Token};
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
-use env_data::SharedVars;
+use env_data::SharedEnvVars;
 use graphql_schema::{DbPool, DiveQLSchema, Mutation, Query};
 use r2d2;
 use redis::Client;
 use std::env;
-use token_source::Token;
 
 // tracing
 use tracing::{info, Level};
@@ -65,17 +57,11 @@ fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
 
 async fn index(
     schema: web::Data<DiveQLSchema>,
+    // redis_pool_data: web::Data<RedisPool>,
     http_req: HttpRequest,
     gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
     let mut request = gql_req.into_inner();
-
-    // THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
-    // let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
-    // info!("AUTH HEADER: {:?}", auth_header_value);
-    // let cookie_header_value = http_req.headers().get(http::header::COOKIE);
-    // info!("COOKIE HEADER: {:?}", cookie_header_value);
-    // info!("auth_header_value: {auth_header_value:?}");
 
     if let Some(token) = get_token_from_headers(http_req.headers()) {
         request = request.data(token);
@@ -111,7 +97,7 @@ async fn main() -> std::io::Result<()> {
     let redis_client = Client::open(redis_url).expect("failure starting redis server");
     let redis_pool = r2d2::Pool::new(redis_client).unwrap();
 
-    let env_vars = SharedVars { environment };
+    let env_vars = SharedEnvVars { environment };
 
     // graphql schema builder
     let schema = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
@@ -146,6 +132,13 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
+
+// THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
+// let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
+// info!("AUTH HEADER: {:?}", auth_header_value);
+// let cookie_header_value = http_req.headers().get(http::header::COOKIE);
+// info!("COOKIE HEADER: {:?}", cookie_header_value);
+// info!("auth_header_value: {auth_header_value:?}");
 
 /*
    OTHER

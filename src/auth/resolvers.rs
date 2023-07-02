@@ -1,11 +1,20 @@
-use async_graphql::{types::connection::*, Context, Object};
-
-use crate::errors::BigError;
-use crate::guards::LoggedInGuard;
+use crate::{
+    graphql_schema::DbPool,
+    utility::{
+        errors::BigError,
+        gql::guards::{DevelopmentGuard, LoggedInGuard},
+    },
+};
+use actix_web::web;
+use async_graphql::{Context, Object};
+use diesel::RunQueryDsl;
 
 use super::{
-    formV1::form::FormOutputV1,
-    helpers::{AllFormsInput, AllFormsOutput},
+    actions::{get_user, insert_user, login, logout},
+    dto::{
+        auth_dto::Login,
+        user_dto::{User, UserInput, UserRetrievalData},
+    },
 };
 
 #[derive(Default)]
@@ -35,7 +44,7 @@ impl Query {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_user_with_email(&mut conn, email)
+            get_user(&mut conn, UserRetrievalData::Email(email))
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?

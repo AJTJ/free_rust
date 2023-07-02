@@ -1,16 +1,16 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-
-use crate::errors::ActixBlockingSnafu;
-use crate::{
-    actions::get_dive_sessions_by_id, dto::dive_session_dto::DiveSession, errors::BigError,
-    graphql_schema::DbPool,
-};
+use crate::graphql_schema::DbPool;
+use crate::utility::errors::ActixBlockingSnafu;
+use crate::utility::errors::BigError;
 use actix_web::web;
 use async_graphql::async_trait;
 use async_graphql::dataloader::*;
 use snafu::ResultExt;
+use std::collections::HashMap;
+use std::sync::Arc;
 use uuid::Uuid;
+
+use super::actions::get_dive_sessions_by_id;
+use super::dto::dive_session_dto::DiveSession;
 
 pub struct DiveSessionsLoader(DbPool);
 

@@ -2,37 +2,12 @@ use async_graphql::{async_trait::async_trait, Context, Guard, Result};
 use tracing::info;
 
 use crate::{
-    actions::get_user_session_data, env_data::DEV_ENV,
-    helpers::token_helpers::get_cookie_from_token, SharedVars,
+    auth::{actions::get_user_session_data, utility::token_helpers::get_cookie_from_token},
+    env_data::DEV_ENV,
+    SharedEnvVars,
 };
 
-#[derive(Eq, PartialEq, Copy, Clone)]
-// enum Role {
-//     Admin,
-//     Guest,
-// }
-
-// struct RoleGuard {
-//     role: Role,
-// }
-
-// impl RoleGuard {
-//     fn new(role: Role) -> Self {
-//         Self { role }
-//     }
-// }
-
-// #[async_trait]
-// impl Guard for RoleGuard {
-//     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-//         if ctx.data_opt::<Role>() == Some(&self.role) {
-//             Ok(())
-//         } else {
-//             Err("Forbidden".into())
-//         }
-//     }
-// }
-#[derive(Default)]
+#[derive(Eq, PartialEq, Copy, Clone, Default)]
 pub struct LoggedInGuard {}
 
 impl LoggedInGuard {
@@ -85,7 +60,7 @@ impl DevelopmentGuard {
 #[async_trait]
 impl Guard for DevelopmentGuard {
     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-        let shared_vars = ctx.data_unchecked::<SharedVars>();
+        let shared_vars = ctx.data_unchecked::<SharedEnvVars>();
         if shared_vars.environment == DEV_ENV {
             Ok(())
         } else {
@@ -109,3 +84,29 @@ impl Guard for NoAllow {
         Err("".into())
     }
 }
+
+// enum Role {
+//     Admin,
+//     Guest,
+// }
+
+// struct RoleGuard {
+//     role: Role,
+// }
+
+// impl RoleGuard {
+//     fn new(role: Role) -> Self {
+//         Self { role }
+//     }
+// }
+
+// #[async_trait]
+// impl Guard for RoleGuard {
+//     async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+//         if ctx.data_opt::<Role>() == Some(&self.role) {
+//             Ok(())
+//         } else {
+//             Err("Forbidden".into())
+//         }
+//     }
+// }
