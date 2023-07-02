@@ -40,34 +40,6 @@ impl From<ReportNameInputV1> for ReportNameOutputV1 {
     }
 }
 
-// Discipline and Max Depth
-
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
-struct DisciplineAndMaxDepthInputV1 {
-    discipline: DisciplinesEnum,
-    max_depth: i32,
-    // defaults
-    field_order: Option<i32>,
-}
-
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
-struct DisciplineAndMaxDepthOutputV1 {
-    discipline: DisciplinesEnum,
-    max_depth: i32,
-    // defaults
-    field_order: Option<i32>,
-}
-
-impl From<DisciplineAndMaxDepthInputV1> for DisciplineAndMaxDepthOutputV1 {
-    fn from(value: DisciplineAndMaxDepthInputV1) -> Self {
-        DisciplineAndMaxDepthOutputV1 {
-            discipline: value.discipline,
-            max_depth: value.max_depth,
-            field_order: value.field_order,
-        }
-    }
-}
-
 // Wildlife
 
 #[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
@@ -118,6 +90,84 @@ impl From<WeatherInputV1> for WeatherOutputV1 {
     }
 }
 
+// Discipline and Max Depth
+
+#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+struct DisciplineAndMaxDepthInputV1 {
+    discipline: DisciplinesEnum,
+    max_depth: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+struct DisciplineAndMaxDepthOutputV1 {
+    discipline: DisciplinesEnum,
+    max_depth: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+impl From<DisciplineAndMaxDepthInputV1> for DisciplineAndMaxDepthOutputV1 {
+    fn from(value: DisciplineAndMaxDepthInputV1) -> Self {
+        DisciplineAndMaxDepthOutputV1 {
+            discipline: value.discipline,
+            max_depth: value.max_depth,
+            field_order: value.field_order,
+        }
+    }
+}
+
+// MAX DEPTH
+
+#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+struct MaxDepthInputV1 {
+    max_depth: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+struct MaxDepthOutputV1 {
+    max_depth: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+impl From<MaxDepthInputV1> for MaxDepthOutputV1 {
+    fn from(value: MaxDepthInputV1) -> Self {
+        MaxDepthOutputV1 {
+            max_depth: value.max_depth,
+            field_order: value.field_order,
+        }
+    }
+}
+
+// CONGESTION
+
+#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+struct CongestionInputV1 {
+    value: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+struct CongestionOutputV1 {
+    value: i32,
+    // defaults
+    field_order: Option<i32>,
+}
+
+impl From<CongestionInputV1> for CongestionOutputV1 {
+    fn from(value: CongestionInputV1) -> Self {
+        CongestionOutputV1 {
+            value: value.value,
+            field_order: value.field_order,
+        }
+    }
+}
+
 // Forms
 
 #[derive(Serialize, Deserialize, InputObject, Clone)]
@@ -125,7 +175,9 @@ pub struct FormInputV1 {
     report_name: Option<ReportNameInputV1>,
     wildlife: Option<WildlifeInputV1>,
     weather: Option<WeatherInputV1>,
-    discipline_and_max_depth: Option<DisciplineAndMaxDepthInputV1>,
+    discipline_and_max_depth: Option<Vec<DisciplineAndMaxDepthInputV1>>,
+    max_depth: Option<MaxDepthInputV1>,
+    congestion: Option<CongestionInputV1>,
 }
 
 #[derive(Serialize, Deserialize, SimpleObject, Clone)]
@@ -133,7 +185,9 @@ pub struct FormOutputV1 {
     report_name: Option<ReportNameOutputV1>,
     wildlife: Option<WildlifeOutputV1>,
     weather: Option<WeatherOutputV1>,
-    discipline_and_max_depth: Option<DisciplineAndMaxDepthOutputV1>,
+    discipline_and_max_depth: Option<Vec<DisciplineAndMaxDepthOutputV1>>,
+    max_depth: Option<MaxDepthOutputV1>,
+    congestion: Option<CongestionOutputV1>,
 }
 
 impl From<FormInputV1> for FormOutputV1 {
@@ -141,12 +195,18 @@ impl From<FormInputV1> for FormOutputV1 {
         let report_name = value.report_name.and_then(|x| Some(x.into()));
         let wildlife = value.wildlife.and_then(|x| Some(x.into()));
         let weather = value.weather.and_then(|x| Some(x.into()));
-        let discipline_and_max_depth = value.discipline_and_max_depth.and_then(|x| Some(x.into()));
+        let discipline_and_max_depth = value
+            .discipline_and_max_depth
+            .and_then(|x| Some(x.into_iter().map(|x| x.into()).collect()));
+        let max_depth = value.max_depth.and_then(|x| Some(x.into()));
+        let congestion = value.congestion.and_then(|x| Some(x.into()));
         FormOutputV1 {
             report_name,
             wildlife,
             weather,
             discipline_and_max_depth,
+            max_depth,
+            congestion,
         }
     }
 }
