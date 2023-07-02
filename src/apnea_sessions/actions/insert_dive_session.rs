@@ -1,5 +1,5 @@
 use crate::apnea_sessions::dto::dive_session_dto::{DiveSession, DiveSessionCreation};
-use crate::auth::actions::get_user_id_from_token_and_session;
+use crate::auth::actions::get_user_id_from_auth;
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::BigError;
 use crate::{apnea_sessions::dto::dive_session_dto::DiveSessionInput, diesel::ExpressionMethods};
@@ -18,7 +18,7 @@ pub async fn add_dive_session(
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
 
-    let user_id = get_user_id_from_token_and_session(ctx).await?;
+    let user_id = get_user_id_from_auth(ctx).await?;
 
     let new_session = DiveSessionCreation {
         id: uuid,

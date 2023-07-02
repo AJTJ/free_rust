@@ -3,7 +3,7 @@ use crate::{
         dto::report_dto::{Report, ReportCreation, ReportDetailsInput},
         helpers::FormOutput,
     },
-    auth::actions::get_user_id_from_token_and_session,
+    auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
     utility::errors::{BigError, SerdeSerializeSnafu},
 };
@@ -20,7 +20,7 @@ pub async fn insert_report(
     report_data: FormOutput,
 ) -> Result<Report, BigError> {
     let current_stamp = Utc::now().naive_utc();
-    let user_id = get_user_id_from_token_and_session(ctx).await?;
+    let user_id = get_user_id_from_auth(ctx).await?;
 
     let created_report = ReportCreation {
         report_data: serde_json::to_value(report_data).context(SerdeSerializeSnafu)?,

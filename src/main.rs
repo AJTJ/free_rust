@@ -19,7 +19,7 @@ use actix_web::{
     App, HttpRequest, HttpResponse, HttpServer, Result,
 };
 
-use crate::apnea_sessions::data_loaders::DiveSessionsLoader;
+// use crate::apnea_sessions::data_loaders::DiveSessionsLoader;
 use async_graphql::{
     dataloader::DataLoader,
     extensions::Tracing,
@@ -103,10 +103,10 @@ async fn main() -> std::io::Result<()> {
     let schema = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .extension(Tracing)
         .data(redis_pool)
-        .data(DataLoader::new(
-            DiveSessionsLoader::new(pooled_database.clone()),
-            rt::spawn,
-        ))
+        // .data(DataLoader::new(
+        //     DiveSessionsLoader::new(pooled_database.clone()),
+        //     rt::spawn,
+        // ))
         .data(pooled_database.clone())
         .data(env_vars)
         .limit_depth(8)

@@ -11,7 +11,7 @@ use uuid::Uuid;
 pub fn get_forms(
     conn: &mut PgConnection,
     input_user_id: Uuid,
-    _db_query_ob: Option<QueryParams>,
+    query_params: QueryParams,
 ) -> Result<Vec<Form>, BigError> {
     use crate::schema::forms::dsl::{forms, user_id as forms_user_id};
 

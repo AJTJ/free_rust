@@ -1,15 +1,18 @@
 use super::{
     actions::{
-        add_dive_session, get_dive_sessions_by_user, get_dives, insert_dive, update_dive,
+        add_dive_session, get_dive_sessions, get_dives, insert_dive, update_dive,
         update_dive_session,
     },
     dto::{
         dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
-        dive_session_dto::{DiveSession, DiveSessionFilter, DiveSessionInput, DiveSessionUpdate},
+        dive_session_dto::{
+            ApnesSessionRetrievalData, DiveSession, DiveSessionFilter, DiveSessionInput,
+            DiveSessionUpdate,
+        },
     },
 };
 use crate::{
-    auth::actions::get_user_id_from_token_and_session,
+    auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
     utility::{
         errors::{ActixBlockingSnafu, BigError},
@@ -43,7 +46,7 @@ impl Query {
         query_params: QueryParams,
     ) -> Result<Connection<String, DiveSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let user_id = get_user_id_from_token_and_session(ctx).await?;
+        let user_id = get_user_id_from_auth(ctx).await?;
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
             let dive_session_filter = dive_session_filter.clone();
@@ -51,9 +54,9 @@ impl Query {
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_dive_sessions_by_user(
+                    get_dive_sessions(
                         &mut conn,
-                        &user_id,
+                        ApnesSessionRetrievalData::User(user_id),
                         dive_session_filter,
                         query_params,
                     )
@@ -75,7 +78,7 @@ impl Query {
         db_query_dto: Option<QueryParams>,
     ) -> Result<Vec<Dive>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        let user_id = get_user_id_from_token_and_session(ctx).await?;
+        let user_id = get_user_id_from_auth(ctx).await?;
 
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();

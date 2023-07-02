@@ -1,9 +1,11 @@
+use crate::{apnea_forms::actions::get_forms::get_forms, utility::errors::DieselQuerySnafu};
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
+use snafu::ResultExt;
 use uuid::Uuid;
 
 use crate::{
-    auth::actions::get_user_id_from_token_and_session,
+    auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
     utility::{
         errors::BigError,
@@ -14,7 +16,7 @@ use crate::{
 use super::{
     actions::get_reports::get_reports,
     dto::{form_dto::FormDetailsInput, report_dto::ReportDetailsInput},
-    formV1::form::FormOutputV1,
+    formV1::form::{self, FormOutputV1},
     helpers::{FormInput, FormOutput},
 };
 
@@ -32,10 +34,20 @@ impl Query {
         ctx: &Context<'_>,
         query_params: QueryParams,
     ) -> Result<Vec<FormOutput>, BigError> {
-        // TODO: Query the database and get a `Vec<AllFormsOutput>`
-        // Does it need to be validated in the process?
-        // TODO: Add pagination and dataloader
-        unimplemented!()
+        // TODO: Data loader and pagination
+        let user_id = get_user_id_from_auth(ctx).await?;
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let forms = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_forms(&mut conn, user_id, query_params)
+        })
+        .await
+        .map_err(|e| BigError::ActixBlockingError { source: e })??;
+
+        let form_output = forms.into_iter().map(|f| f.form_data).collect();
+
+        Ok(form_output)
     }
 
     // they simply get all the forms they want
@@ -45,10 +57,9 @@ impl Query {
         ctx: &Context<'_>,
         query_params: QueryParams,
     ) -> Result<Connection<String, FormOutput>, BigError> {
-        // TODO: Query the database and get a `Vec<AllFormsOutput>`
         // TODO: Add dataloader?
 
-        let user_id = get_user_id_from_token_and_session(ctx).await?;
+        let user_id = get_user_id_from_auth(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let my_closure = move |query_params: QueryParams| {
@@ -67,32 +78,6 @@ impl Query {
         let query_response = gql_query(query_params, &my_closure).await;
         query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
-
-    // #[graphql(guard = "LoggedInGuard::new()")]
-    // async fn completed_forms(
-    //     &self,
-    //     ctx: &Context<'_>,
-    //     query_params: QueryParams,
-    // ) -> Result<Connection<String, FormStructureOutput>, BigError> {
-    //     let user_id = get_user_id_from_token_and_session(ctx).await?;
-    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-    //     let my_closure = move |query_params: QueryParams| {
-    //         let query_params = query_params.clone();
-    //         let pool_ctx = pool_ctx.clone();
-    //         async move {
-    //             web::block(move || {
-    //                 let mut conn = pool_ctx.get().unwrap();
-    //                 get_completed_forms_by_user_id(&mut conn, user_id, query_params)
-    //             })
-    //             .await
-    //             .map_err(|e| BigError::ActixBlockingError { source: e })?
-    //         }
-    //     };
-
-    //     let query_response = gql_query(query_params, &my_closure).await;
-    //     query_response.map_err(|e| BigError::AsyncQueryError { error: e })
-    // }
 }
 
 #[Object]

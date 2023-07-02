@@ -105,3 +105,8 @@ pub struct DiveSessionFilter {
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
 }
+
+pub enum ApnesSessionRetrievalData {
+    Sessions(Vec<Uuid>),
+    User(Uuid),
+}

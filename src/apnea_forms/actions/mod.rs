@@ -4,3 +4,5 @@ pub(crate) mod get_report;
 pub(crate) mod get_reports;
 pub(crate) mod insert_form;
 pub(crate) mod insert_report;
+pub(crate) mod modify_form;
+pub(crate) mod modify_report;

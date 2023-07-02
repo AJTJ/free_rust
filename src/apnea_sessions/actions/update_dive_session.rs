@@ -7,7 +7,7 @@ use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 
-use super::get_dive_session_by_id;
+use super::get_dive_session;
 
 // TODO: better error handling
 pub async fn update_dive_session(
@@ -36,7 +36,7 @@ pub async fn update_dive_session(
 
     let updated_session = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        get_dive_session_by_id(&mut conn, &my_session_mod_data.id, None)
+        get_dive_session(&mut conn, &my_session_mod_data.id, None)
     })
     .await
     .map_err(|e| BigError::ActixBlockingError { source: e })?

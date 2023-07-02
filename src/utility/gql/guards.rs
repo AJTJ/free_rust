@@ -2,7 +2,7 @@ use async_graphql::{async_trait::async_trait, Context, Guard, Result};
 use tracing::info;
 
 use crate::{
-    auth::{actions::get_user_session_data, utility::token_helpers::get_cookie_from_token},
+    auth::{actions::get_user_session, utility::token_helpers::get_cookie_from_token},
     env_data::DEV_ENV,
     SharedEnvVars,
 };
@@ -24,7 +24,7 @@ impl Guard for LoggedInGuard {
                 // info!("The cookie struct in guard: {c:?}");
 
                 if let Some(session_id) = c.encoded_session_id {
-                    match get_user_session_data(ctx, session_id).await {
+                    match get_user_session(ctx, session_id).await {
                         Ok(s) => {
                             // info!("The session data in guard: {s:?}");
                             // TODO Need to check that the token hasn't expired

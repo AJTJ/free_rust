@@ -1,6 +1,6 @@
 use super::dive_session_dto::DiveSession;
 use crate::{
-    apnea_sessions::actions::get_dive_session_by_id,
+    apnea_sessions::actions::get_dive_session,
     graphql_schema::DbPool,
     schema::dives,
     utility::{errors::BigError, gql::query_dto::QueryParams},
@@ -87,7 +87,7 @@ impl Dive {
         let session_id = self.session_id;
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_session_by_id(&mut conn, &session_id, query_params).map(DiveSession::from)
+            get_dive_session(&mut conn, &session_id, query_params).map(DiveSession::from)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?

@@ -3,7 +3,6 @@ use r2d2::Pool;
 use redis::{from_redis_value, Client, FromRedisValue, RedisResult, ToRedisArgs};
 use serde::{Deserialize, Serialize};
 use std::string::String;
-use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
 pub type UniversalIdType = [u8; 32];
@@ -67,10 +66,3 @@ impl FromRedisValue for SessionData {
         RedisResult::Ok(serde_json::from_str(&redis_value).expect("redis to SessionData failing"))
     }
 }
-
-// match redis_value {
-//     Ok(v) => serde_json::from_str(&v).unwrap(),
-//     Err(e) => {
-
-//     }
-// }

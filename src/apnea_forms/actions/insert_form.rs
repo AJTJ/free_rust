@@ -1,6 +1,6 @@
 use crate::apnea_forms::dto::form_dto::{Form, FormCreation, FormDetailsInput};
 use crate::apnea_forms::helpers::FormOutput;
-use crate::auth::actions::get_user_id_from_token_and_session;
+use crate::auth::actions::get_user_id_from_auth;
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::{BigError, SerdeSerializeSnafu};
 use actix_web::web;
@@ -16,7 +16,7 @@ pub async fn insert_form(
     form_data: FormOutput,
 ) -> Result<Form, BigError> {
     let current_stamp = Utc::now().naive_utc();
-    let user_id = get_user_id_from_token_and_session(ctx).await?;
+    let user_id = get_user_id_from_auth(ctx).await?;
 
     let created_form = FormCreation {
         form_name: form_input.form_name,

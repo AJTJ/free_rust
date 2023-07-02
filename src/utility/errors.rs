@@ -2,6 +2,7 @@ use actix_web::{cookie::ParseError as CookieParseError, error::BlockingError};
 use async_graphql::Error as AsyncError;
 use chrono::ParseError as ChronoParseError;
 use diesel::result::Error as DieselError;
+use r2d2::Error as R2D2Error;
 use redis::RedisError;
 use serde_json::Error as SerdeError;
 use snafu::prelude::*;
@@ -61,6 +62,10 @@ pub enum BigError {
     // SESSION
     #[snafu(display("RedisSessionError: {}", source))]
     RedisSessionError { source: RedisError },
+
+    // R2D2
+    #[snafu(display("R2D2 Error: {}", source))]
+    R2D2Error { source: R2D2Error },
 
     // DB/DIESEL
     #[snafu(display("QueryError: {}", source))]

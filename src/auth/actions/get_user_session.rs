@@ -5,7 +5,7 @@ use redis::{Commands, RedisError};
 
 use crate::auth::utility::auth_data::{RedisPool, SessionData};
 
-pub async fn get_user_session_data(
+pub async fn get_user_session(
     ctx: &Context<'_>,
     encoded_session_id: String,
 ) -> Result<SessionData, RedisError> {

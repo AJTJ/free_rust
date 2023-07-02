@@ -8,7 +8,7 @@ use chrono::Utc;
 use diesel::RunQueryDsl;
 use uuid::Uuid;
 
-use super::{get_user, get_user_id_from_token_and_session};
+use super::{get_user, get_user_id_from_auth};
 
 pub async fn update_user(
     ctx: &Context<'_>,
@@ -22,7 +22,7 @@ pub async fn update_user(
     // NOTE: get user_id from cookie/session if it isn't included
     let input_user_id = match input_user_id {
         Some(u) => u,
-        None => get_user_id_from_token_and_session(ctx).await?,
+        None => get_user_id_from_auth(ctx).await?,
     };
 
     let my_user_mod_data = user_mod_data.clone();

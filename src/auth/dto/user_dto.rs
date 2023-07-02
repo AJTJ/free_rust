@@ -1,7 +1,7 @@
 use crate::{
     apnea_sessions::{
-        actions::get_dive_sessions_by_user,
-        dto::dive_session_dto::{DiveSession, DiveSessionFilter},
+        actions::get_dive_sessions,
+        dto::dive_session_dto::{ApnesSessionRetrievalData, DiveSession, DiveSessionFilter},
     },
     graphql_schema::DbPool,
     schema::users,
@@ -93,9 +93,9 @@ impl User {
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_dive_sessions_by_user(
+                    get_dive_sessions(
                         &mut conn,
-                        &user_id,
+                        ApnesSessionRetrievalData::User(user_id),
                         dive_session_filter,
                         query_params,
                     )

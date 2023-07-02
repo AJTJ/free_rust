@@ -1,6 +1,6 @@
 use crate::{
     apnea_sessions::dto::dive_dto::{Dive, DiveCreation, DiveInput},
-    auth::actions::get_user_id_from_token_and_session,
+    auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
     utility::errors::BigError,
 };
@@ -16,7 +16,7 @@ pub async fn insert_dive(
     dive_data: DiveInput,
 ) -> Result<Dive, BigError> {
     let current_stamp = Utc::now().naive_utc();
-    let user_id = get_user_id_from_token_and_session(ctx).await?;
+    let user_id = get_user_id_from_auth(ctx).await?;
     let new_dive = DiveCreation {
         discipline_type: dive_data.discipline_type,
         depth: dive_data.depth,

@@ -1,5 +1,7 @@
 use crate::{
-    apnea_sessions::dto::dive_session_dto::{DiveSession, DiveSessionFilter},
+    apnea_sessions::dto::dive_session_dto::{
+        ApnesSessionRetrievalData, DiveSession, DiveSessionFilter,
+    },
     diesel::ExpressionMethods,
     utility::{
         errors::{BigError, ChronoParseSnafu, DieselQuerySnafu},
@@ -10,19 +12,23 @@ use async_graphql::connection::{Connection, Edge, EmptyFields};
 use chrono::NaiveDateTime;
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
-use uuid::Uuid;
 
-pub fn get_dive_sessions_by_user(
+pub fn get_dive_sessions(
     conn: &mut PgConnection,
-    input_user_id: &Uuid,
+    retrieval_method: ApnesSessionRetrievalData,
     dive_session_filter: Option<DiveSessionFilter>,
     query_params: QueryParams,
 ) -> Result<Connection<String, DiveSession>, BigError> {
-    use crate::schema::dive_sessions::dsl::{created_at, dive_sessions, user_id};
+    use crate::schema::dive_sessions::dsl::{created_at, dive_sessions, id as session_id, user_id};
 
-    let mut query = dive_sessions
-        .filter(user_id.eq(&input_user_id))
-        .into_boxed();
+    let mut query = match retrieval_method {
+        ApnesSessionRetrievalData::Sessions(s) => {
+            dive_sessions.filter(session_id.eq_any(s)).into_boxed()
+        }
+        ApnesSessionRetrievalData::User(input_user_id) => {
+            dive_sessions.filter(user_id.eq(input_user_id)).into_boxed()
+        }
+    };
 
     if let Some(after) = &query_params.after {
         let after = after.parse::<NaiveDateTime>().context(ChronoParseSnafu)?;
@@ -45,7 +51,8 @@ pub fn get_dive_sessions_by_user(
     Ok(connection)
 }
 
-// Ok(res
-//     .into_iter()
-//     .map(|d| (d.created_at.to_string(), d))
-//     .collect::<Vec<(String, DiveSession)>>())
+// dive_sessions
+// .filter(session_id.eq_any(&s))
+// .order(created_at)
+// .get_results::<DiveSession>(conn)
+// .context(DieselQuerySnafu),
