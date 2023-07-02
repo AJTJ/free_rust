@@ -1,6 +1,6 @@
-use super::dive_session_dto::DiveSession;
+use super::apnea_session_dto::ApneaSession;
 use crate::{
-    apnea_sessions::actions::get_dive_session,
+    apnea_sessions::actions::get_apnea_session,
     graphql_schema::DbPool,
     schema::dives,
     utility::{errors::BigError, gql::query_dto::QueryParams},
@@ -77,17 +77,17 @@ pub struct Dive {
 
 #[ComplexObject]
 impl Dive {
-    async fn dive_session(
+    async fn apnea_session(
         &self,
         ctx: &Context<'_>,
         query_params: Option<QueryParams>,
-    ) -> Result<DiveSession, BigError> {
+    ) -> Result<ApneaSession, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.session_id;
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dive_session(&mut conn, &session_id, query_params).map(DiveSession::from)
+            get_apnea_session(&mut conn, &session_id, query_params).map(ApneaSession::from)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?
@@ -102,7 +102,7 @@ pub struct DiveFilter {
     pub distance: Option<f64>,
     pub dive_time: Option<NaiveTime>,
     pub dive_name: Option<String>,
-    pub dive_session: Option<Uuid>,
+    pub apnea_session: Option<Uuid>,
     pub user_id: Option<Uuid>,
 
     pub id: Option<Uuid>,

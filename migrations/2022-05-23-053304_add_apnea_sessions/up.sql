@@ -1,5 +1,5 @@
 -- Your SQL goes here
-CREATE TABLE dive_sessions (
+CREATE TABLE apnea_sessions (
   -- session-specific info
   start_time TIMESTAMP NOT NULL,
   end_time TIMESTAMP NOT NULL,

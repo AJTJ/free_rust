@@ -5,7 +5,7 @@ CREATE TABLE reports (
   form_id uuid NOT NULL REFERENCES forms (id),
   original_form_id uuid REFERENCES forms (id),
   previous_report_id uuid REFERENCES reports (id),
-  session_id uuid NOT NULL REFERENCES dive_sessions (id),
+  session_id uuid NOT NULL REFERENCES apnea_sessions (id),
   user_id uuid NOT NULL REFERENCES users (id),
   -- default data
   id uuid DEFAULT uuid_generate_v4(),

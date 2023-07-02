@@ -1,5 +1,5 @@
 use crate::{
-    apnea_sessions::actions::get_dives, graphql_schema::DbPool, schema::dive_sessions,
+    apnea_sessions::actions::get_dives, graphql_schema::DbPool, schema::apnea_sessions,
     utility::gql::query_dto::QueryParams,
 };
 use actix_web::web;
@@ -10,15 +10,15 @@ use uuid::Uuid;
 use super::dive_dto::{Dive, DiveFilter, DiveRetrievalData};
 
 #[derive(InputObject)]
-pub struct DiveSessionInput {
+pub struct ApneaSessionInput {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
 }
 
 #[derive(AsChangeset, InputObject, Clone)]
-#[diesel(table_name = dive_sessions)]
-pub struct DiveSessionUpdate {
+#[diesel(table_name = apnea_sessions)]
+pub struct ApneaSessionUpdate {
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,
     pub session_name: Option<String>,
@@ -28,8 +28,8 @@ pub struct DiveSessionUpdate {
 }
 
 #[derive(Insertable)]
-#[diesel(table_name = dive_sessions)]
-pub struct DiveSessionCreation {
+#[diesel(table_name = apnea_sessions)]
+pub struct ApneaSessionCreation {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
@@ -45,7 +45,7 @@ pub struct DiveSessionCreation {
 // Matches the database object 1:1
 #[derive(Queryable, SimpleObject, Clone)]
 #[graphql(complex)]
-pub struct DiveSession {
+pub struct ApneaSession {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
@@ -66,7 +66,7 @@ pub struct DiveSession {
 }
 
 #[ComplexObject]
-impl DiveSession {
+impl ApneaSession {
     async fn dives(
         &self,
         ctx: &Context<'_>,
@@ -96,7 +96,7 @@ impl DiveSession {
 }
 
 #[derive(InputObject, Clone)]
-pub struct DiveSessionFilter {
+pub struct ApneaSessionFilter {
     pub session_id: Option<Uuid>,
     pub start_time: Option<NaiveDateTime>,
     pub end_time: Option<NaiveDateTime>,

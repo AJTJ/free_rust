@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 pub async fn insert_dive(
     ctx: &Context<'_>,
-    dive_session_id: Uuid,
+    apnea_session_id: Uuid,
     dive_data: DiveInput,
 ) -> Result<Dive, BigError> {
     let current_stamp = Utc::now().naive_utc();
@@ -23,7 +23,7 @@ pub async fn insert_dive(
         distance: dive_data.distance,
         dive_time: dive_data.dive_time,
         dive_name: dive_data.dive_name,
-        session_id: dive_session_id,
+        session_id: apnea_session_id,
         user_id,
         created_at: current_stamp,
         updated_at: current_stamp,

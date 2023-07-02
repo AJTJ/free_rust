@@ -1,7 +1,7 @@
 use crate::{
     apnea_sessions::{
-        actions::get_dive_sessions,
-        dto::dive_session_dto::{ApnesSessionRetrievalData, DiveSession, DiveSessionFilter},
+        actions::get_apnea_sessions,
+        dto::apnea_session_dto::{ApneaSession, ApneaSessionFilter, ApnesSessionRetrievalData},
     },
     graphql_schema::DbPool,
     schema::users,
@@ -77,26 +77,26 @@ pub enum UserRetrievalData {
 
 #[ComplexObject]
 impl User {
-    async fn dive_sessions(
+    async fn apnea_sessions(
         &self,
         ctx: &Context<'_>,
-        dive_session_filter: Option<DiveSessionFilter>,
+        apnea_session_filter: Option<ApneaSessionFilter>,
         query_params: QueryParams,
-    ) -> Result<Connection<String, DiveSession>, BigError> {
+    ) -> Result<Connection<String, ApneaSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = self.id;
 
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
-            let dive_session_filter = dive_session_filter.clone();
+            let apnea_session_filter = apnea_session_filter.clone();
             let pool_ctx = pool_ctx.clone();
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_dive_sessions(
+                    get_apnea_sessions(
                         &mut conn,
                         ApnesSessionRetrievalData::User(user_id),
-                        dive_session_filter,
+                        apnea_session_filter,
                         query_params,
                     )
                 })

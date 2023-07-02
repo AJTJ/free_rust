@@ -1,16 +1,17 @@
 use super::{
     actions::{
-        add_dive_session, get_dive_sessions, get_dives, insert_dive, update_dive,
-        update_dive_session,
+        get_apnea_sessions, get_dives, insert_apnea_session, insert_dive, update_apnea_session,
+        update_dive,
     },
     dto::{
-        dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
-        dive_session_dto::{
-            ApnesSessionRetrievalData, DiveSession, DiveSessionFilter, DiveSessionInput,
-            DiveSessionUpdate,
+        apnea_session_dto::{
+            ApneaSession, ApneaSessionFilter, ApneaSessionInput, ApneaSessionUpdate,
+            ApnesSessionRetrievalData,
         },
+        dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
     },
 };
+use crate::diesel::RunQueryDsl;
 use crate::{
     auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
@@ -25,8 +26,6 @@ use crate::{
 };
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
-use diesel::RunQueryDsl;
-use snafu::OptionExt;
 use snafu::ResultExt;
 use uuid::Uuid;
 
@@ -39,25 +38,25 @@ pub struct ApneaSessionsMutation;
 #[Object]
 impl ApneaSessionsQuery {
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn dive_sessions(
+    async fn apnea_sessions(
         &self,
         ctx: &Context<'_>,
-        dive_session_filter: Option<DiveSessionFilter>,
+        apnea_session_filter: Option<ApneaSessionFilter>,
         query_params: QueryParams,
-    ) -> Result<Connection<String, DiveSession>, BigError> {
+    ) -> Result<Connection<String, ApneaSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_auth(ctx).await?;
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
-            let dive_session_filter = dive_session_filter.clone();
+            let apnea_session_filter = apnea_session_filter.clone();
             let pool_ctx = pool_ctx.clone();
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_dive_sessions(
+                    get_apnea_sessions(
                         &mut conn,
                         ApnesSessionRetrievalData::User(user_id),
-                        dive_session_filter,
+                        apnea_session_filter,
                         query_params,
                     )
                 })
@@ -99,31 +98,31 @@ impl ApneaSessionsQuery {
 impl ApneaSessionsMutation {
     // DIVE SESSION
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn add_dive_session(
+    async fn add_apnea_session(
         &self,
         ctx: &Context<'_>,
-        dive_session_input: DiveSessionInput,
-    ) -> Result<DiveSession, BigError> {
-        add_dive_session(ctx, dive_session_input).await
+        apnea_session_input: ApneaSessionInput,
+    ) -> Result<ApneaSession, BigError> {
+        insert_apnea_session(ctx, apnea_session_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn update_dive_session(
+    async fn update_apnea_session(
         &self,
         ctx: &Context<'_>,
-        dive_session_update: DiveSessionUpdate,
-    ) -> Result<DiveSession, BigError> {
-        update_dive_session(ctx, dive_session_update).await
+        apnea_session_update: ApneaSessionUpdate,
+    ) -> Result<ApneaSession, BigError> {
+        update_apnea_session(ctx, apnea_session_update).await
     }
 
     // for testing
     #[graphql(guard = "DevelopmentGuard::new()")]
-    async fn delete_all_dive_sessions(&self, ctx: &Context<'_>) -> Result<usize, BigError> {
+    async fn delete_all_apnea_sessions(&self, ctx: &Context<'_>) -> Result<usize, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            use crate::schema::dive_sessions::dsl::dive_sessions;
-            diesel::delete(dive_sessions).execute(&mut conn)
+            use crate::schema::apnea_sessions::dsl::apnea_sessions;
+            diesel::delete(apnea_sessions).execute(&mut conn)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?
@@ -134,10 +133,10 @@ impl ApneaSessionsMutation {
     async fn add_dive(
         &self,
         ctx: &Context<'_>,
-        dive_session_id: Uuid,
+        apnea_session_id: Uuid,
         dive_input: DiveInput,
     ) -> Result<Dive, BigError> {
-        insert_dive(ctx, dive_session_id, dive_input).await
+        insert_dive(ctx, apnea_session_id, dive_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]

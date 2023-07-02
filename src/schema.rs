@@ -1,7 +1,7 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    dive_sessions (id) {
+    apnea_sessions (id) {
         start_time -> Timestamp,
         end_time -> Timestamp,
         session_name -> Nullable<Text>,
@@ -82,15 +82,15 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(dive_sessions -> users (user_id));
-diesel::joinable!(dives -> dive_sessions (session_id));
+diesel::joinable!(apnea_sessions -> users (user_id));
+diesel::joinable!(dives -> apnea_sessions (session_id));
 diesel::joinable!(dives -> users (user_id));
 diesel::joinable!(forms -> users (user_id));
-diesel::joinable!(reports -> dive_sessions (session_id));
+diesel::joinable!(reports -> apnea_sessions (session_id));
 diesel::joinable!(reports -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    dive_sessions,
+    apnea_sessions,
     dives,
     forms,
     reports,

@@ -14,16 +14,16 @@
 // use super::dto::dive_session_dto::ApnesSessionRetrievalData;
 // use super::dto::dive_session_dto::DiveSession;
 
-// pub struct DiveSessionsLoader(DbPool);
+// pub struct ApneaSessionLoader(DbPool);
 
-// impl DiveSessionsLoader {
+// impl ApneaSessionLoader {
 //     pub fn new(postgres_pool: DbPool) -> Self {
 //         Self(postgres_pool)
 //     }
 // }
 
 // #[async_trait::async_trait]
-// impl Loader<Uuid> for DiveSessionsLoader {
+// impl Loader<Uuid> for ApneaSessionLoader {
 //     type Value = DiveSession;
 //     type Error = Arc<BigError>;
 

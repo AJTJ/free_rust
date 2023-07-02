@@ -1,26 +1,26 @@
-use crate::apnea_sessions::dto::dive_session_dto::{DiveSession, DiveSessionCreation};
+use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
 use crate::auth::actions::get_user_id_from_auth;
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::BigError;
-use crate::{apnea_sessions::dto::dive_session_dto::DiveSessionInput, diesel::ExpressionMethods};
+use crate::{apnea_sessions::dto::apnea_session_dto::ApneaSessionInput, diesel::ExpressionMethods};
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 use uuid::Uuid;
 
-pub async fn add_dive_session(
+pub async fn insert_apnea_session(
     ctx: &Context<'_>,
-    session_data: DiveSessionInput,
-) -> Result<DiveSession, BigError> {
-    use crate::schema::dive_sessions::dsl::dive_sessions;
+    session_data: ApneaSessionInput,
+) -> Result<ApneaSession, BigError> {
+    use crate::schema::apnea_sessions::dsl::apnea_sessions;
 
     let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
 
     let user_id = get_user_id_from_auth(ctx).await?;
 
-    let new_session = DiveSessionCreation {
+    let new_session = ApneaSessionCreation {
         id: uuid,
         start_time: session_data.start_time,
         end_time: session_data.end_time,
@@ -35,9 +35,9 @@ pub async fn add_dive_session(
 
     web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        let response = diesel::insert_into(dive_sessions)
+        let response = diesel::insert_into(apnea_sessions)
             .values(&new_session)
-            .get_result::<DiveSession>(&mut conn);
+            .get_result::<ApneaSession>(&mut conn);
         response
     })
     .await
