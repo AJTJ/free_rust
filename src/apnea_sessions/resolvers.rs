@@ -98,7 +98,7 @@ impl ApneaSessionsQuery {
 impl ApneaSessionsMutation {
     // DIVE SESSION
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn add_apnea_session(
+    async fn insert_apnea_session(
         &self,
         ctx: &Context<'_>,
         apnea_session_input: ApneaSessionInput,
@@ -130,7 +130,7 @@ impl ApneaSessionsMutation {
     }
     // DIVES
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn add_dive(
+    async fn insert_dive(
         &self,
         ctx: &Context<'_>,
         apnea_session_id: Uuid,
