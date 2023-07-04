@@ -7,7 +7,7 @@ use crate::{
     },
 };
 use async_graphql::connection::{Connection, Edge, EmptyFields};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
 use uuid::Uuid;
@@ -24,7 +24,7 @@ pub fn get_reports(
         .into_boxed();
 
     if let Some(after) = &query_params.after {
-        let after = after.parse::<NaiveDateTime>().context(ChronoParseSnafu)?;
+        let after = after.parse::<DateTime<Utc>>().context(ChronoParseSnafu)?;
         query = query.filter(created_at.gt(after))
     }
 

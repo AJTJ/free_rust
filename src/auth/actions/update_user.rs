@@ -32,7 +32,7 @@ pub async fn update_user(
         use crate::schema::users::dsl::{id as user_id, updated_at, users};
         diesel::update(users)
             .filter(user_id.eq(&input_user_id))
-            .set((&my_user_mod_data, updated_at.eq(Utc::now().naive_utc())))
+            .set((&my_user_mod_data, updated_at.eq(Utc::now())))
             .execute(&mut conn)
     })
     .await

@@ -16,7 +16,7 @@ pub async fn update_dive(ctx: &Context<'_>, dive_mod_data: DiveUpdate) -> Result
         use crate::schema::dives::dsl::{dives, id as dive_id, updated_at};
         diesel::update(dives)
             .filter(dive_id.eq(&my_dive_mod_data.id))
-            .set((&my_dive_mod_data, updated_at.eq(Utc::now().naive_utc())))
+            .set((&my_dive_mod_data, updated_at.eq(Utc::now())))
             .get_result::<Dive>(&mut conn)
     })
     .await

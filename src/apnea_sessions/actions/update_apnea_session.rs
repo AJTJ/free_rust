@@ -24,7 +24,7 @@ pub async fn update_apnea_session(
         use crate::schema::apnea_sessions::dsl::{apnea_sessions, id as session_id, updated_at};
         let update_statement = diesel::update(apnea_sessions)
             .filter(session_id.eq(&my_session_mod_data.id))
-            .set((&my_session_mod_data, updated_at.eq(Utc::now().naive_utc())))
+            .set((&my_session_mod_data, updated_at.eq(Utc::now())))
             .execute(&mut conn);
 
         update_statement
