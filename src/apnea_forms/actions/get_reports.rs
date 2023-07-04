@@ -16,7 +16,7 @@ pub fn get_reports(
     conn: &mut PgConnection,
     input_user_id: Uuid,
     query_params: QueryParams,
-) -> Result<Connection<String, FormOutput>, BigError> {
+) -> Result<Connection<String, Report>, BigError> {
     use crate::schema::reports::dsl::{created_at, reports, user_id as forms_user_id};
 
     let mut query = reports
@@ -42,8 +42,8 @@ pub fn get_reports(
 
     let output_vals = my_reports
         .into_iter()
-        .map(|r| (r.created_at.to_string(), r.report_data))
-        .collect::<Vec<(String, FormOutput)>>();
+        .map(|r| (r.created_at.to_string(), r))
+        .collect::<Vec<(String, Report)>>();
 
     connection.edges.extend(
         output_vals

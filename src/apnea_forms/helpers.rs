@@ -10,13 +10,13 @@ use serde::{Deserialize, Serialize};
 use super::form_v1::form::{FormInputV1, FormOutputV1};
 
 // NOTE: This is only for receiving from the client
-#[derive(OneofObject)]
+#[derive(OneofObject, Debug)]
 pub enum FormInput {
     V1(FormInputV1),
 }
 
 // All operations are done on this object
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "version")]
 #[derive(Union, FromSqlRow)]
 pub enum FormOutput {

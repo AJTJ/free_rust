@@ -31,7 +31,7 @@ pub struct FormCreation {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject, Clone)]
+#[derive(Queryable, SimpleObject, Clone, Debug)]
 // #[graphql(complex)]
 pub struct Form {
     pub form_name: String,

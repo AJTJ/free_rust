@@ -37,7 +37,7 @@ pub struct ApneaSessionsMutation;
 
 #[Object]
 impl ApneaSessionsQuery {
-    #[graphql(guard = "LoggedInGuard::new()")]
+    // #[graphql(guard = "LoggedInGuard::new()")]
     async fn apnea_sessions(
         &self,
         ctx: &Context<'_>,

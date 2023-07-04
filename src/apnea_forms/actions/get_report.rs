@@ -1,9 +1,22 @@
-use crate::{apnea_forms::dto::report_dto::Report, diesel::ExpressionMethods};
+use crate::{
+    apnea_forms::dto::report_dto::{Report, ReportRetrievalData},
+    diesel::ExpressionMethods,
+};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 
-pub fn get_report(conn: &mut PgConnection, report_id: Uuid) -> diesel::QueryResult<Report> {
+pub fn get_report(
+    conn: &mut PgConnection,
+    report_retrieval: ReportRetrievalData,
+) -> diesel::QueryResult<Report> {
     use crate::schema::reports::dsl::*;
 
-    reports.filter(id.eq(&report_id)).get_result::<Report>(conn)
+    match report_retrieval {
+        ReportRetrievalData::ReportId(report_id) => {
+            reports.filter(id.eq(&report_id)).get_result::<Report>(conn)
+        }
+        ReportRetrievalData::SessionId(inc_session_id) => reports
+            .filter(session_id.eq(&inc_session_id))
+            .get_result::<Report>(conn),
+    }
 }

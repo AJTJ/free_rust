@@ -1,6 +1,7 @@
 use crate::apnea_forms::actions::get_forms::get_forms;
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
+use tracing::info;
 use uuid::Uuid;
 
 use crate::{
@@ -14,7 +15,10 @@ use crate::{
 
 use super::{
     actions::get_reports::get_reports,
-    dto::{form_dto::FormDetailsInput, report_dto::ReportDetailsInput},
+    dto::{
+        form_dto::{Form, FormDetailsInput},
+        report_dto::{Report, ReportDetailsInput},
+    },
     form_v1::form::{self, FormOutputV1},
     helpers::{FormInput, FormOutput},
 };
@@ -32,7 +36,7 @@ impl ApneaFormsQuery {
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
-    ) -> Result<Vec<FormOutput>, BigError> {
+    ) -> Result<Vec<Form>, BigError> {
         // TODO: Data loader and pagination
         let user_id = get_user_id_from_auth(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -44,9 +48,11 @@ impl ApneaFormsQuery {
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })??;
 
-        let form_output = forms.into_iter().map(|f| f.form_data).collect();
+        info!("all forms: {forms:?}");
 
-        Ok(form_output)
+        // let form_output = forms.into_iter().map(|f| f.form_data).collect();
+
+        Ok(forms)
     }
 
     // they simply get all the forms they want
@@ -55,7 +61,7 @@ impl ApneaFormsQuery {
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
-    ) -> Result<Connection<String, FormOutput>, BigError> {
+    ) -> Result<Connection<String, Report>, BigError> {
         // TODO: Add dataloader?
 
         let user_id = get_user_id_from_auth(ctx).await?;
@@ -89,7 +95,7 @@ impl ApneaFormsMutation {
         ctx: &Context<'_>,
         form_details_input: FormDetailsInput,
         form_input: FormInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Form, BigError> {
         match form_input {
             FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
@@ -105,7 +111,7 @@ impl ApneaFormsMutation {
         ctx: &Context<'_>,
         previous_form_id: Uuid,
         form_input: FormInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Form, BigError> {
         match form_input {
             FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
@@ -123,7 +129,8 @@ impl ApneaFormsMutation {
         ctx: &Context<'_>,
         report_details_input: ReportDetailsInput,
         report_input: FormInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Report, BigError> {
+        info!("report_input: {report_input:?}");
         match report_input {
             FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
@@ -139,11 +146,11 @@ impl ApneaFormsMutation {
         ctx: &Context<'_>,
         previous_report_id: Uuid,
         forms_input: FormInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Report, BigError> {
         match forms_input {
             FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
-                    .modify_form(ctx, previous_report_id)
+                    .modify_report(ctx, previous_report_id)
                     .await
             }
         }

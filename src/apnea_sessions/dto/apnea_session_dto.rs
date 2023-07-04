@@ -1,13 +1,22 @@
+use super::dive_dto::{Dive, DiveFilter, DiveRetrievalData};
 use crate::{
-    apnea_sessions::actions::get_dives, graphql_schema::DbPool, schema::apnea_sessions,
-    utility::gql::query_dto::QueryParams,
+    apnea_forms::{
+        actions::get_report::get_report,
+        dto::report_dto::{Report, ReportRetrievalData},
+    },
+    apnea_sessions::actions::get_dives,
+    graphql_schema::DbPool,
+    schema::apnea_sessions,
+    utility::{
+        errors::{BigError, DieselQuerySnafu},
+        gql::query_dto::QueryParams,
+    },
 };
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 use chrono::NaiveDateTime;
+use snafu::ResultExt;
 use uuid::Uuid;
-
-use super::dive_dto::{Dive, DiveFilter, DiveRetrievalData};
 
 #[derive(InputObject)]
 pub struct ApneaSessionInput {
@@ -92,6 +101,21 @@ impl ApneaSession {
         .expect("error in another loading dive sessions");
 
         Ok(dives)
+    }
+
+    async fn report(&self, ctx: &Context<'_>) -> FieldResult<Report> {
+        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+        let session_id = self.id;
+
+        let report = web::block(move || {
+            let mut conn = pool_ctx.get().unwrap();
+            get_report(&mut conn, ReportRetrievalData::SessionId(session_id))
+        })
+        .await
+        .map_err(|e| BigError::ActixBlockingError { source: e })??;
+
+        Ok(report)
     }
 }
 

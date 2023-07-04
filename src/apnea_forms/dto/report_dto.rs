@@ -1,6 +1,6 @@
 use crate::{apnea_forms::helpers::FormOutput, schema::reports};
 
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::{InputObject, OneofObject, SimpleObject};
 use chrono::NaiveDateTime;
 use serde_json::Value;
 use uuid::Uuid;
@@ -11,29 +11,28 @@ pub struct ReportDetailsInput {
     pub original_form_id: Option<Uuid>,
     pub previous_report_id: Option<Uuid>,
     pub session_id: Uuid,
-    pub user_id: Uuid,
 }
 
-#[derive(InputObject)]
-pub struct ReportOutput {
-    pub form_id: Uuid,
-    pub original_form_id: Option<Uuid>,
-    pub previous_report_id: Option<Uuid>,
-    pub session_id: Uuid,
-    pub user_id: Uuid,
-}
+// #[derive(InputObject)]
+// pub struct ReportOutput {
+//     pub form_id: Uuid,
+//     pub original_form_id: Option<Uuid>,
+//     pub previous_report_id: Option<Uuid>,
+//     pub session_id: Uuid,
+//     pub user_id: Uuid,
+// }
 
-impl From<ReportDetailsInput> for ReportOutput {
-    fn from(value: ReportDetailsInput) -> Self {
-        ReportOutput {
-            form_id: value.form_id,
-            original_form_id: value.original_form_id,
-            previous_report_id: value.previous_report_id,
-            session_id: value.session_id,
-            user_id: value.user_id,
-        }
-    }
-}
+// impl From<ReportDetailsInput> for ReportOutput {
+//     fn from(value: ReportDetailsInput) -> Self {
+//         ReportOutput {
+//             form_id: value.form_id,
+//             original_form_id: value.original_form_id,
+//             previous_report_id: value.previous_report_id,
+//             session_id: value.session_id,
+//             user_id: value.user_id,
+//         }
+//     }
+// }
 
 #[derive(Insertable, Debug)]
 #[diesel(table_name = reports)]
@@ -77,6 +76,12 @@ pub struct Report {
     pub archived_at: Option<NaiveDateTime>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
+}
+
+#[derive(OneofObject)]
+pub enum ReportRetrievalData {
+    ReportId(Uuid),
+    SessionId(Uuid),
 }
 
 // #[ComplexObject]

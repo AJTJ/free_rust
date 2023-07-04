@@ -7,26 +7,29 @@ use uuid::Uuid;
 use crate::{
     apnea_forms::{
         actions::{insert_form::insert_form, insert_report::insert_report},
-        dto::{form_dto::FormDetailsInput, report_dto::ReportDetailsInput},
+        dto::{
+            form_dto::{Form, FormDetailsInput},
+            report_dto::{Report, ReportDetailsInput},
+        },
         helpers::FormOutput,
     },
-    utility::errors::{BigError, SerdeSerializeSnafu},
+    utility::errors::BigError,
 };
 
 use super::enums::{DisciplinesEnum, WildlifeEnumV1};
 
 // Report Name
 
-#[derive(Serialize, Deserialize, InputObject, Clone)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
 struct ReportNameInputV1 {
-    name: String,
+    name: Option<String>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
 struct ReportNameOutputV1 {
-    name: String,
+    name: Option<String>,
     // defaults
     field_order: Option<i32>,
 }
@@ -42,16 +45,16 @@ impl From<ReportNameInputV1> for ReportNameOutputV1 {
 
 // Wildlife
 
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
 struct WildlifeInputV1 {
-    value: WildlifeEnumV1,
+    value: Option<WildlifeEnumV1>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
 struct WildlifeOutputV1 {
-    value: WildlifeEnumV1,
+    value: Option<WildlifeEnumV1>,
     // defaults
     field_order: Option<i32>,
 }
@@ -67,16 +70,16 @@ impl From<WildlifeInputV1> for WildlifeOutputV1 {
 
 // Weather
 
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
 struct WeatherInputV1 {
-    wind: i32,
+    wind: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
 struct WeatherOutputV1 {
-    wind: i32,
+    wind: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
@@ -91,28 +94,48 @@ impl From<WeatherInputV1> for WeatherOutputV1 {
 }
 
 // Discipline and Max Depth
-
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
-struct DisciplineAndMaxDepthInputV1 {
-    discipline: DisciplinesEnum,
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
+struct InnerDisciplineMaxDepthInputV1 {
+    discipline: Option<DisciplinesEnum>,
     max_depth: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
+struct InnerDisciplineMaxDepthOutputV1 {
+    discipline: Option<DisciplinesEnum>,
+    max_depth: i32,
+}
+
+impl From<InnerDisciplineMaxDepthInputV1> for InnerDisciplineMaxDepthOutputV1 {
+    fn from(value: InnerDisciplineMaxDepthInputV1) -> Self {
+        InnerDisciplineMaxDepthOutputV1 {
+            discipline: value.discipline,
+            max_depth: value.max_depth,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
+struct DisciplineAndMaxDepthInputV1 {
+    discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthInputV1>>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
 struct DisciplineAndMaxDepthOutputV1 {
-    discipline: DisciplinesEnum,
-    max_depth: i32,
+    discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthOutputV1>>,
     // defaults
     field_order: Option<i32>,
 }
 
 impl From<DisciplineAndMaxDepthInputV1> for DisciplineAndMaxDepthOutputV1 {
     fn from(value: DisciplineAndMaxDepthInputV1) -> Self {
+        let discipline_max_depth = value
+            .discipline_max_depth
+            .and_then(|x| Some(x.into_iter().map(|l| l.into()).collect()));
         DisciplineAndMaxDepthOutputV1 {
-            discipline: value.discipline,
-            max_depth: value.max_depth,
+            discipline_max_depth,
             field_order: value.field_order,
         }
     }
@@ -120,16 +143,16 @@ impl From<DisciplineAndMaxDepthInputV1> for DisciplineAndMaxDepthOutputV1 {
 
 // MAX DEPTH
 
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
 struct MaxDepthInputV1 {
-    max_depth: i32,
+    max_depth: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
 struct MaxDepthOutputV1 {
-    max_depth: i32,
+    max_depth: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
@@ -145,16 +168,16 @@ impl From<MaxDepthInputV1> for MaxDepthOutputV1 {
 
 // CONGESTION
 
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
 struct CongestionInputV1 {
-    value: i32,
+    value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
 struct CongestionOutputV1 {
-    value: i32,
+    value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
@@ -170,16 +193,16 @@ impl From<CongestionInputV1> for CongestionOutputV1 {
 
 // VISIBILITY
 
-#[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
 struct VisibilityInputV1 {
-    value: i32,
+    value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
 struct VisibilityOutputV1 {
-    value: i32,
+    value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
@@ -195,23 +218,23 @@ impl From<VisibilityInputV1> for VisibilityOutputV1 {
 
 // FORMS
 
-#[derive(Serialize, Deserialize, InputObject, Clone)]
+#[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
 pub struct FormInputV1 {
     report_name: Option<ReportNameInputV1>,
     wildlife: Option<WildlifeInputV1>,
     weather: Option<WeatherInputV1>,
-    discipline_and_max_depth: Option<Vec<DisciplineAndMaxDepthInputV1>>,
+    discipline_and_max_depth: Option<DisciplineAndMaxDepthInputV1>,
     max_depth: Option<MaxDepthInputV1>,
     congestion: Option<CongestionInputV1>,
     visibility: Option<VisibilityInputV1>,
 }
 
-#[derive(Serialize, Deserialize, SimpleObject, Clone)]
+#[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
 pub struct FormOutputV1 {
     report_name: Option<ReportNameOutputV1>,
     wildlife: Option<WildlifeOutputV1>,
     weather: Option<WeatherOutputV1>,
-    discipline_and_max_depth: Option<Vec<DisciplineAndMaxDepthOutputV1>>,
+    discipline_and_max_depth: Option<DisciplineAndMaxDepthOutputV1>,
     max_depth: Option<MaxDepthOutputV1>,
     congestion: Option<CongestionOutputV1>,
     visibility: Option<VisibilityOutputV1>,
@@ -222,9 +245,7 @@ impl From<FormInputV1> for FormOutputV1 {
         let report_name = value.report_name.and_then(|x| Some(x.into()));
         let wildlife = value.wildlife.and_then(|x| Some(x.into()));
         let weather = value.weather.and_then(|x| Some(x.into()));
-        let discipline_and_max_depth = value
-            .discipline_and_max_depth
-            .and_then(|x| Some(x.into_iter().map(|x| x.into()).collect()));
+        let discipline_and_max_depth = value.discipline_and_max_depth.and_then(|x| Some(x.into()));
         let max_depth = value.max_depth.and_then(|x| Some(x.into()));
         let congestion = value.congestion.and_then(|x| Some(x.into()));
         let visibility = value.visibility.and_then(|x| Some(x.into()));
@@ -247,17 +268,17 @@ impl FormOutputV1 {
         &self,
         ctx: &Context<'_>,
         form_input: FormDetailsInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Form, BigError> {
         // TODO: perform validation
         let form = insert_form(ctx, form_input, FormOutput::V1(self.clone())).await?;
-        Ok(form.form_data)
+        Ok(form)
     }
 
     pub async fn modify_form(
         &self,
         ctx: &Context<'_>,
         previous_form_id: Uuid,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Form, BigError> {
         // TODO: get previous form, apply modifications/changes
         // TODO: update database
         unimplemented!()
@@ -267,17 +288,17 @@ impl FormOutputV1 {
         &self,
         ctx: &Context<'_>,
         report_input: ReportDetailsInput,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Report, BigError> {
         // TODO: perform validation?
         let report = insert_report(ctx, report_input, FormOutput::V1(self.clone())).await?;
-        Ok(report.report_data)
+        Ok(report)
     }
 
     pub async fn modify_report(
         &self,
         ctx: &Context<'_>,
         previous_report_id: Uuid,
-    ) -> Result<FormOutput, BigError> {
+    ) -> Result<Report, BigError> {
         // TODO: get previous report, apply modifications/changes
         // TODO: update database
         unimplemented!()
