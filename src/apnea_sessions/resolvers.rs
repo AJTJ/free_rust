@@ -11,7 +11,7 @@ use super::{
         dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
     },
 };
-use crate::diesel::RunQueryDsl;
+use crate::{apnea_forms::dto::report_dto::ReportDetailsInput, diesel::RunQueryDsl};
 use crate::{
     auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
@@ -102,8 +102,9 @@ impl ApneaSessionsMutation {
         &self,
         ctx: &Context<'_>,
         apnea_session_input: ApneaSessionInput,
+        report_details: Option<ReportDetailsInput>,
     ) -> Result<ApneaSession, BigError> {
-        insert_apnea_session(ctx, apnea_session_input).await
+        insert_apnea_session(ctx, apnea_session_input, report_details).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]

@@ -33,6 +33,14 @@ impl FromSql<sql_types::Jsonb, Pg> for FormOutput {
     }
 }
 
+impl FormOutput {
+    pub fn from_input(input: FormInput) -> Self {
+        match input {
+            FormInput::V1(v1) => FormOutput::V1(FormOutputV1::from(v1)),
+        }
+    }
+}
+
 // impl AsExpression<sql_types::Jsonb> for FormOutput {
 //     type Expression;
 

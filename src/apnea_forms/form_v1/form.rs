@@ -287,10 +287,12 @@ impl FormOutputV1 {
     pub async fn insert_report(
         &self,
         ctx: &Context<'_>,
+        session_id: &Uuid,
         report_input: ReportDetailsInput,
     ) -> Result<Report, BigError> {
         // TODO: perform validation?
-        let report = insert_report(ctx, report_input, FormOutput::V1(self.clone())).await?;
+        let report =
+            insert_report(ctx, session_id, report_input, FormOutput::V1(self.clone())).await?;
         Ok(report)
     }
 

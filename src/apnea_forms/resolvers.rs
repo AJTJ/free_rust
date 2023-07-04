@@ -127,6 +127,7 @@ impl ApneaFormsMutation {
     async fn insert_report(
         &self,
         ctx: &Context<'_>,
+        session_id: Uuid,
         report_details_input: ReportDetailsInput,
         report_input: FormInput,
     ) -> Result<Report, BigError> {
@@ -134,7 +135,7 @@ impl ApneaFormsMutation {
         match report_input {
             FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
-                    .insert_report(ctx, report_details_input)
+                    .insert_report(ctx, &session_id, report_details_input)
                     .await
             }
         }

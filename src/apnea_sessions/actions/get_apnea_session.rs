@@ -8,7 +8,6 @@ use uuid::Uuid;
 pub fn get_apnea_session(
     conn: &mut PgConnection,
     input_session_id: &Uuid,
-    db_query_ob: Option<QueryParams>,
 ) -> diesel::QueryResult<ApneaSession> {
     use crate::schema::apnea_sessions::dsl::{apnea_sessions, created_at, id as session_id};
 

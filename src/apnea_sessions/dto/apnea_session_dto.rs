@@ -3,6 +3,7 @@ use crate::{
     apnea_forms::{
         actions::get_report::get_report,
         dto::report_dto::{Report, ReportRetrievalData},
+        helpers::FormInput,
     },
     apnea_sessions::actions::get_dives,
     graphql_schema::DbPool,
@@ -23,6 +24,7 @@ pub struct ApneaSessionInput {
     pub start_time: NaiveDateTime,
     pub end_time: NaiveDateTime,
     pub session_name: Option<String>,
+    pub session_report: Option<FormInput>,
 }
 
 #[derive(AsChangeset, InputObject, Clone)]

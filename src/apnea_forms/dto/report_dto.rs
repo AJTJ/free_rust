@@ -10,7 +10,6 @@ pub struct ReportDetailsInput {
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
     pub previous_report_id: Option<Uuid>,
-    pub session_id: Uuid,
 }
 
 // #[derive(InputObject)]

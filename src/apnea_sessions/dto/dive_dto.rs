@@ -87,7 +87,7 @@ impl Dive {
         let session_id = self.session_id;
         web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_apnea_session(&mut conn, &session_id, query_params).map(ApneaSession::from)
+            get_apnea_session(&mut conn, &session_id).map(ApneaSession::from)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?

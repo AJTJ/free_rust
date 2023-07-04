@@ -1,3 +1,7 @@
+use crate::apnea_forms::actions::insert_report::insert_report;
+use crate::apnea_forms::dto::report_dto::ReportDetailsInput;
+use crate::apnea_forms::helpers::FormOutput;
+use crate::apnea_sessions::actions::get_apnea_session;
 use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
 use crate::auth::actions::get_user_id_from_auth;
 use crate::graphql_schema::DbPool;
@@ -11,7 +15,8 @@ use uuid::Uuid;
 
 pub async fn insert_apnea_session(
     ctx: &Context<'_>,
-    session_data: ApneaSessionInput,
+    session_input: ApneaSessionInput,
+    report_details: Option<ReportDetailsInput>,
 ) -> Result<ApneaSession, BigError> {
     use crate::schema::apnea_sessions::dsl::apnea_sessions;
 
@@ -22,9 +27,9 @@ pub async fn insert_apnea_session(
 
     let new_session = ApneaSessionCreation {
         id: uuid,
-        start_time: session_data.start_time,
-        end_time: session_data.end_time,
-        session_name: session_data.session_name,
+        start_time: session_input.start_time,
+        end_time: session_input.end_time,
+        session_name: session_input.session_name,
         user_id,
         created_at: current_stamp,
         updated_at: current_stamp,
@@ -33,7 +38,7 @@ pub async fn insert_apnea_session(
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    web::block(move || {
+    let new_session = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
         let response = diesel::insert_into(apnea_sessions)
             .values(&new_session)
@@ -42,5 +47,28 @@ pub async fn insert_apnea_session(
     })
     .await
     .map_err(|e| BigError::ActixBlockingError { source: e })?
-    .map_err(|e| BigError::DieselInsertError { source: e })
+    .map_err(|e| BigError::DieselInsertError { source: e })?;
+
+    if let (Some(report_input), Some(report_details)) =
+        (session_input.session_report, report_details)
+    {
+        insert_report(
+            ctx,
+            &new_session.id,
+            report_details,
+            FormOutput::from_input(report_input),
+        )
+        .await?;
+    };
+
+    let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    let refetched_session = web::block(move || {
+        let mut conn = pool_ctx.get().unwrap();
+        get_apnea_session(&mut conn, &new_session.id)
+    })
+    .await
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
+    .map_err(|e| BigError::DieselInsertError { source: e })?;
+
+    Ok(refetched_session)
 }

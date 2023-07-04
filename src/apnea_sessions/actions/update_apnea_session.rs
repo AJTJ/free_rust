@@ -38,7 +38,7 @@ pub async fn update_apnea_session(
 
     let updated_session = web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        get_apnea_session(&mut conn, &my_session_mod_data.id, None)
+        get_apnea_session(&mut conn, &my_session_mod_data.id)
     })
     .await
     .map_err(|e| BigError::ActixBlockingError { source: e })?

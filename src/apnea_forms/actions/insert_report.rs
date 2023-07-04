@@ -13,9 +13,11 @@ use chrono::Utc;
 use diesel::RunQueryDsl;
 use serde_json::Value;
 use snafu::ResultExt;
+use uuid::Uuid;
 
 pub async fn insert_report(
     ctx: &Context<'_>,
+    session_id: &Uuid,
     report_input: ReportDetailsInput,
     report_data: FormOutput,
 ) -> Result<Report, BigError> {
@@ -27,7 +29,7 @@ pub async fn insert_report(
         original_form_id: report_input.original_form_id,
         previous_report_id: report_input.previous_report_id,
         form_id: report_input.form_id,
-        session_id: report_input.session_id,
+        session_id: *session_id,
         user_id,
         created_at: current_stamp,
         updated_at: current_stamp,
