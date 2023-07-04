@@ -14,7 +14,7 @@ use actix_web::web;
 use async_graphql::{
     connection::Connection, ComplexObject, Context, InputObject, OneofObject, SimpleObject,
 };
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 #[derive(Clone, InputObject)]
@@ -29,7 +29,7 @@ pub struct UserInput {
 pub struct UserUpdate {
     pub username: Option<String>,
     pub email: Option<String>,
-    pub last_login: Option<NaiveDateTime>,
+    pub last_login: Option<DateTime<Utc>>,
     pub is_active: Option<bool>,
 }
 
@@ -40,10 +40,10 @@ pub struct UserCreation {
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
-    pub last_login: NaiveDateTime,
+    pub last_login: DateTime<Utc>,
 
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
 }
 
@@ -55,16 +55,16 @@ pub struct User {
     pub hashed_password: String,
     pub password_salt: Vec<u8>,
     pub email: String,
-    pub last_login: NaiveDateTime,
+    pub last_login: DateTime<Utc>,
 
     // default data
     pub id: Uuid,
 
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
     #[graphql(skip)]
-    pub archived_at: Option<NaiveDateTime>,
+    pub archived_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
 }

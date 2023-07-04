@@ -21,7 +21,7 @@ pub async fn insert_report(
     report_input: ReportDetailsInput,
     report_data: FormOutput,
 ) -> Result<Report, BigError> {
-    let current_stamp = Utc::now().naive_utc();
+    let current_stamp = Utc::now();
     let user_id = get_user_id_from_auth(ctx).await?;
 
     let created_report = ReportCreation {

@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use r2d2::Pool;
 use redis::{from_redis_value, Client, FromRedisValue, RedisResult, ToRedisArgs};
 use serde::{Deserialize, Serialize};
@@ -46,7 +46,7 @@ impl ToRedisArgs for SessionKeyValue {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SessionData {
     pub user_id: Uuid,
-    pub expiry: NaiveDateTime,
+    pub expiry: DateTime<Utc>,
 }
 
 impl ToRedisArgs for SessionData {

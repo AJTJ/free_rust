@@ -20,8 +20,8 @@ pub async fn insert_apnea_session(
 ) -> Result<ApneaSession, BigError> {
     use crate::schema::apnea_sessions::dsl::apnea_sessions;
 
-    let current_stamp = Utc::now().naive_utc();
     let uuid = Uuid::new_v4();
+    let current_stamp = Utc::now();
 
     let user_id = get_user_id_from_auth(ctx).await?;
 

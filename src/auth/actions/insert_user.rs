@@ -11,7 +11,7 @@ use rand::Rng;
 pub fn insert_user(conn: &mut PgConnection, user_data: UserInput) -> diesel::QueryResult<User> {
     use crate::schema::users::dsl::users;
 
-    let current_stamp = Utc::now().naive_utc();
+    let current_stamp = Utc::now();
 
     // PW + HASHING
     let salt_gen: UniversalIdType = rand::thread_rng().gen::<UniversalIdType>();

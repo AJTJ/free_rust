@@ -15,7 +15,7 @@ pub async fn insert_dive(
     apnea_session_id: Uuid,
     dive_data: DiveInput,
 ) -> Result<Dive, BigError> {
-    let current_stamp = Utc::now().naive_utc();
+    let current_stamp = Utc::now();
     let user_id = get_user_id_from_auth(ctx).await?;
     let new_dive = DiveCreation {
         discipline_type: dive_data.discipline_type,

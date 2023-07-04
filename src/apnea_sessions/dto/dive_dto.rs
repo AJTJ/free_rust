@@ -7,7 +7,7 @@ use crate::{
 };
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, InputObject, OneofObject, SimpleObject};
-use chrono::{NaiveDateTime, NaiveTime};
+use chrono::{DateTime, NaiveTime, Utc};
 use uuid::Uuid;
 
 #[derive(InputObject)]
@@ -44,8 +44,8 @@ pub struct DiveCreation {
     pub session_id: Uuid,
     pub user_id: Uuid,
     // partial default data
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
 }
 
@@ -66,11 +66,11 @@ pub struct Dive {
     // default data
     #[graphql(derived(into = "ID"))]
     pub id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
     #[graphql(skip)]
-    pub archived_at: Option<NaiveDateTime>,
+    pub archived_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
 }
@@ -107,8 +107,8 @@ pub struct DiveFilter {
 
     pub id: Option<Uuid>,
     pub is_active: Option<bool>,
-    pub created_at: Option<NaiveDateTime>,
-    pub updated_at: Option<NaiveDateTime>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 // #[derive(OneofObject)]

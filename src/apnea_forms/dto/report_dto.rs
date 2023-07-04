@@ -1,7 +1,7 @@
 use crate::{apnea_forms::helpers::FormOutput, schema::reports};
 
 use async_graphql::{InputObject, OneofObject, SimpleObject};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -45,8 +45,8 @@ pub struct ReportCreation {
     pub user_id: Uuid,
 
     // partial default data
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
 }
 
@@ -68,11 +68,11 @@ pub struct Report {
 
     // default data
     pub id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
     #[graphql(skip)]
-    pub archived_at: Option<NaiveDateTime>,
+    pub archived_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
 }

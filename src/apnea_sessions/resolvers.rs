@@ -27,6 +27,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
 use snafu::ResultExt;
+use tracing::info;
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -104,7 +105,11 @@ impl ApneaSessionsMutation {
         apnea_session_input: ApneaSessionInput,
         report_details: Option<ReportDetailsInput>,
     ) -> Result<ApneaSession, BigError> {
-        insert_apnea_session(ctx, apnea_session_input, report_details).await
+        let session = insert_apnea_session(ctx, apnea_session_input, report_details).await;
+
+        info!("session: {session:?}");
+
+        session
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]

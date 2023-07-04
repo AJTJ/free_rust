@@ -43,7 +43,7 @@ pub async fn login(
                         ctx,
                         SessionData {
                             user_id: user.id,
-                            expiry: Utc::now().naive_utc() + Duration::minutes(10080),
+                            expiry: Utc::now() + Duration::minutes(10080),
                         },
                         encoded_session_id.clone(),
                     )
@@ -55,7 +55,7 @@ pub async fn login(
                     ctx.insert_http_header(AUTHORIZATION, cookie.to_string());
 
                     let updated_user = UserUpdate {
-                        last_login: Some(Utc::now().naive_utc()),
+                        last_login: Some(Utc::now()),
                         username: None,
                         email: None,
                         is_active: None,

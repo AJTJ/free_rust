@@ -15,7 +15,7 @@ pub async fn insert_form(
     form_input: FormDetailsInput,
     form_data: FormOutput,
 ) -> Result<Form, BigError> {
-    let current_stamp = Utc::now().naive_utc();
+    let current_stamp = Utc::now();
     let user_id = get_user_id_from_auth(ctx).await?;
 
     let created_form = FormCreation {

@@ -21,22 +21,22 @@ use super::enums::{DisciplinesEnum, WildlifeEnumV1};
 // Report Name
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
-struct ReportNameInputV1 {
+struct SessionNameInputV1 {
     name: Option<String>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
-struct ReportNameOutputV1 {
+struct SessionNameOutputV1 {
     name: Option<String>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<ReportNameInputV1> for ReportNameOutputV1 {
-    fn from(value: ReportNameInputV1) -> Self {
-        ReportNameOutputV1 {
+impl From<SessionNameInputV1> for SessionNameOutputV1 {
+    fn from(value: SessionNameInputV1) -> Self {
+        SessionNameOutputV1 {
             name: value.name,
             field_order: value.field_order,
         }
@@ -220,7 +220,7 @@ impl From<VisibilityInputV1> for VisibilityOutputV1 {
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
 pub struct FormInputV1 {
-    report_name: Option<ReportNameInputV1>,
+    session_name: Option<SessionNameInputV1>,
     wildlife: Option<WildlifeInputV1>,
     weather: Option<WeatherInputV1>,
     discipline_and_max_depth: Option<DisciplineAndMaxDepthInputV1>,
@@ -231,7 +231,7 @@ pub struct FormInputV1 {
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
 pub struct FormOutputV1 {
-    report_name: Option<ReportNameOutputV1>,
+    session_name: Option<SessionNameOutputV1>,
     wildlife: Option<WildlifeOutputV1>,
     weather: Option<WeatherOutputV1>,
     discipline_and_max_depth: Option<DisciplineAndMaxDepthOutputV1>,
@@ -242,7 +242,7 @@ pub struct FormOutputV1 {
 
 impl From<FormInputV1> for FormOutputV1 {
     fn from(value: FormInputV1) -> Self {
-        let report_name = value.report_name.and_then(|x| Some(x.into()));
+        let session_name = value.session_name.and_then(|x| Some(x.into()));
         let wildlife = value.wildlife.and_then(|x| Some(x.into()));
         let weather = value.weather.and_then(|x| Some(x.into()));
         let discipline_and_max_depth = value.discipline_and_max_depth.and_then(|x| Some(x.into()));
@@ -250,7 +250,7 @@ impl From<FormInputV1> for FormOutputV1 {
         let congestion = value.congestion.and_then(|x| Some(x.into()));
         let visibility = value.visibility.and_then(|x| Some(x.into()));
         FormOutputV1 {
-            report_name,
+            session_name,
             wildlife,
             weather,
             discipline_and_max_depth,

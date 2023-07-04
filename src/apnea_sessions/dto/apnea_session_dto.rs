@@ -15,14 +15,14 @@ use crate::{
 };
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use snafu::ResultExt;
 use uuid::Uuid;
 
 #[derive(InputObject)]
 pub struct ApneaSessionInput {
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub session_name: Option<String>,
     pub session_report: Option<FormInput>,
 }
@@ -30,8 +30,8 @@ pub struct ApneaSessionInput {
 #[derive(AsChangeset, InputObject, Clone)]
 #[diesel(table_name = apnea_sessions)]
 pub struct ApneaSessionUpdate {
-    pub start_time: Option<NaiveDateTime>,
-    pub end_time: Option<NaiveDateTime>,
+    pub start_time: Option<DateTime<Utc>>,
+    pub end_time: Option<DateTime<Utc>>,
     pub session_name: Option<String>,
 
     pub id: Uuid,
@@ -41,24 +41,24 @@ pub struct ApneaSessionUpdate {
 #[derive(Insertable)]
 #[diesel(table_name = apnea_sessions)]
 pub struct ApneaSessionCreation {
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub session_name: Option<String>,
 
     pub user_id: Uuid,
 
     pub id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
 }
 
 // Matches the database object 1:1
-#[derive(Queryable, SimpleObject, Clone)]
+#[derive(Queryable, SimpleObject, Clone, Debug)]
 #[graphql(complex)]
 pub struct ApneaSession {
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub session_name: Option<String>,
 
     #[graphql(skip)]
@@ -67,11 +67,11 @@ pub struct ApneaSession {
     // default data
     #[graphql(derived(into = "ID"))]
     pub id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub is_active: bool,
     #[graphql(skip)]
-    pub archived_at: Option<NaiveDateTime>,
+    pub archived_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
 }
@@ -105,7 +105,7 @@ impl ApneaSession {
         Ok(dives)
     }
 
-    async fn report(&self, ctx: &Context<'_>) -> FieldResult<Report> {
+    async fn report(&self, ctx: &Context<'_>) -> FieldResult<Option<Report>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.id;
@@ -115,21 +115,21 @@ impl ApneaSession {
             get_report(&mut conn, ReportRetrievalData::SessionId(session_id))
         })
         .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })??;
+        .map_err(|e| BigError::ActixBlockingError { source: e })?;
 
-        Ok(report)
+        Ok(report.ok())
     }
 }
 
 #[derive(InputObject, Clone)]
 pub struct ApneaSessionFilter {
     pub session_id: Option<Uuid>,
-    pub start_time: Option<NaiveDateTime>,
-    pub end_time: Option<NaiveDateTime>,
+    pub start_time: Option<DateTime<Utc>>,
+    pub end_time: Option<DateTime<Utc>>,
     pub session_name: Option<String>,
     pub is_active: Option<bool>,
-    pub created_at: Option<NaiveDateTime>,
-    pub updated_at: Option<NaiveDateTime>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 pub enum ApnesSessionRetrievalData {

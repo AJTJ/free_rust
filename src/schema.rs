@@ -2,15 +2,15 @@
 
 diesel::table! {
     apnea_sessions (id) {
-        start_time -> Timestamp,
-        end_time -> Timestamp,
+        start_time -> Timestamptz,
+        end_time -> Nullable<Timestamptz>,
         session_name -> Nullable<Text>,
         user_id -> Uuid,
         id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
         is_active -> Bool,
-        archived_at -> Nullable<Timestamp>,
+        archived_at -> Nullable<Timestamptz>,
         archived_by -> Nullable<Uuid>,
     }
 }
@@ -25,10 +25,10 @@ diesel::table! {
         session_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
         is_active -> Bool,
-        archived_at -> Nullable<Timestamp>,
+        archived_at -> Nullable<Timestamptz>,
         archived_by -> Nullable<Uuid>,
     }
 }
@@ -41,10 +41,10 @@ diesel::table! {
         original_form_id -> Nullable<Uuid>,
         previous_form_id -> Nullable<Uuid>,
         id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
         is_active -> Bool,
-        archived_at -> Nullable<Timestamp>,
+        archived_at -> Nullable<Timestamptz>,
         archived_by -> Nullable<Uuid>,
     }
 }
@@ -58,10 +58,10 @@ diesel::table! {
         session_id -> Uuid,
         user_id -> Uuid,
         id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
         is_active -> Bool,
-        archived_at -> Nullable<Timestamp>,
+        archived_at -> Nullable<Timestamptz>,
         archived_by -> Nullable<Uuid>,
     }
 }
@@ -72,12 +72,12 @@ diesel::table! {
         hashed_password -> Text,
         password_salt -> Bytea,
         email -> Text,
-        last_login -> Timestamp,
+        last_login -> Timestamptz,
         id -> Uuid,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
         is_active -> Bool,
-        archived_at -> Nullable<Timestamp>,
+        archived_at -> Nullable<Timestamptz>,
         archived_by -> Nullable<Uuid>,
     }
 }
@@ -89,10 +89,4 @@ diesel::joinable!(forms -> users (user_id));
 diesel::joinable!(reports -> apnea_sessions (session_id));
 diesel::joinable!(reports -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    apnea_sessions,
-    dives,
-    forms,
-    reports,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(apnea_sessions, dives, forms, reports, users,);
