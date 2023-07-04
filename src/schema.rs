@@ -89,4 +89,10 @@ diesel::joinable!(forms -> users (user_id));
 diesel::joinable!(reports -> apnea_sessions (session_id));
 diesel::joinable!(reports -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(apnea_sessions, dives, forms, reports, users,);
+diesel::allow_tables_to_appear_in_same_query!(
+    apnea_sessions,
+    dives,
+    forms,
+    reports,
+    users,
+);
