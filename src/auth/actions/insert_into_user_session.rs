@@ -6,24 +6,22 @@ use snafu::ResultExt;
 
 use crate::{
     auth::utility::auth_data::{RedisPool, SessionData},
-    utility::errors::{ActixBlockingSnafu, BigError},
+    utility::errors::{ActixBlockingSnafu, BigError, RedisSessionSnafu},
 };
 
 pub async fn insert_into_user_session(
     ctx: &Context<'_>,
     session_data: SessionData,
     encoded_session_id: String,
-) -> Result<(), BigError> {
+) -> Result<bool, BigError> {
     let redis_pool = ctx.data::<RedisPool>().unwrap().clone();
 
-    let res = web::block(move || {
+    web::block(move || {
         let mut redis_conn = redis_pool.get().unwrap();
-        redis_conn
-            .set::<String, SessionData, bool>(encoded_session_id, session_data)
-            .expect("should have updated teh session data");
+        // TODO: Still not convinced this should be a bool
+        redis_conn.set::<String, SessionData, bool>(encoded_session_id, session_data)
     })
     .await
-    .context(ActixBlockingSnafu)?;
-
-    Ok(res)
+    .context(ActixBlockingSnafu)?
+    .context(RedisSessionSnafu)
 }

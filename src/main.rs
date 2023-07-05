@@ -9,7 +9,7 @@ pub mod env_data;
 pub mod graphql_schema;
 pub mod schema;
 pub mod utility;
-
+use crate::apnea_sessions::apnea_session_loader::ApneaSessionLoader;
 use actix_web::{
     guard,
     http::header::{HeaderMap, AUTHORIZATION, COOKIE},
@@ -18,8 +18,6 @@ use actix_web::{
     web::{self, Data},
     App, HttpRequest, HttpResponse, HttpServer, Result,
 };
-
-// use crate::apnea_sessions::data_loaders::DiveSessionsLoader;
 use async_graphql::{
     dataloader::DataLoader,
     extensions::Tracing,
@@ -103,10 +101,10 @@ async fn main() -> std::io::Result<()> {
     let schema = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .extension(Tracing)
         .data(redis_pool)
-        // .data(DataLoader::new(
-        //     DiveSessionsLoader::new(pooled_database.clone()),
-        //     rt::spawn,
-        // ))
+        .data(DataLoader::new(
+            ApneaSessionLoader::new(pooled_database.clone()),
+            rt::spawn,
+        ))
         .data(pooled_database.clone())
         .data(env_vars)
         .limit_depth(8)
@@ -132,42 +130,3 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-
-// THIS GRABS THE AUTHORIZATION TOKEN CORRECTLY
-// let auth_header_value = http_req.headers().get(http::header::AUTHORIZATION);
-// info!("AUTH HEADER: {:?}", auth_header_value);
-// let cookie_header_value = http_req.headers().get(http::header::COOKIE);
-// info!("COOKIE HEADER: {:?}", cookie_header_value);
-// info!("auth_header_value: {auth_header_value:?}");
-
-/*
-   OTHER
-
-   BB8 Pool
-   let manager = bb8_po
-   let pool = bb8::Pool::builder().build(manager).await.unwrap();
-
-   .wrap(
-                IdentityMiddleware::builder()
-                    .login_deadline(Some(Duration::from_secs(604800)))
-                    .build(),
-            )
-*/
-
-// pub async fn index(
-//     schema: web::Data<DiveQLSchema>,
-//     req: GraphQLRequest,
-//     session: Session,
-// ) -> GraphQLResponse {
-//     // TODO: get the session_id from the request
-
-//     // get the session data from the request
-//     // let uid = session.get::<String>("user_id").unwrap_or(None);
-
-//     // build the session data
-//     // let id = Identity { id: uid };
-
-//     // send the session data through to the gql schema
-//     let session = Shared::new(session);
-//     schema.execute(req.into_inner().data(session)).await.into()
-// }

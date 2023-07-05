@@ -47,7 +47,7 @@ pub async fn login(
                         },
                         encoded_session_id.clone(),
                     )
-                    .await;
+                    .await?;
 
                     let cookie = create_cookie(encoded_session_id);
 

@@ -54,33 +54,3 @@ pub struct Form {
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
 }
-
-// #[ComplexObject]
-// impl Form {
-//     pub async fn form_fields(
-//         &self,
-//         ctx: &Context<'_>,
-//         db_query_dto: Option<QueryParams>,
-//     ) -> Result<Vec<FormField>, BigError> {
-//         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-//         let logger_id = self.id;
-//         let user_id = self.user_id;
-
-//         web::block(move || {
-//             let mut conn = pool_ctx.get().unwrap();
-//             get_form_fields_by_form(&mut conn, &logger_id, &user_id, db_query_dto)
-//                 .map(|v| v.into_iter().map(FormField::from).collect())
-//         })
-//         .await
-//         .map_err(|e| BigError::ActixBlockingError { source: e })
-//         .unwrap()
-//         .map_err(|e| BigError::DieselQueryError { source: e })
-//     }
-// }
-
-// #[derive(SimpleObject, Clone)]
-// pub struct FormOutput {
-//     pub form: Form,
-//     pub form_structure: FormStructureOutput,
-// }

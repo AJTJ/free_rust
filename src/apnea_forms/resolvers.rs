@@ -17,7 +17,7 @@ use super::{
     actions::get_reports::get_reports,
     dto::{
         form_dto::{Form, FormDetailsInput},
-        report_dto::{Report, ReportDetailsInput},
+        report_dto::{Report, ReportDetailsInput, ReportsRetrievalData},
     },
     form_v1::form::{self, FormOutputV1},
     helpers::{FormInput, FormOutput},
@@ -48,7 +48,7 @@ impl ApneaFormsQuery {
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })??;
 
-        info!("all forms: {forms:?}");
+        // info!("all forms: {forms:?}");
 
         // let form_output = forms.into_iter().map(|f| f.form_data).collect();
 
@@ -73,7 +73,11 @@ impl ApneaFormsQuery {
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_reports(&mut conn, user_id, query_params)
+                    get_reports(
+                        &mut conn,
+                        ReportsRetrievalData::UserId(user_id),
+                        query_params,
+                    )
                 })
                 .await
                 .map_err(|e| BigError::ActixBlockingError { source: e })?
@@ -131,7 +135,7 @@ impl ApneaFormsMutation {
         report_details_input: ReportDetailsInput,
         report_input: FormInput,
     ) -> Result<Report, BigError> {
-        info!("report_input: {report_input:?}");
+        // info!("report_input: {report_input:?}");
         match report_input {
             FormInput::V1(v1) => {
                 FormOutputV1::from(v1)
@@ -157,81 +161,3 @@ impl ApneaFormsMutation {
         }
     }
 }
-
-// #[graphql(guard = "LoggedInGuard::new()")]
-// async fn form_structures(&self, _ctx: &Context<'_>) -> FormStructureOutput {
-//     get_form_structures()
-// }
-
-// #[graphql(guard = "LoggedInGuard::new()")]
-// async fn forms(&self, ctx: &Context<'_>) -> Result<Vec<FormOutput>, BigError> {
-//     let user_id = get_user_id_from_token_and_session(ctx).await?;
-//     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-//     web::block(move || {
-//         let mut conn = pool_ctx.get().unwrap();
-//         get_forms_by_user_id(&mut conn, user_id, None)
-//     })
-//     .await
-//     .map_err(|e| BigError::ActixBlockingError { source: e })?
-// }
-
-// #[graphql(guard = "LoggedInGuard::new()")]
-// async fn form_fields(
-//     &self,
-//     ctx: &Context<'_>,
-//     logger_id: Uuid,
-// ) -> Result<Vec<FormField>, BigError> {
-//     let user_id = get_user_id_from_token_and_session(ctx).await?;
-//     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-//     web::block(move || {
-//         let mut conn = pool_ctx.get().unwrap();
-//         get_form_fields_by_form(&mut conn, &logger_id, &user_id, None)
-//     })
-//     .await
-//     .map_err(|e| BigError::ActixBlockingError { source: e })?
-//     .map_err(|e| BigError::DieselQueryError { source: e })
-// }
-
-// // COMPLETED FORMS
-// #[graphql(guard = "LoggedInGuard::new()")]
-// async fn completed_forms(
-//     &self,
-//     ctx: &Context<'_>,
-//     query_params: QueryParams,
-// ) -> Result<Connection<String, FormStructureOutput>, BigError> {
-//     let user_id = get_user_id_from_token_and_session(ctx).await?;
-//     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-//     let my_closure = move |query_params: QueryParams| {
-//         let query_params = query_params.clone();
-//         let pool_ctx = pool_ctx.clone();
-//         async move {
-//             web::block(move || {
-//                 let mut conn = pool_ctx.get().unwrap();
-//                 get_completed_forms_by_user_id(&mut conn, user_id, query_params)
-//             })
-//             .await
-//             .map_err(|e| BigError::ActixBlockingError { source: e })?
-//         }
-//     };
-
-//     let query_response = gql_query(query_params, &my_closure).await;
-//     query_response.map_err(|e| BigError::AsyncQueryError { error: e })
-// }
-
-// async fn add_form(
-//     &self,
-//     ctx: &Context<'_>,
-//     form_input: FormInput,
-// ) -> Result<FormStructureOutput, BigError> {
-//     add_form(ctx, form_input).await
-// }
-
-// // LOG STUFF
-// async fn add_completed_form(
-//     &self,
-//     ctx: &Context<'_>,
-//     completed_form_input: CompletedFormInput,
-// ) -> Result<FormStructureOutput, BigError> {
-//     insert_completed_form(ctx, completed_form_input).await
-// }

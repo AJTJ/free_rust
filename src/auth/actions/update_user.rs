@@ -12,14 +12,13 @@ use super::{get_user, get_user_id_from_auth};
 
 pub async fn update_user(
     ctx: &Context<'_>,
-    // TODO: Impl change password here? Or somewhere else?
     new_password: Option<String>,
     input_user_id: Option<Uuid>,
     user_mod_data: UserUpdate,
 ) -> Result<User, BigError> {
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    // NOTE: get user_id from cookie/session if it isn't included
+    // NOTE: get user_id from cookie/session if it isn't included, since this is used as part of the login process
     let input_user_id = match input_user_id {
         Some(u) => u,
         None => get_user_id_from_auth(ctx).await?,
@@ -46,6 +45,6 @@ pub async fn update_user(
         get_user(&mut conn, UserRetrievalData::Id(input_user_id))
     })
     .await
-    .expect("web::block error here?")
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselQueryError { source: e })
 }

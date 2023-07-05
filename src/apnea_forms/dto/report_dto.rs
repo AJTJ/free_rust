@@ -83,28 +83,8 @@ pub enum ReportRetrievalData {
     SessionId(Uuid),
 }
 
-// #[ComplexObject]
-// impl Report {
-//     async fn report_fields(
-//         &self,
-//         ctx: &Context<'_>,
-//         // db_query_dto: Option<QueryParams>,
-//     ) -> Result<Vec<ReportField>, BigError> {
-//         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-//         let log_id = self.id;
-//         web::block(move || {
-//             let mut conn = pool_ctx.get().unwrap();
-//             get_report_fields_by_c_form(&mut conn, &log_id)
-//                 .map(|v| v.into_iter().map(ReportField::from).collect())
-//         })
-//         .await
-//         .map_err(|e| BigError::ActixBlockingError { source: e })?
-//         .map_err(|e| BigError::DieselQueryError { source: e })
-//     }
-// }
-
-// #[derive(SimpleObject, Clone)]
-// pub struct ReportOutput {
-//     pub form: Report,
-//     pub form_structure: FormStructureOutput,
-// }
+#[derive(OneofObject)]
+pub enum ReportsRetrievalData {
+    UserId(Uuid),
+    ReportIds(Vec<Uuid>),
+}

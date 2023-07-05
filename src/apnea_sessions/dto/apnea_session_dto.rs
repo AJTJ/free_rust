@@ -99,8 +99,8 @@ impl ApneaSession {
             )
         })
         .await
-        .expect("error in dive sessions web::block")
-        .expect("error in another loading dive sessions");
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
+        .context(DieselQuerySnafu)?;
 
         Ok(dives)
     }
@@ -117,6 +117,7 @@ impl ApneaSession {
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?;
 
+        // NOTE: transform to options, since there may NOT be a report, which is fine
         Ok(report.ok())
     }
 }
@@ -132,7 +133,7 @@ pub struct ApneaSessionFilter {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-pub enum ApnesSessionRetrievalData {
+pub enum ApneaSessionRetrievalData {
     Sessions(Vec<Uuid>),
     User(Uuid),
 }

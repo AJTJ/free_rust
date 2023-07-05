@@ -39,28 +39,3 @@ impl From<extern_uuid> for MyId {
         MyId(async_id::from(value))
     }
 }
-
-// #[derive(Serialize, Deserialize, Clone)]
-// struct ValueDerived(String);
-
-// #[derive(Serialize, Deserialize, Clone)]
-// struct ValueDerived2(String);
-
-// scalar!(ValueDerived);
-// scalar!(ValueDerived2);
-
-// impl From<ValueDerived> for ValueDerived2 {
-//     fn from(value: ValueDerived) -> Self {
-//         ValueDerived2(value.0)
-//     }
-// }
-
-// fn option_to_option<T, U: From<T>>(value: Option<T>) -> Option<U> {
-//     value.map(|x| x.into())
-// }
-
-// #[derive(SimpleObject)]
-// struct TestObj {
-//     #[graphql(derived(owned, name = "value2", into = "Option<ValueDerived2>", with = "option_to_option"))]
-//     pub value1: Option<ValueDerived>,
-// }

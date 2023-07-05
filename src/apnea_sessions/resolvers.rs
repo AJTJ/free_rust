@@ -5,8 +5,8 @@ use super::{
     },
     dto::{
         apnea_session_dto::{
-            ApneaSession, ApneaSessionFilter, ApneaSessionInput, ApneaSessionUpdate,
-            ApnesSessionRetrievalData,
+            ApneaSession, ApneaSessionFilter, ApneaSessionInput, ApneaSessionRetrievalData,
+            ApneaSessionUpdate,
         },
         dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
     },
@@ -56,7 +56,7 @@ impl ApneaSessionsQuery {
                     let mut conn = pool_ctx.get().unwrap();
                     get_apnea_sessions(
                         &mut conn,
-                        ApnesSessionRetrievalData::User(user_id),
+                        ApneaSessionRetrievalData::User(user_id),
                         apnea_session_filter,
                         query_params,
                     )

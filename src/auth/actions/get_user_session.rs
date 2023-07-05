@@ -2,21 +2,27 @@
 use actix_web::web;
 use async_graphql::Context;
 use redis::{Commands, RedisError};
+use snafu::ResultExt;
 
-use crate::auth::utility::auth_data::{RedisPool, SessionData};
+use crate::{
+    auth::utility::auth_data::{RedisPool, SessionData},
+    utility::errors::{BigError, RedisSessionSnafu},
+};
 
 pub async fn get_user_session(
     ctx: &Context<'_>,
     encoded_session_id: String,
-) -> Result<SessionData, RedisError> {
+) -> Result<SessionData, BigError> {
     let redis_pool = ctx.data::<RedisPool>().unwrap().clone();
 
-    let el = web::block(move || {
+    web::block(move || {
         let mut redis_conn = redis_pool.get().unwrap();
         redis_conn.get::<String, SessionData>(encoded_session_id)
     })
     .await
-    .expect("error with web block in session_data retrieval");
-
-    el
+    .map_err(|e| BigError::ActixBlockingError { source: e })?
+    .context(RedisSessionSnafu)
 }
+
+// .map_err(|e| BigError::ActixBlockingError { source: e })?
+//         .context(DieselQuerySnafu)?;

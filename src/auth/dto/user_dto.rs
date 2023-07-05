@@ -1,7 +1,7 @@
 use crate::{
     apnea_sessions::{
         actions::get_apnea_sessions,
-        dto::apnea_session_dto::{ApneaSession, ApneaSessionFilter, ApnesSessionRetrievalData},
+        dto::apnea_session_dto::{ApneaSession, ApneaSessionFilter, ApneaSessionRetrievalData},
     },
     graphql_schema::DbPool,
     schema::users,
@@ -95,7 +95,7 @@ impl User {
                     let mut conn = pool_ctx.get().unwrap();
                     get_apnea_sessions(
                         &mut conn,
-                        ApnesSessionRetrievalData::User(user_id),
+                        ApneaSessionRetrievalData::User(user_id),
                         apnea_session_filter,
                         query_params,
                     )

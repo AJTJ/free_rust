@@ -18,6 +18,7 @@ impl ToRedisArgs for RedisKeyType {
     where
         W: ?Sized + redis::RedisWrite,
     {
+        // TODO: is this safe?
         out.write_arg_fmt(serde_json::to_string(self).expect("can't serialize the RedisKeyType"))
     }
 }
@@ -38,6 +39,7 @@ impl ToRedisArgs for SessionKeyValue {
         W: ?Sized + redis::RedisWrite,
     {
         out.write_arg_fmt(
+            // TODO: is this safe?
             serde_json::to_string(self).expect("Can't serialize SessionKeyValue as string"),
         )
     }
@@ -55,6 +57,7 @@ impl ToRedisArgs for SessionData {
         W: ?Sized + redis::RedisWrite,
     {
         out.write_arg_fmt(
+            // TODO: is this safe?
             serde_json::to_string(self).expect("Can't serialize SessionData as string"),
         )
     }
@@ -63,6 +66,7 @@ impl ToRedisArgs for SessionData {
 impl FromRedisValue for SessionData {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         let redis_value: String = from_redis_value(v)?;
+        // TODO: is this safe?
         RedisResult::Ok(serde_json::from_str(&redis_value).expect("redis to SessionData failing"))
     }
 }

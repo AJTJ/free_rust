@@ -1,6 +1,6 @@
 use crate::{
     apnea_sessions::dto::apnea_session_dto::{
-        ApneaSession, ApneaSessionFilter, ApnesSessionRetrievalData,
+        ApneaSession, ApneaSessionFilter, ApneaSessionRetrievalData,
     },
     diesel::ExpressionMethods,
     utility::{
@@ -15,7 +15,7 @@ use snafu::ResultExt;
 
 pub fn get_apnea_sessions(
     conn: &mut PgConnection,
-    retrieval_method: ApnesSessionRetrievalData,
+    retrieval_method: ApneaSessionRetrievalData,
     apnea_session_filter: Option<ApneaSessionFilter>,
     query_params: QueryParams,
 ) -> Result<Connection<String, ApneaSession>, BigError> {
@@ -24,10 +24,10 @@ pub fn get_apnea_sessions(
     };
 
     let mut query = match retrieval_method {
-        ApnesSessionRetrievalData::Sessions(s) => {
+        ApneaSessionRetrievalData::Sessions(s) => {
             apnea_sessions.filter(session_id.eq_any(s)).into_boxed()
         }
-        ApnesSessionRetrievalData::User(input_user_id) => apnea_sessions
+        ApneaSessionRetrievalData::User(input_user_id) => apnea_sessions
             .filter(user_id.eq(input_user_id))
             .into_boxed(),
     };
