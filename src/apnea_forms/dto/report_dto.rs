@@ -12,27 +12,6 @@ pub struct ReportDetailsInput {
     pub previous_report_id: Option<Uuid>,
 }
 
-// #[derive(InputObject)]
-// pub struct ReportOutput {
-//     pub form_id: Uuid,
-//     pub original_form_id: Option<Uuid>,
-//     pub previous_report_id: Option<Uuid>,
-//     pub session_id: Uuid,
-//     pub user_id: Uuid,
-// }
-
-// impl From<ReportDetailsInput> for ReportOutput {
-//     fn from(value: ReportDetailsInput) -> Self {
-//         ReportOutput {
-//             form_id: value.form_id,
-//             original_form_id: value.original_form_id,
-//             previous_report_id: value.previous_report_id,
-//             session_id: value.session_id,
-//             user_id: value.user_id,
-//         }
-//     }
-// }
-
 #[derive(Insertable, Debug)]
 #[diesel(table_name = reports)]
 pub struct ReportCreation {
@@ -51,9 +30,9 @@ pub struct ReportCreation {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject, Clone)]
+#[derive(Queryable, SimpleObject, Clone, Insertable)]
 pub struct Report {
-    pub report_data: FormOutput,
+    pub report_data: Value,
     // relationships
     #[graphql(skip)]
     pub form_id: Uuid,
@@ -88,3 +67,24 @@ pub enum ReportsRetrievalData {
     UserId(Uuid),
     ReportIds(Vec<Uuid>),
 }
+
+// #[derive(InputObject)]
+// pub struct ReportOutput {
+//     pub form_id: Uuid,
+//     pub original_form_id: Option<Uuid>,
+//     pub previous_report_id: Option<Uuid>,
+//     pub session_id: Uuid,
+//     pub user_id: Uuid,
+// }
+
+// impl From<ReportDetailsInput> for ReportOutput {
+//     fn from(value: ReportDetailsInput) -> Self {
+//         ReportOutput {
+//             form_id: value.form_id,
+//             original_form_id: value.original_form_id,
+//             previous_report_id: value.previous_report_id,
+//             session_id: value.session_id,
+//             user_id: value.user_id,
+//         }
+//     }
+// }

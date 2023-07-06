@@ -33,8 +33,8 @@ pub fn get_apnea_sessions(
     };
 
     if let Some(after) = &query_params.after {
-        let after = after.parse::<DateTime<Utc>>().context(ChronoParseSnafu)?;
-        query = query.filter(created_at.gt(after))
+        query =
+            query.filter(created_at.gt(after.parse::<DateTime<Utc>>().context(ChronoParseSnafu)?))
     }
 
     let desired_count = query_params.first.unwrap_or(10);
