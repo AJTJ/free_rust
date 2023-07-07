@@ -30,9 +30,9 @@ pub struct ReportCreation {
 }
 
 // This one needs to match 1:1
-#[derive(Queryable, SimpleObject, Clone, Insertable)]
+#[derive(Queryable, SimpleObject, Clone)]
 pub struct Report {
-    pub report_data: Value,
+    pub report_data: FormOutput,
     // relationships
     #[graphql(skip)]
     pub form_id: Uuid,

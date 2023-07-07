@@ -59,6 +59,7 @@ async fn index(
     http_req: HttpRequest,
     gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
+    info!("index hit");
     let mut request = gql_req.into_inner();
 
     if let Some(token) = get_token_from_headers(http_req.headers()) {

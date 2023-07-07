@@ -8,6 +8,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::{Context, Object};
 use diesel::RunQueryDsl;
+use tracing::info;
 
 use super::{
     actions::{get_user, insert_user, login, logout},
@@ -27,6 +28,7 @@ pub struct AuthMutation;
 impl AuthQuery {
     #[graphql(guard = "DevelopmentGuard::new()")]
     async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
+        info!("all users hit");
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         web::block(move || {
