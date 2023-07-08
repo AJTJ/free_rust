@@ -93,13 +93,13 @@ impl ApneaFormsMutation {
     async fn insert_form(
         &self,
         ctx: &Context<'_>,
-        form_details_input: FormDetails,
+        form_details: FormDetails,
         form_request: FormRequest,
     ) -> Result<Form, BigError> {
         match form_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
-                    .insert_form(ctx, form_details_input)
+                    .insert_form(ctx, form_details)
                     .await
             }
         }
@@ -128,14 +128,14 @@ impl ApneaFormsMutation {
         &self,
         ctx: &Context<'_>,
         session_id: Uuid,
-        report_details_input: ReportDetails,
-        report_input: FormRequest,
+        report_details: ReportDetails,
+        report_request: FormRequest,
     ) -> Result<Report, BigError> {
-        // info!("report_input: {report_input:?}");
-        match report_input {
+        // info!("report_request: {report_request:?}");
+        match report_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
-                    .insert_report(ctx, &session_id, report_details_input)
+                    .insert_report(ctx, &session_id, report_details)
                     .await
             }
         }
