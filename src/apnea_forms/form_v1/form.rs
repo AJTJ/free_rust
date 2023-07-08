@@ -9,7 +9,7 @@ use crate::{
         actions::{insert_form::insert_form, insert_report::insert_report},
         dto::{
             form_dto::{Form, FormDetails},
-            report_dto::{Report, ReportDetailsInput},
+            report_dto::{Report, ReportDetails},
         },
         helpers::FormResponse,
     },
@@ -288,7 +288,7 @@ impl FormResponseV1 {
         &self,
         ctx: &Context<'_>,
         session_id: &Uuid,
-        report_input: ReportDetailsInput,
+        report_input: ReportDetails,
     ) -> Result<Report, BigError> {
         // TODO: perform validation?
         let report = insert_report(

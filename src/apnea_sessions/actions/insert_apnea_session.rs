@@ -1,5 +1,5 @@
 use crate::apnea_forms::actions::insert_report::insert_report;
-use crate::apnea_forms::dto::report_dto::ReportDetailsInput;
+use crate::apnea_forms::dto::report_dto::ReportDetails;
 use crate::apnea_forms::helpers::FormResponse;
 use crate::apnea_sessions::actions::get_apnea_session;
 use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
@@ -16,7 +16,7 @@ use uuid::Uuid;
 pub async fn insert_apnea_session(
     ctx: &Context<'_>,
     session_input: ApneaSessionInput,
-    report_details: Option<ReportDetailsInput>,
+    report_details: Option<ReportDetails>,
 ) -> Result<ApneaSession, BigError> {
     use crate::schema::apnea_sessions::dsl::apnea_sessions;
 

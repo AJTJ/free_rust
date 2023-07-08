@@ -1,6 +1,6 @@
 use crate::{
     apnea_forms::{
-        dto::report_dto::{Report, ReportCreation, ReportDetailsInput},
+        dto::report_dto::{Report, ReportCreation, ReportDetails},
         helpers::FormResponse,
     },
     auth::actions::get_user_id_from_auth,
@@ -18,7 +18,7 @@ use uuid::Uuid;
 pub async fn insert_report(
     ctx: &Context<'_>,
     session_id: &Uuid,
-    report_input: ReportDetailsInput,
+    report_input: ReportDetails,
     report_data: FormResponse,
 ) -> Result<Report, BigError> {
     let current_stamp = Utc::now();

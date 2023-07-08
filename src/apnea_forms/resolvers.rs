@@ -17,7 +17,7 @@ use super::{
     actions::get_reports::get_reports,
     dto::{
         form_dto::{Form, FormDetails},
-        report_dto::{Report, ReportDetailsInput, ReportsRetrievalData},
+        report_dto::{Report, ReportDetails, ReportsRetrievalData},
     },
     form_v1::form::{self, FormResponseV1},
     helpers::{FormRequest, FormResponse},
@@ -128,7 +128,7 @@ impl ApneaFormsMutation {
         &self,
         ctx: &Context<'_>,
         session_id: Uuid,
-        report_details_input: ReportDetailsInput,
+        report_details_input: ReportDetails,
         report_input: FormRequest,
     ) -> Result<Report, BigError> {
         // info!("report_input: {report_input:?}");

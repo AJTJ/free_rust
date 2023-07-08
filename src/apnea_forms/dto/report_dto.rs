@@ -6,7 +6,7 @@ use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(InputObject)]
-pub struct ReportDetailsInput {
+pub struct ReportDetails {
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
     pub previous_report_id: Option<Uuid>,
