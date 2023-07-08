@@ -8,7 +8,7 @@ use crate::{
     apnea_forms::{
         actions::{insert_form::insert_form, insert_report::insert_report},
         dto::{
-            form_dto::{Form, FormDetailsInput},
+            form_dto::{Form, FormDetails},
             report_dto::{Report, ReportDetailsInput},
         },
         helpers::FormResponse,
@@ -267,10 +267,10 @@ impl FormResponseV1 {
     pub async fn insert_form(
         &self,
         ctx: &Context<'_>,
-        form_input: FormDetailsInput,
+        form_request: FormDetails,
     ) -> Result<Form, BigError> {
         // TODO: perform validation
-        let form = insert_form(ctx, form_input, FormResponse::V1(self.clone())).await?;
+        let form = insert_form(ctx, form_request, FormResponse::V1(self.clone())).await?;
         Ok(form)
     }
 

@@ -16,7 +16,7 @@ use crate::{
 use super::{
     actions::get_reports::get_reports,
     dto::{
-        form_dto::{Form, FormDetailsInput},
+        form_dto::{Form, FormDetails},
         report_dto::{Report, ReportDetailsInput, ReportsRetrievalData},
     },
     form_v1::form::{self, FormResponseV1},
@@ -93,10 +93,10 @@ impl ApneaFormsMutation {
     async fn insert_form(
         &self,
         ctx: &Context<'_>,
-        form_details_input: FormDetailsInput,
-        form_input: FormRequest,
+        form_details_input: FormDetails,
+        form_request: FormRequest,
     ) -> Result<Form, BigError> {
-        match form_input {
+        match form_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
                     .insert_form(ctx, form_details_input)
@@ -110,9 +110,9 @@ impl ApneaFormsMutation {
         &self,
         ctx: &Context<'_>,
         previous_form_id: Uuid,
-        form_input: FormRequest,
+        form_request: FormRequest,
     ) -> Result<Form, BigError> {
-        match form_input {
+        match form_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
                     .modify_form(ctx, previous_form_id)
