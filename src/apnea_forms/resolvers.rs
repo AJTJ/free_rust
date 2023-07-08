@@ -19,8 +19,8 @@ use super::{
         form_dto::{Form, FormDetailsInput},
         report_dto::{Report, ReportDetailsInput, ReportsRetrievalData},
     },
-    form_v1::form::{self, FormOutputV1},
-    helpers::{FormInput, FormOutput},
+    form_v1::form::{self, FormResponseV1},
+    helpers::{FormRequest, FormResponse},
 };
 
 #[derive(Default)]
@@ -47,10 +47,6 @@ impl ApneaFormsQuery {
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })??;
-
-        // info!("all forms: {forms:?}");
-
-        // let form_output = forms.into_iter().map(|f| f.form_data).collect();
 
         Ok(forms)
     }
@@ -98,11 +94,11 @@ impl ApneaFormsMutation {
         &self,
         ctx: &Context<'_>,
         form_details_input: FormDetailsInput,
-        form_input: FormInput,
+        form_input: FormRequest,
     ) -> Result<Form, BigError> {
         match form_input {
-            FormInput::V1(v1) => {
-                FormOutputV1::from(v1)
+            FormRequest::V1(v1) => {
+                FormResponseV1::from(v1)
                     .insert_form(ctx, form_details_input)
                     .await
             }
@@ -114,11 +110,11 @@ impl ApneaFormsMutation {
         &self,
         ctx: &Context<'_>,
         previous_form_id: Uuid,
-        form_input: FormInput,
+        form_input: FormRequest,
     ) -> Result<Form, BigError> {
         match form_input {
-            FormInput::V1(v1) => {
-                FormOutputV1::from(v1)
+            FormRequest::V1(v1) => {
+                FormResponseV1::from(v1)
                     .modify_form(ctx, previous_form_id)
                     .await
             }
@@ -133,12 +129,12 @@ impl ApneaFormsMutation {
         ctx: &Context<'_>,
         session_id: Uuid,
         report_details_input: ReportDetailsInput,
-        report_input: FormInput,
+        report_input: FormRequest,
     ) -> Result<Report, BigError> {
         // info!("report_input: {report_input:?}");
         match report_input {
-            FormInput::V1(v1) => {
-                FormOutputV1::from(v1)
+            FormRequest::V1(v1) => {
+                FormResponseV1::from(v1)
                     .insert_report(ctx, &session_id, report_details_input)
                     .await
             }
@@ -150,11 +146,11 @@ impl ApneaFormsMutation {
         &self,
         ctx: &Context<'_>,
         previous_report_id: Uuid,
-        forms_input: FormInput,
+        forms_input: FormRequest,
     ) -> Result<Report, BigError> {
         match forms_input {
-            FormInput::V1(v1) => {
-                FormOutputV1::from(v1)
+            FormRequest::V1(v1) => {
+                FormResponseV1::from(v1)
                     .modify_report(ctx, previous_report_id)
                     .await
             }

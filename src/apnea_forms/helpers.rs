@@ -1,29 +1,28 @@
 use async_graphql::{OneofObject, Union};
 use diesel::{
     deserialize::{FromSql, FromSqlRow},
-    expression::AsExpression,
     pg::{Pg, PgValue},
     sql_types,
 };
 use serde::{Deserialize, Serialize};
 
-use super::form_v1::form::{FormInputV1, FormOutputV1};
+use super::form_v1::form::{FormRequestV1, FormResponseV1};
 
 // NOTE: This is only for receiving from the client
 #[derive(OneofObject, Debug)]
-pub enum FormInput {
-    V1(FormInputV1),
+pub enum FormRequest {
+    V1(FormRequestV1),
 }
 
 // All operations are done on this object
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "version")]
 #[derive(Union, FromSqlRow)]
-pub enum FormOutput {
-    V1(FormOutputV1),
+pub enum FormResponse {
+    V1(FormResponseV1),
 }
 
-impl FromSql<sql_types::Jsonb, Pg> for FormOutput {
+impl FromSql<sql_types::Jsonb, Pg> for FormResponse {
     fn from_sql(value: PgValue<'_>) -> diesel::deserialize::Result<Self> {
         let bytes = value.as_bytes();
         if bytes[0] != 1 {
@@ -33,26 +32,10 @@ impl FromSql<sql_types::Jsonb, Pg> for FormOutput {
     }
 }
 
-impl FormOutput {
-    pub fn from_input(input: FormInput) -> Self {
+impl FormResponse {
+    pub fn from_input(input: FormRequest) -> Self {
         match input {
-            FormInput::V1(v1) => FormOutput::V1(FormOutputV1::from(v1)),
+            FormRequest::V1(v1) => FormResponse::V1(FormResponseV1::from(v1)),
         }
     }
 }
-
-// impl AsExpression<sql_types::Jsonb> for FormOutput {
-//     type Expression;
-
-//     fn as_expression(self) -> Self::Expression {
-//         serde_json::to_value(self)
-//     }
-// }
-
-// impl AsExpression<sql_types::Jsonb> for FormOutput {
-//     type Expression;
-
-//     fn as_expression(self) -> Self::Expression {
-//         serde_json::to_value(self)
-//     }
-// }

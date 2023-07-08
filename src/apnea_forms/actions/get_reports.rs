@@ -1,7 +1,7 @@
 use crate::{
     apnea_forms::{
         dto::report_dto::{Report, ReportsRetrievalData},
-        helpers::FormOutput,
+        helpers::FormResponse,
     },
     diesel::ExpressionMethods,
     utility::{

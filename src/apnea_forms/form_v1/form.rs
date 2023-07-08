@@ -11,7 +11,7 @@ use crate::{
             form_dto::{Form, FormDetailsInput},
             report_dto::{Report, ReportDetailsInput},
         },
-        helpers::FormOutput,
+        helpers::FormResponse,
     },
     utility::errors::BigError,
 };
@@ -219,7 +219,7 @@ impl From<VisibilityInputV1> for VisibilityOutputV1 {
 // FORMS
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
-pub struct FormInputV1 {
+pub struct FormRequestV1 {
     session_name: Option<SessionNameInputV1>,
     wildlife: Option<WildlifeInputV1>,
     weather: Option<WeatherInputV1>,
@@ -230,7 +230,7 @@ pub struct FormInputV1 {
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
-pub struct FormOutputV1 {
+pub struct FormResponseV1 {
     session_name: Option<SessionNameOutputV1>,
     wildlife: Option<WildlifeOutputV1>,
     weather: Option<WeatherOutputV1>,
@@ -240,8 +240,8 @@ pub struct FormOutputV1 {
     visibility: Option<VisibilityOutputV1>,
 }
 
-impl From<FormInputV1> for FormOutputV1 {
-    fn from(value: FormInputV1) -> Self {
+impl From<FormRequestV1> for FormResponseV1 {
+    fn from(value: FormRequestV1) -> Self {
         let session_name = value.session_name.and_then(|x| Some(x.into()));
         let wildlife = value.wildlife.and_then(|x| Some(x.into()));
         let weather = value.weather.and_then(|x| Some(x.into()));
@@ -249,7 +249,7 @@ impl From<FormInputV1> for FormOutputV1 {
         let max_depth = value.max_depth.and_then(|x| Some(x.into()));
         let congestion = value.congestion.and_then(|x| Some(x.into()));
         let visibility = value.visibility.and_then(|x| Some(x.into()));
-        FormOutputV1 {
+        FormResponseV1 {
             session_name,
             wildlife,
             weather,
@@ -263,14 +263,14 @@ impl From<FormInputV1> for FormOutputV1 {
 
 // Logic
 
-impl FormOutputV1 {
+impl FormResponseV1 {
     pub async fn insert_form(
         &self,
         ctx: &Context<'_>,
         form_input: FormDetailsInput,
     ) -> Result<Form, BigError> {
         // TODO: perform validation
-        let form = insert_form(ctx, form_input, FormOutput::V1(self.clone())).await?;
+        let form = insert_form(ctx, form_input, FormResponse::V1(self.clone())).await?;
         Ok(form)
     }
 
@@ -291,8 +291,13 @@ impl FormOutputV1 {
         report_input: ReportDetailsInput,
     ) -> Result<Report, BigError> {
         // TODO: perform validation?
-        let report =
-            insert_report(ctx, session_id, report_input, FormOutput::V1(self.clone())).await?;
+        let report = insert_report(
+            ctx,
+            session_id,
+            report_input,
+            FormResponse::V1(self.clone()),
+        )
+        .await?;
         Ok(report)
     }
 

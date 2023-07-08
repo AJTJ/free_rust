@@ -1,4 +1,4 @@
-use crate::{apnea_forms::helpers::FormOutput, schema::reports};
+use crate::{apnea_forms::helpers::FormResponse, schema::reports};
 
 use async_graphql::{InputObject, OneofObject, SimpleObject};
 use chrono::{DateTime, Utc};
@@ -32,7 +32,7 @@ pub struct ReportCreation {
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Clone)]
 pub struct Report {
-    pub report_data: FormOutput,
+    pub report_data: FormResponse,
     // relationships
     #[graphql(skip)]
     pub form_id: Uuid,
@@ -67,24 +67,3 @@ pub enum ReportsRetrievalData {
     UserId(Uuid),
     ReportIds(Vec<Uuid>),
 }
-
-// #[derive(InputObject)]
-// pub struct ReportOutput {
-//     pub form_id: Uuid,
-//     pub original_form_id: Option<Uuid>,
-//     pub previous_report_id: Option<Uuid>,
-//     pub session_id: Uuid,
-//     pub user_id: Uuid,
-// }
-
-// impl From<ReportDetailsInput> for ReportOutput {
-//     fn from(value: ReportDetailsInput) -> Self {
-//         ReportOutput {
-//             form_id: value.form_id,
-//             original_form_id: value.original_form_id,
-//             previous_report_id: value.previous_report_id,
-//             session_id: value.session_id,
-//             user_id: value.user_id,
-//         }
-//     }
-// }

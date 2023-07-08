@@ -1,4 +1,4 @@
-// use crate::dive_forms::form_1::FormInputV1;
+// use crate::dive_forms::form_1::FormRequestV1;
 // use crate::errors::BigError;
 // use async_graphql::{InputObject, InputType, OutputType, SimpleObject};
 // use serde::{Deserialize, Serialize};
@@ -37,7 +37,7 @@
 // }
 
 // #[derive(Serialize, Deserialize, InputObject, Clone, Copy)]
-// #[graphql(concrete(name = "FormInputV_1", params(FormInputV1)))]
+// #[graphql(concrete(name = "FormInputV_1", params(FormRequestV1)))]
 // pub struct FormInputNew<T: FormTrait + InputType> {
 //     pub inner: T,
 // }

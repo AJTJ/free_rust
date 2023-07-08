@@ -1,4 +1,4 @@
-use crate::{apnea_forms::helpers::FormOutput, schema::forms};
+use crate::{apnea_forms::helpers::FormResponse, schema::forms};
 
 use async_graphql::{InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
@@ -35,7 +35,7 @@ pub struct FormCreation {
 // #[graphql(complex)]
 pub struct Form {
     pub form_name: String,
-    pub form_data: FormOutput,
+    pub form_data: FormResponse,
     // relationship data
     #[graphql(skip)]
     pub user_id: Uuid,

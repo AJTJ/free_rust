@@ -1,6 +1,6 @@
 use crate::apnea_forms::actions::insert_report::insert_report;
 use crate::apnea_forms::dto::report_dto::ReportDetailsInput;
-use crate::apnea_forms::helpers::FormOutput;
+use crate::apnea_forms::helpers::FormResponse;
 use crate::apnea_sessions::actions::get_apnea_session;
 use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
 use crate::auth::actions::get_user_id_from_auth;
@@ -56,7 +56,7 @@ pub async fn insert_apnea_session(
             ctx,
             &new_session.id,
             report_details,
-            FormOutput::from_input(report_input),
+            FormResponse::from_input(report_input),
         )
         .await?;
     };
