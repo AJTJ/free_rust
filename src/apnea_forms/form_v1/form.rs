@@ -1,9 +1,4 @@
-use async_graphql::{Context, Enum, InputObject, SimpleObject};
-use serde::{Deserialize, Serialize};
-use snafu::ResultExt;
-use strum::{Display, EnumIter, EnumString};
-use uuid::Uuid;
-
+use super::enums::{DisciplinesEnum, WildlifeEnumV1};
 use crate::{
     apnea_forms::{
         actions::{insert_form::insert_form, insert_report::insert_report},
@@ -15,28 +10,31 @@ use crate::{
     },
     utility::errors::BigError,
 };
-
-use super::enums::{DisciplinesEnum, WildlifeEnumV1};
+use async_graphql::{Context, Enum, InputObject, SimpleObject};
+use serde::{Deserialize, Serialize};
+// use snafu::ResultExt;
+// use strum::{Display, EnumIter, EnumString};
+use uuid::Uuid;
 
 // Report Name
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
-struct SessionNameInputV1 {
+struct SessionNameRequestV1 {
     name: Option<String>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
-struct SessionNameOutputV1 {
+struct SessionNameResponseV1 {
     name: Option<String>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<SessionNameInputV1> for SessionNameOutputV1 {
-    fn from(value: SessionNameInputV1) -> Self {
-        SessionNameOutputV1 {
+impl From<SessionNameRequestV1> for SessionNameResponseV1 {
+    fn from(value: SessionNameRequestV1) -> Self {
+        SessionNameResponseV1 {
             name: value.name,
             field_order: value.field_order,
         }
@@ -46,22 +44,22 @@ impl From<SessionNameInputV1> for SessionNameOutputV1 {
 // Wildlife
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
-struct WildlifeInputV1 {
+struct WildlifeRequestV1 {
     value: Option<WildlifeEnumV1>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
-struct WildlifeOutputV1 {
+struct WildlifeResponseV1 {
     value: Option<WildlifeEnumV1>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<WildlifeInputV1> for WildlifeOutputV1 {
-    fn from(value: WildlifeInputV1) -> Self {
-        WildlifeOutputV1 {
+impl From<WildlifeRequestV1> for WildlifeResponseV1 {
+    fn from(value: WildlifeRequestV1) -> Self {
+        WildlifeResponseV1 {
             value: value.value,
             field_order: value.field_order,
         }
@@ -71,22 +69,22 @@ impl From<WildlifeInputV1> for WildlifeOutputV1 {
 // Weather
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
-struct WeatherInputV1 {
+struct WeatherRequestV1 {
     wind: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
-struct WeatherOutputV1 {
+struct WeatherResponseV1 {
     wind: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<WeatherInputV1> for WeatherOutputV1 {
-    fn from(value: WeatherInputV1) -> Self {
-        WeatherOutputV1 {
+impl From<WeatherRequestV1> for WeatherResponseV1 {
+    fn from(value: WeatherRequestV1) -> Self {
+        WeatherResponseV1 {
             wind: value.wind,
             field_order: value.field_order,
         }
@@ -95,20 +93,20 @@ impl From<WeatherInputV1> for WeatherOutputV1 {
 
 // Discipline and Max Depth
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
-struct InnerDisciplineMaxDepthInputV1 {
+struct InnerDisciplineMaxDepthRequestV1 {
     discipline: Option<DisciplinesEnum>,
     max_depth: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
-struct InnerDisciplineMaxDepthOutputV1 {
+struct InnerDisciplineMaxDepthResponseV1 {
     discipline: Option<DisciplinesEnum>,
     max_depth: i32,
 }
 
-impl From<InnerDisciplineMaxDepthInputV1> for InnerDisciplineMaxDepthOutputV1 {
-    fn from(value: InnerDisciplineMaxDepthInputV1) -> Self {
-        InnerDisciplineMaxDepthOutputV1 {
+impl From<InnerDisciplineMaxDepthRequestV1> for InnerDisciplineMaxDepthResponseV1 {
+    fn from(value: InnerDisciplineMaxDepthRequestV1) -> Self {
+        InnerDisciplineMaxDepthResponseV1 {
             discipline: value.discipline,
             max_depth: value.max_depth,
         }
@@ -116,25 +114,25 @@ impl From<InnerDisciplineMaxDepthInputV1> for InnerDisciplineMaxDepthOutputV1 {
 }
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
-struct DisciplineAndMaxDepthInputV1 {
-    discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthInputV1>>,
+struct DisciplineAndMaxDepthRequestV1 {
+    discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthRequestV1>>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
-struct DisciplineAndMaxDepthOutputV1 {
-    discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthOutputV1>>,
+struct DisciplineAndMaxDepthResponseV1 {
+    discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthResponseV1>>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<DisciplineAndMaxDepthInputV1> for DisciplineAndMaxDepthOutputV1 {
-    fn from(value: DisciplineAndMaxDepthInputV1) -> Self {
+impl From<DisciplineAndMaxDepthRequestV1> for DisciplineAndMaxDepthResponseV1 {
+    fn from(value: DisciplineAndMaxDepthRequestV1) -> Self {
         let discipline_max_depth = value
             .discipline_max_depth
             .and_then(|x| Some(x.into_iter().map(|l| l.into()).collect()));
-        DisciplineAndMaxDepthOutputV1 {
+        DisciplineAndMaxDepthResponseV1 {
             discipline_max_depth,
             field_order: value.field_order,
         }
@@ -144,22 +142,22 @@ impl From<DisciplineAndMaxDepthInputV1> for DisciplineAndMaxDepthOutputV1 {
 // MAX DEPTH
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
-struct MaxDepthInputV1 {
+struct MaxDepthRequestV1 {
     max_depth: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
-struct MaxDepthOutputV1 {
+struct MaxDepthResponseV1 {
     max_depth: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<MaxDepthInputV1> for MaxDepthOutputV1 {
-    fn from(value: MaxDepthInputV1) -> Self {
-        MaxDepthOutputV1 {
+impl From<MaxDepthRequestV1> for MaxDepthResponseV1 {
+    fn from(value: MaxDepthRequestV1) -> Self {
+        MaxDepthResponseV1 {
             max_depth: value.max_depth,
             field_order: value.field_order,
         }
@@ -169,22 +167,22 @@ impl From<MaxDepthInputV1> for MaxDepthOutputV1 {
 // CONGESTION
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
-struct CongestionInputV1 {
+struct CongestionRequestV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
-struct CongestionOutputV1 {
+struct CongestionResponseV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<CongestionInputV1> for CongestionOutputV1 {
-    fn from(value: CongestionInputV1) -> Self {
-        CongestionOutputV1 {
+impl From<CongestionRequestV1> for CongestionResponseV1 {
+    fn from(value: CongestionRequestV1) -> Self {
+        CongestionResponseV1 {
             value: value.value,
             field_order: value.field_order,
         }
@@ -194,22 +192,22 @@ impl From<CongestionInputV1> for CongestionOutputV1 {
 // VISIBILITY
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone, Copy)]
-struct VisibilityInputV1 {
+struct VisibilityRequestV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone, Copy)]
-struct VisibilityOutputV1 {
+struct VisibilityResponseV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
 }
 
-impl From<VisibilityInputV1> for VisibilityOutputV1 {
-    fn from(value: VisibilityInputV1) -> Self {
-        VisibilityOutputV1 {
+impl From<VisibilityRequestV1> for VisibilityResponseV1 {
+    fn from(value: VisibilityRequestV1) -> Self {
+        VisibilityResponseV1 {
             value: value.value,
             field_order: value.field_order,
         }
@@ -220,24 +218,24 @@ impl From<VisibilityInputV1> for VisibilityOutputV1 {
 
 #[derive(Serialize, Deserialize, Debug, InputObject, Clone)]
 pub struct FormRequestV1 {
-    session_name: Option<SessionNameInputV1>,
-    wildlife: Option<WildlifeInputV1>,
-    weather: Option<WeatherInputV1>,
-    discipline_and_max_depth: Option<DisciplineAndMaxDepthInputV1>,
-    max_depth: Option<MaxDepthInputV1>,
-    congestion: Option<CongestionInputV1>,
-    visibility: Option<VisibilityInputV1>,
+    session_name: Option<SessionNameRequestV1>,
+    wildlife: Option<WildlifeRequestV1>,
+    weather: Option<WeatherRequestV1>,
+    discipline_and_max_depth: Option<DisciplineAndMaxDepthRequestV1>,
+    max_depth: Option<MaxDepthRequestV1>,
+    congestion: Option<CongestionRequestV1>,
+    visibility: Option<VisibilityRequestV1>,
 }
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
 pub struct FormResponseV1 {
-    session_name: Option<SessionNameOutputV1>,
-    wildlife: Option<WildlifeOutputV1>,
-    weather: Option<WeatherOutputV1>,
-    discipline_and_max_depth: Option<DisciplineAndMaxDepthOutputV1>,
-    max_depth: Option<MaxDepthOutputV1>,
-    congestion: Option<CongestionOutputV1>,
-    visibility: Option<VisibilityOutputV1>,
+    session_name: Option<SessionNameResponseV1>,
+    wildlife: Option<WildlifeResponseV1>,
+    weather: Option<WeatherResponseV1>,
+    discipline_and_max_depth: Option<DisciplineAndMaxDepthResponseV1>,
+    max_depth: Option<MaxDepthResponseV1>,
+    congestion: Option<CongestionResponseV1>,
+    visibility: Option<VisibilityResponseV1>,
 }
 
 impl From<FormRequestV1> for FormResponseV1 {
@@ -288,13 +286,13 @@ impl FormResponseV1 {
         &self,
         ctx: &Context<'_>,
         session_id: &Uuid,
-        report_input: ReportDetails,
+        report_details: ReportDetails,
     ) -> Result<Report, BigError> {
         // TODO: perform validation?
         let report = insert_report(
             ctx,
             session_id,
-            report_input,
+            report_details,
             FormResponse::V1(self.clone()),
         )
         .await?;
