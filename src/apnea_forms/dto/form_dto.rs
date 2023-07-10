@@ -8,7 +8,6 @@ use uuid::Uuid;
 #[derive(InputObject)]
 pub struct FormDetails {
     pub form_name: String,
-
     pub original_form_id: Option<Uuid>,
     pub previous_form_id: Option<Uuid>,
 }

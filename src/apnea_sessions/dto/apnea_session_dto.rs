@@ -105,7 +105,7 @@ impl ApneaSession {
         Ok(dives)
     }
 
-    async fn report(&self, ctx: &Context<'_>) -> FieldResult<Option<Report>> {
+    async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.id;
@@ -115,10 +115,10 @@ impl ApneaSession {
             get_report(&mut conn, ReportRetrievalData::SessionId(session_id))
         })
         .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?;
+        .map_err(|e| BigError::ActixBlockingError { source: e })?
+        .map_err(|e| BigError::DieselQueryError { source: e });
 
-        // NOTE: transform to options, since there may NOT be a report, which is fine
-        Ok(report.ok())
+        report
     }
 }
 

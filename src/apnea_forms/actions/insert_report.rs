@@ -10,8 +10,10 @@ use crate::{
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
-use diesel::RunQueryDsl;
-use serde_json::Value;
+use diesel::{
+    BoolExpressionMethods, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl,
+    RunQueryDsl,
+};
 use snafu::ResultExt;
 use uuid::Uuid;
 
@@ -20,9 +22,9 @@ pub async fn insert_report(
     session_id: &Uuid,
     report_input: ReportDetails,
     report_data: FormResponse,
-) -> Result<Report, BigError> {
+    user_id: &Uuid,
+) -> Result<Option<Report>, BigError> {
     let current_stamp = Utc::now();
-    let user_id = get_user_id_from_auth(ctx).await?;
 
     let created_report = ReportCreation {
         report_data: serde_json::to_value(report_data).context(SerdeSerializeSnafu)?,
@@ -30,7 +32,7 @@ pub async fn insert_report(
         previous_report_id: report_input.previous_report_id,
         form_id: report_input.form_id,
         session_id: *session_id,
-        user_id,
+        user_id: user_id.clone(),
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,
@@ -43,7 +45,8 @@ pub async fn insert_report(
         let mut conn = pool_ctx.get().unwrap();
         let insert_response = diesel::insert_into(reports)
             .values(&created_report)
-            .get_result::<Report>(&mut conn);
+            .get_result::<Report>(&mut conn)
+            .optional();
 
         insert_response
     })

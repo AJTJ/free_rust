@@ -1,7 +1,10 @@
 use super::enums::{DisciplinesEnum, WildlifeEnumV1};
 use crate::{
     apnea_forms::{
-        actions::{insert_form::insert_form, insert_report::insert_report},
+        actions::{
+            archive_form::archive_form, archive_report::archive_report, insert_form::insert_form,
+            insert_report::insert_report,
+        },
         dto::{
             form_dto::{Form, FormDetails},
             report_dto::{Report, ReportDetails},
@@ -265,21 +268,24 @@ impl FormResponseV1 {
     pub async fn insert_form(
         &self,
         ctx: &Context<'_>,
-        form_request: FormDetails,
-    ) -> Result<Form, BigError> {
+        form_details: FormDetails,
+        user_id: &Uuid,
+    ) -> Result<Option<Form>, BigError> {
         // TODO: perform validation
-        let form = insert_form(ctx, form_request, FormResponse::V1(self.clone())).await?;
+        let form = insert_form(ctx, form_details, FormResponse::V1(self.clone()), user_id).await?;
         Ok(form)
     }
 
     pub async fn modify_form(
         &self,
         ctx: &Context<'_>,
-        previous_form_id: Uuid,
-    ) -> Result<Form, BigError> {
-        // TODO: get previous form, apply modifications/changes
-        // TODO: update database
-        unimplemented!()
+        previous_form_id: &Uuid,
+        form_details: FormDetails,
+        user_id: &Uuid,
+    ) -> Result<Option<Form>, BigError> {
+        archive_form(ctx, previous_form_id, user_id).await?;
+        let form = insert_form(ctx, form_details, FormResponse::V1(self.clone()), user_id).await?;
+        Ok(form)
     }
 
     pub async fn insert_report(
@@ -287,13 +293,14 @@ impl FormResponseV1 {
         ctx: &Context<'_>,
         session_id: &Uuid,
         report_details: ReportDetails,
-    ) -> Result<Report, BigError> {
-        // TODO: perform validation?
+        user_id: &Uuid,
+    ) -> Result<Option<Report>, BigError> {
         let report = insert_report(
             ctx,
             session_id,
             report_details,
             FormResponse::V1(self.clone()),
+            user_id,
         )
         .await?;
         Ok(report)
@@ -302,10 +309,20 @@ impl FormResponseV1 {
     pub async fn modify_report(
         &self,
         ctx: &Context<'_>,
-        previous_report_id: Uuid,
-    ) -> Result<Report, BigError> {
-        // TODO: get previous report, apply modifications/changes
-        // TODO: update database
-        unimplemented!()
+        session_id: &Uuid,
+        previous_report_id: &Uuid,
+        report_details: ReportDetails,
+        user_id: &Uuid,
+    ) -> Result<Option<Report>, BigError> {
+        archive_report(ctx, previous_report_id, user_id).await?;
+        let report = insert_report(
+            ctx,
+            session_id,
+            report_details,
+            FormResponse::V1(self.clone()),
+            user_id,
+        )
+        .await?;
+        Ok(report)
     }
 }

@@ -105,11 +105,8 @@ impl ApneaSessionsMutation {
         apnea_session_input: ApneaSessionInput,
         report_details: Option<ReportDetails>,
     ) -> Result<ApneaSession, BigError> {
-        let session = insert_apnea_session(ctx, apnea_session_input, report_details).await;
-
-        info!("session: {session:?}");
-
-        session
+        let user_id = get_user_id_from_auth(ctx).await?;
+        insert_apnea_session(ctx, apnea_session_input, report_details, &user_id).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]

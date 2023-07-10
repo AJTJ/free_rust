@@ -3,7 +3,6 @@ use crate::{
         dto::report_dto::{Report, ReportsRetrievalData},
         helpers::FormResponse,
     },
-    diesel::ExpressionMethods,
     utility::{
         errors::{BigError, ChronoParseSnafu, DieselQuerySnafu},
         gql::query_dto::QueryParams,
@@ -11,9 +10,11 @@ use crate::{
 };
 use async_graphql::connection::{Connection, Edge, EmptyFields};
 use chrono::{DateTime, Utc};
-use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    BoolExpressionMethods, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl,
+    RunQueryDsl,
+};
 use snafu::ResultExt;
-use uuid::Uuid;
 
 pub fn get_reports(
     conn: &mut PgConnection,
@@ -38,19 +39,21 @@ pub fn get_reports(
         query = query.filter(created_at.gt(after))
     }
 
-    let my_reports: Vec<Report> = query
+    let my_reports: Option<Vec<Report>> = query
         .limit(query_params.first.and_then(|q| Some(q)).unwrap_or(10) as i64)
         .get_results::<Report>(conn)
+        .optional()
         .context(DieselQuerySnafu)?;
 
     let desired_count = query_params.first.unwrap_or(10);
 
     let mut connection = Connection::new(
         query_params.after.is_some(),
-        my_reports.len() > desired_count,
+        my_reports.clone().unwrap_or_else(|| vec![]).len() > desired_count,
     );
 
     let output_vals = my_reports
+        .unwrap_or_else(|| vec![])
         .into_iter()
         .map(|r| (r.created_at.to_string(), r))
         .collect::<Vec<(String, Report)>>();

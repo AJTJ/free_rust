@@ -36,7 +36,7 @@ impl ApneaFormsQuery {
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
-    ) -> Result<Vec<Form>, BigError> {
+    ) -> Result<Option<Vec<Form>>, BigError> {
         // TODO: Data loader and pagination
         let user_id = get_user_id_from_auth(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
@@ -95,27 +95,32 @@ impl ApneaFormsMutation {
         ctx: &Context<'_>,
         form_details: FormDetails,
         form_request: FormRequest,
-    ) -> Result<Form, BigError> {
+    ) -> Result<Option<Form>, BigError> {
+        let user_id = get_user_id_from_auth(ctx).await?;
         match form_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
-                    .insert_form(ctx, form_details)
+                    .insert_form(ctx, form_details, &user_id)
                     .await
             }
         }
     }
 
+    // NOTE: This seems like the ideal model.
+    // I am getting/checking the user_id right away, and passing it down.
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn modify_form(
         &self,
         ctx: &Context<'_>,
         previous_form_id: Uuid,
+        form_details: FormDetails,
         form_request: FormRequest,
-    ) -> Result<Form, BigError> {
+    ) -> Result<Option<Form>, BigError> {
+        let user_id = get_user_id_from_auth(ctx).await?;
         match form_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
-                    .modify_form(ctx, previous_form_id)
+                    .modify_form(ctx, &previous_form_id, form_details, &user_id)
                     .await
             }
         }
@@ -130,12 +135,12 @@ impl ApneaFormsMutation {
         session_id: Uuid,
         report_details: ReportDetails,
         report_request: FormRequest,
-    ) -> Result<Report, BigError> {
-        // info!("report_request: {report_request:?}");
+    ) -> Result<Option<Report>, BigError> {
+        let user_id = get_user_id_from_auth(ctx).await?;
         match report_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
-                    .insert_report(ctx, &session_id, report_details)
+                    .insert_report(ctx, &session_id, report_details, &user_id)
                     .await
             }
         }
@@ -145,13 +150,22 @@ impl ApneaFormsMutation {
     async fn modify_report(
         &self,
         ctx: &Context<'_>,
+        session_id: Uuid,
         previous_report_id: Uuid,
-        forms_input: FormRequest,
-    ) -> Result<Report, BigError> {
-        match forms_input {
+        report_details: ReportDetails,
+        report_request: FormRequest,
+    ) -> Result<Option<Report>, BigError> {
+        let user_id = get_user_id_from_auth(ctx).await?;
+        match report_request {
             FormRequest::V1(v1) => {
                 FormResponseV1::from(v1)
-                    .modify_report(ctx, previous_report_id)
+                    .modify_report(
+                        ctx,
+                        &session_id,
+                        &previous_report_id,
+                        report_details,
+                        &user_id,
+                    )
                     .await
             }
         }

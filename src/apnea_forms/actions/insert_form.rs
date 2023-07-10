@@ -6,22 +6,26 @@ use crate::utility::errors::{BigError, SerdeSerializeSnafu};
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
-use diesel::RunQueryDsl;
+use diesel::{
+    BoolExpressionMethods, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl,
+    RunQueryDsl,
+};
 use serde_json;
 use snafu::ResultExt;
+use uuid::Uuid;
 
 pub async fn insert_form(
     ctx: &Context<'_>,
     form_request: FormDetails,
     form_data: FormResponse,
-) -> Result<Form, BigError> {
+    user_id: &Uuid,
+) -> Result<Option<Form>, BigError> {
     let current_stamp = Utc::now();
-    let user_id = get_user_id_from_auth(ctx).await?;
 
     let created_form = FormCreation {
         form_name: form_request.form_name,
         form_data: serde_json::to_value(form_data).context(SerdeSerializeSnafu)?,
-        user_id,
+        user_id: user_id.clone(),
         original_form_id: form_request.original_form_id,
         previous_form_id: form_request.previous_form_id,
         created_at: current_stamp,
@@ -36,7 +40,8 @@ pub async fn insert_form(
         let mut conn = pool_ctx.get().unwrap();
         let insert_response = diesel::insert_into(forms)
             .values(&created_form)
-            .get_result::<Form>(&mut conn);
+            .get_result::<Form>(&mut conn)
+            .optional();
 
         insert_response
     })

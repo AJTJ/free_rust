@@ -17,20 +17,19 @@ pub async fn insert_apnea_session(
     ctx: &Context<'_>,
     session_input: ApneaSessionInput,
     report_details: Option<ReportDetails>,
+    user_id: &Uuid,
 ) -> Result<ApneaSession, BigError> {
     use crate::schema::apnea_sessions::dsl::apnea_sessions;
 
     let uuid = Uuid::new_v4();
     let current_stamp = Utc::now();
 
-    let user_id = get_user_id_from_auth(ctx).await?;
-
     let new_session = ApneaSessionCreation {
         id: uuid,
         start_time: session_input.start_time,
         end_time: session_input.end_time,
         session_name: session_input.session_name,
-        user_id,
+        user_id: user_id.clone(),
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,
@@ -57,6 +56,7 @@ pub async fn insert_apnea_session(
             &new_session.id,
             report_details,
             FormResponse::from_input(report_input),
+            user_id,
         )
         .await?;
     };
