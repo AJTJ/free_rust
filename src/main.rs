@@ -10,7 +10,9 @@ pub mod graphql_schema;
 pub mod schema;
 pub mod utility;
 use crate::apnea_sessions::apnea_session_loader::ApneaSessionLoader;
+use crate::auth::utility::token_helpers::get_cookie_from_token;
 use actix_web::{
+    cookie::Cookie,
     guard,
     http::header::{HeaderMap, AUTHORIZATION, COOKIE},
     middleware::{self, Logger},
@@ -18,11 +20,14 @@ use actix_web::{
     web::{self, Data},
     App, HttpRequest, HttpResponse, HttpServer, Result,
 };
+use async_graphql::async_trait;
 use async_graphql::{
     dataloader::DataLoader,
-    extensions::Tracing,
+    extensions::{
+        ApolloTracing, Extension, ExtensionContext, ExtensionFactory, NextRequest, Tracing,
+    },
     http::{playground_source, GraphQLPlaygroundConfig},
-    EmptySubscription, Schema,
+    EmptySubscription, Response, Schema,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth::utility::{auth_data::RedisPool, token_source::Token};
@@ -32,7 +37,7 @@ use env_data::SharedEnvVars;
 use graphql_schema::{DbPool, DiveQLSchema, Mutation, Query};
 use r2d2;
 use redis::Client;
-use std::env;
+use std::{env, sync::Arc};
 
 // tracing
 use tracing::{info, Level};
@@ -98,10 +103,38 @@ async fn main() -> std::io::Result<()> {
 
     let env_vars = SharedEnvVars { environment };
 
+    struct AuthExtension;
+
+    #[async_trait::async_trait]
+    impl Extension for AuthExtension {
+        async fn request(&self, ctx: &ExtensionContext<'_>, next: NextRequest<'_>) -> Response {
+            let token = ctx.data::<Token>();
+            info!("Auth Middleware experiemnt token: {token:?}");
+
+            // The code here will be run before the prepare_request is executed.
+            let result = next.run(ctx).await;
+
+            // The code after the completion of this future will be after the processing, just before sending the result to the user.
+            result
+        }
+    }
+
+    struct AuthMiddleware;
+
+    impl ExtensionFactory for AuthMiddleware {
+        fn create(&self) -> std::sync::Arc<dyn async_graphql::extensions::Extension> {
+            let auth_extension = AuthExtension {};
+
+            Arc::new(auth_extension)
+        }
+    }
+
     // graphql schema builder
     let schema = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .extension(Tracing)
+        .extension(ApolloTracing)
         .data(redis_pool)
+        .extension(AuthMiddleware)
         .data(DataLoader::new(
             ApneaSessionLoader::new(pooled_database.clone()),
             rt::spawn,
