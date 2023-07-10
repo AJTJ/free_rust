@@ -26,6 +26,7 @@ impl Guard for LoggedInGuard {
                 if let Some(session_id) = c.encoded_session_id {
                     match get_user_session(ctx, session_id).await {
                         Ok(s) => {
+                            // let el = ctx.data().insert();
                             // info!("The session data in guard: {s:?}");
                             // TODO Need to check that the token hasn't expired
                             // TODO Should I extend the token's lifetime if it hasn't expired?

@@ -58,9 +58,9 @@ fn get_token_from_headers(headers: &HeaderMap) -> Option<Token> {
     my_header
 }
 
+// TODO: This seems like the place to put the user_id into the gql context.
 async fn index(
     schema: web::Data<DiveQLSchema>,
-    // redis_pool_data: web::Data<RedisPool>,
     http_req: HttpRequest,
     gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
@@ -100,7 +100,6 @@ async fn main() -> std::io::Result<()> {
     // REDIS
     let redis_client = Client::open(redis_url).expect("failure starting redis server");
     let redis_pool = r2d2::Pool::new(redis_client).unwrap();
-
     let env_vars = SharedEnvVars { environment };
 
     struct AuthExtension;
@@ -110,6 +109,8 @@ async fn main() -> std::io::Result<()> {
         async fn request(&self, ctx: &ExtensionContext<'_>, next: NextRequest<'_>) -> Response {
             let token = ctx.data::<Token>();
             info!("Auth Middleware experiemnt token: {token:?}");
+
+            // let el = ctx.session_data.insert("meme");
 
             // The code here will be run before the prepare_request is executed.
             let result = next.run(ctx).await;
