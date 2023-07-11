@@ -1,7 +1,6 @@
 use crate::apnea_forms::actions::get_forms::get_forms;
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
-use tracing::info;
 use uuid::Uuid;
 
 use crate::{
@@ -19,7 +18,7 @@ use super::{
         form_dto::{Form, FormDetails},
         report_dto::{Report, ReportDetails, ReportsRetrievalData},
     },
-    form_v1::form::{self, FormResponseV1},
+    form_v1::{form::FormV1, new_ideas::ResponseFormFieldsV1},
     helpers::{FormRequest, FormResponse},
 };
 
@@ -83,6 +82,10 @@ impl ApneaFormsQuery {
         let query_response = gql_query(query_params, &my_closure).await;
         query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
+
+    // async fn get_new_fields(&self, ctx: &Context<'_>) -> Result<ResponseFormFieldsV1, BigError> {
+    //     unimplemented!()
+    // }
 }
 
 #[Object]
@@ -99,7 +102,7 @@ impl ApneaFormsMutation {
         let user_id = get_user_id_from_auth(ctx).await?;
         match form_request {
             FormRequest::V1(v1) => {
-                FormResponseV1::from(v1)
+                FormV1::from(v1)
                     .insert_form(ctx, form_details, &user_id)
                     .await
             }
@@ -119,7 +122,7 @@ impl ApneaFormsMutation {
         let user_id = get_user_id_from_auth(ctx).await?;
         match form_request {
             FormRequest::V1(v1) => {
-                FormResponseV1::from(v1)
+                FormV1::from(v1)
                     .modify_form(ctx, &previous_form_id, form_details, &user_id)
                     .await
             }
@@ -139,7 +142,7 @@ impl ApneaFormsMutation {
         let user_id = get_user_id_from_auth(ctx).await?;
         match report_request {
             FormRequest::V1(v1) => {
-                FormResponseV1::from(v1)
+                FormV1::from(v1)
                     .insert_report(ctx, &session_id, report_details, &user_id)
                     .await
             }
@@ -158,7 +161,7 @@ impl ApneaFormsMutation {
         let user_id = get_user_id_from_auth(ctx).await?;
         match report_request {
             FormRequest::V1(v1) => {
-                FormResponseV1::from(v1)
+                FormV1::from(v1)
                     .modify_report(
                         ctx,
                         &session_id,

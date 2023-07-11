@@ -1,4 +1,7 @@
-use crate::{apnea_forms::helpers::FormResponse, schema::forms};
+use crate::{
+    apnea_forms::{form_v1::new_ideas::ResponseFormFieldsV1, helpers::FormResponse},
+    schema::forms,
+};
 
 use async_graphql::{InputObject, SimpleObject};
 use chrono::{DateTime, Utc};

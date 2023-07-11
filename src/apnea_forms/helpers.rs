@@ -6,12 +6,12 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::form_v1::form::{FormRequestV1, FormResponseV1};
+use super::form_v1::form::FormV1;
 
 // NOTE: This is only for receiving from the client
 #[derive(OneofObject, Debug)]
 pub enum FormRequest {
-    V1(FormRequestV1),
+    V1(FormV1),
 }
 
 // All operations are done on this object
@@ -19,7 +19,7 @@ pub enum FormRequest {
 #[serde(tag = "version")]
 #[derive(Union, FromSqlRow)]
 pub enum FormResponse {
-    V1(FormResponseV1),
+    V1(FormV1),
 }
 
 impl FromSql<sql_types::Jsonb, Pg> for FormResponse {
@@ -35,7 +35,7 @@ impl FromSql<sql_types::Jsonb, Pg> for FormResponse {
 impl FormResponse {
     pub fn from_input(input: FormRequest) -> Self {
         match input {
-            FormRequest::V1(v1) => FormResponse::V1(FormResponseV1::from(v1)),
+            FormRequest::V1(v1) => FormResponse::V1(FormV1::from(v1)),
         }
     }
 }
