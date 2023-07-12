@@ -12,7 +12,7 @@ use async_graphql::Context;
 use chrono::{Duration, Utc};
 use rand::Rng;
 
-use super::{get_user, insert_into_user_session, update_user};
+use super::{get_user, insert_into_user_session, modify_user};
 
 pub async fn login(
     ctx: &Context<'_>,
@@ -61,7 +61,7 @@ pub async fn login(
                         is_active: None,
                     };
 
-                    let updated_user = update_user(ctx, None, Some(user.id), updated_user).await?;
+                    let updated_user = modify_user(ctx, None, Some(user.id), updated_user).await?;
 
                     Ok(updated_user)
                 }

@@ -28,7 +28,6 @@ pub struct AuthMutation;
 impl AuthQuery {
     #[graphql(guard = "DevelopmentGuard::new()")]
     async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
-        info!("all users hit");
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         web::block(move || {
@@ -91,9 +90,7 @@ impl AuthMutation {
     // Should be guarded eventually
     // #[graphql(guard = "LoggedInGuard::new()")]
     async fn logout(&self, ctx: &Context<'_>) -> Result<bool, BigError> {
-        info!("logout hit");
         let res = logout(ctx).await;
-        info!("after logout");
         res
     }
 }

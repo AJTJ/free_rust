@@ -1,8 +1,5 @@
 use crate::apnea_forms::dto::report_dto::{Report, ReportRetrievalData};
-use diesel::{
-    BoolExpressionMethods, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl,
-    RunQueryDsl,
-};
+use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn get_report(
     conn: &mut PgConnection,

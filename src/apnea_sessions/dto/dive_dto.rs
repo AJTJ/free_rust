@@ -19,19 +19,6 @@ pub struct DiveInput {
     pub dive_name: Option<String>,
 }
 
-#[derive(AsChangeset, InputObject, Clone)]
-#[diesel(table_name = dives)]
-pub struct DiveUpdate {
-    pub discipline_type: Option<String>,
-    pub depth: Option<f64>,
-    pub distance: Option<f64>,
-    pub dive_time: Option<i64>,
-    pub dive_name: Option<String>,
-
-    pub id: Uuid,
-    pub is_active: Option<bool>,
-}
-
 #[derive(Insertable)]
 #[diesel(table_name = dives)]
 pub struct DiveCreation {

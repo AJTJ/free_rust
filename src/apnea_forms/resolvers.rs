@@ -13,7 +13,7 @@ use crate::{
 };
 
 use super::{
-    actions::get_reports::get_reports,
+    actions::get_reports_paginated::get_reports_paginated,
     dto::{
         form_dto::{Form, FormDetails},
         report_dto::{Report, ReportDetails, ReportsRetrievalData},
@@ -50,15 +50,12 @@ impl ApneaFormsQuery {
         Ok(forms)
     }
 
-    // they simply get all the forms they want
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn reports(
         &self,
         ctx: &Context<'_>,
         query_params: QueryParams,
     ) -> Result<Connection<String, Report>, BigError> {
-        // TODO: Add dataloader?
-
         let user_id = get_user_id_from_auth(ctx).await?;
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
@@ -68,9 +65,9 @@ impl ApneaFormsQuery {
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
-                    get_reports(
+                    get_reports_paginated(
                         &mut conn,
-                        ReportsRetrievalData::UserId(user_id),
+                        vec![ReportsRetrievalData::UserId(user_id)],
                         query_params,
                     )
                 })
@@ -82,10 +79,6 @@ impl ApneaFormsQuery {
         let query_response = gql_query(query_params, &my_closure).await;
         query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
-
-    // async fn get_new_fields(&self, ctx: &Context<'_>) -> Result<ResponseFormFieldsV1, BigError> {
-    //     unimplemented!()
-    // }
 }
 
 #[Object]

@@ -32,7 +32,7 @@ impl Loader<DiveRetrievalData> for DiveLoaderByUser {
         let my_keys = keys.to_vec();
         let output = web::block(move || {
             let mut conn = pool.get().unwrap();
-            get_dives(&mut conn, my_keys, None)
+            get_dives(&mut conn, my_keys)
         })
         .await
         .context(ActixBlockingSnafu)??;

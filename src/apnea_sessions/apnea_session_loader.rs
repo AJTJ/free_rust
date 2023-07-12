@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use super::actions::get_apnea_sessions;
+use super::actions::get_apnea_sessions_paginated;
 use super::dto::apnea_session_dto::ApneaSession;
 use super::dto::apnea_session_dto::ApneaSessionRetrievalData;
 
@@ -22,6 +22,7 @@ impl ApneaSessionLoader {
     }
 }
 
+// apnea_sessions
 #[async_trait::async_trait]
 impl Loader<Uuid> for ApneaSessionLoader {
     type Value = ApneaSession;
@@ -32,11 +33,9 @@ impl Loader<Uuid> for ApneaSessionLoader {
         let my_keys = keys.to_vec();
         let output = web::block(move || {
             let mut conn = pool.get().unwrap();
-            get_apnea_sessions(
+            get_apnea_sessions_paginated(
                 &mut conn,
                 ApneaSessionRetrievalData::Sessions(my_keys),
-                None,
-                // TODO: I don't know if this makes sense
                 QueryParams {
                     after: None,
                     first: None,

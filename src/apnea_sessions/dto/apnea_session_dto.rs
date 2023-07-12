@@ -1,21 +1,21 @@
 use super::dive_dto::{Dive, DiveRetrievalData};
 use crate::{
     apnea_forms::{
-        actions::get_report::get_report,
-        dto::report_dto::{Report, ReportRetrievalData},
+        dto::report_dto::{Report, ReportsRetrievalData},
         helpers::FormRequest,
+        reports_loader::ReportLoader,
     },
     apnea_sessions::actions::get_dives,
     graphql_schema::DbPool,
     schema::apnea_sessions,
-    utility::{errors::BigError, gql::query_dto::QueryParams},
+    utility::errors::BigError,
 };
 use actix_web::web;
 use async_graphql::{
     dataloader::DataLoader, ComplexObject, Context, FieldResult, InputObject, SimpleObject,
 };
 use chrono::{DateTime, Utc};
-use snafu::ResultExt;
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(InputObject)]
@@ -24,17 +24,6 @@ pub struct ApneaSessionInput {
     pub end_time: Option<DateTime<Utc>>,
     pub session_name: Option<String>,
     pub session_report: Option<FormRequest>,
-}
-
-#[derive(AsChangeset, InputObject, Clone)]
-#[diesel(table_name = apnea_sessions)]
-pub struct ApneaSessionUpdate {
-    pub start_time: Option<DateTime<Utc>>,
-    pub end_time: Option<DateTime<Utc>>,
-    pub session_name: Option<String>,
-
-    pub id: Uuid,
-    pub is_active: Option<bool>,
 }
 
 #[derive(Insertable)]
@@ -77,56 +66,27 @@ pub struct ApneaSession {
 
 #[ComplexObject]
 impl ApneaSession {
-    async fn dives(
-        &self,
-        ctx: &Context<'_>,
-        db_query_dto: Option<QueryParams>,
-    ) -> FieldResult<Option<Vec<Dive>>> {
+    async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, Arc<BigError>> {
+        ctx.data_unchecked::<DataLoader<ReportLoader>>()
+            .load_one(ReportsRetrievalData::SessionId(self.id))
+            .await
+    }
+
+    // Note: I don't think this requires pagination just now. As there will only ever be so many dives per session.
+    async fn dives(&self, ctx: &Context<'_>) -> FieldResult<Option<Vec<Dive>>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.id;
 
         let dives = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_dives(
-                &mut conn,
-                vec![DiveRetrievalData::Session(session_id)],
-                db_query_dto,
-            )
+            get_dives(&mut conn, vec![DiveRetrievalData::Session(session_id)])
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })??;
 
         Ok(dives)
     }
-
-    // async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, BigError> {
-    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-    //     let loader = ctx.data_unchecked::<DataLoader<ReportsLoader>>();
-    //     let report = loader.load_one(key)
-    //     // let session_id = self.id;
-
-    //     // let report = web::block(move || {
-    //     //     let mut conn = pool_ctx.get().unwrap();
-    //     //     get_report(&mut conn, ReportRetrievalData::SessionId(session_id))
-    //     // })
-    //     // .await
-    //     // .map_err(|e| BigError::ActixBlockingError { source: e })?
-    //     // .map_err(|e| BigError::DieselQueryError { source: e });
-
-    //     // report
-    // }
-}
-
-#[derive(InputObject, Clone)]
-pub struct ApneaSessionFilter {
-    pub session_id: Option<Uuid>,
-    pub start_time: Option<DateTime<Utc>>,
-    pub end_time: Option<DateTime<Utc>>,
-    pub session_name: Option<String>,
-    pub is_active: Option<bool>,
-    pub created_at: Option<DateTime<Utc>>,
-    pub updated_at: Option<DateTime<Utc>>,
 }
 
 pub enum ApneaSessionRetrievalData {

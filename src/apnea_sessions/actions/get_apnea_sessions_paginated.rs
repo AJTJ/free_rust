@@ -1,7 +1,5 @@
 use crate::{
-    apnea_sessions::dto::apnea_session_dto::{
-        ApneaSession, ApneaSessionFilter, ApneaSessionRetrievalData,
-    },
+    apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionRetrievalData},
     diesel::ExpressionMethods,
     utility::{
         errors::{BigError, ChronoParseSnafu, DieselQuerySnafu},
@@ -13,10 +11,9 @@ use chrono::{DateTime, Utc};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
 
-pub fn get_apnea_sessions(
+pub fn get_apnea_sessions_paginated(
     conn: &mut PgConnection,
     retrieval_method: ApneaSessionRetrievalData,
-    apnea_session_filter: Option<ApneaSessionFilter>,
     query_params: QueryParams,
 ) -> Result<Connection<String, ApneaSession>, BigError> {
     use crate::schema::apnea_sessions::dsl::{

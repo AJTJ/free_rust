@@ -56,10 +56,10 @@ pub struct Report {
     pub archived_by: Option<Uuid>,
 }
 
-#[derive(OneofObject)]
+#[derive(OneofObject, Clone, PartialEq, Eq, Hash)]
 pub enum ReportRetrievalData {
-    ReportId(Uuid),
     SessionId(Uuid),
+    ReportId(Uuid),
 }
 
 #[derive(OneofObject, Clone, PartialEq, Eq, Hash)]
