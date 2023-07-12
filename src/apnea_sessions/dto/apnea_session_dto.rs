@@ -1,4 +1,4 @@
-use super::dive_dto::{Dive, DiveFilter, DiveRetrievalData};
+use super::dive_dto::{Dive, DiveRetrievalData};
 use crate::{
     apnea_forms::{
         actions::get_report::get_report,
@@ -8,13 +8,12 @@ use crate::{
     apnea_sessions::actions::get_dives,
     graphql_schema::DbPool,
     schema::apnea_sessions,
-    utility::{
-        errors::{BigError, DieselQuerySnafu},
-        gql::query_dto::QueryParams,
-    },
+    utility::{errors::BigError, gql::query_dto::QueryParams},
 };
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
+use async_graphql::{
+    dataloader::DataLoader, ComplexObject, Context, FieldResult, InputObject, SimpleObject,
+};
 use chrono::{DateTime, Utc};
 use snafu::ResultExt;
 use uuid::Uuid;
@@ -82,9 +81,7 @@ impl ApneaSession {
         &self,
         ctx: &Context<'_>,
         db_query_dto: Option<QueryParams>,
-        // this needs to be mut
-        dive_query: Option<DiveFilter>,
-    ) -> FieldResult<Vec<Dive>> {
+    ) -> FieldResult<Option<Vec<Dive>>> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
         let session_id = self.id;
@@ -93,33 +90,32 @@ impl ApneaSession {
             let mut conn = pool_ctx.get().unwrap();
             get_dives(
                 &mut conn,
-                DiveRetrievalData::Session(session_id),
-                dive_query,
+                vec![DiveRetrievalData::Session(session_id)],
                 db_query_dto,
             )
         })
         .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .context(DieselQuerySnafu)?;
+        .map_err(|e| BigError::ActixBlockingError { source: e })??;
 
         Ok(dives)
     }
 
-    async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, BigError> {
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    // async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, BigError> {
+    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    //     let loader = ctx.data_unchecked::<DataLoader<ReportsLoader>>();
+    //     let report = loader.load_one(key)
+    //     // let session_id = self.id;
 
-        let session_id = self.id;
+    //     // let report = web::block(move || {
+    //     //     let mut conn = pool_ctx.get().unwrap();
+    //     //     get_report(&mut conn, ReportRetrievalData::SessionId(session_id))
+    //     // })
+    //     // .await
+    //     // .map_err(|e| BigError::ActixBlockingError { source: e })?
+    //     // .map_err(|e| BigError::DieselQueryError { source: e });
 
-        let report = web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            get_report(&mut conn, ReportRetrievalData::SessionId(session_id))
-        })
-        .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselQueryError { source: e });
-
-        report
-    }
+    //     // report
+    // }
 }
 
 #[derive(InputObject, Clone)]

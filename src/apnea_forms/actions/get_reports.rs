@@ -22,16 +22,18 @@ pub fn get_reports(
     query_params: QueryParams,
 ) -> Result<Connection<String, Report>, BigError> {
     use crate::schema::reports::dsl::{
-        created_at, id as report_id, reports, user_id as forms_user_id,
+        created_at, id as report_id, reports, session_id, user_id as forms_user_id,
     };
 
     let mut query = match report_retrieval {
         ReportsRetrievalData::UserId(input_user_id) => {
             reports.filter(forms_user_id.eq(input_user_id)).into_boxed()
         }
-        ReportsRetrievalData::ReportIds(report_ids) => {
-            reports.filter(report_id.eq_any(report_ids)).into_boxed()
-        }
+        ReportsRetrievalData::SessionId(input_session_id) => {
+            reports.filter(session_id.eq(input_session_id)).into_boxed()
+        } // ReportsRetrievalData::ReportIds(report_ids) => {
+          //     reports.filter(report_id.eq_any(report_ids)).into_boxed()
+          // }
     };
 
     if let Some(after) = &query_params.after {

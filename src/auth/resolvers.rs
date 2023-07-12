@@ -91,6 +91,9 @@ impl AuthMutation {
     // Should be guarded eventually
     // #[graphql(guard = "LoggedInGuard::new()")]
     async fn logout(&self, ctx: &Context<'_>) -> Result<bool, BigError> {
-        logout(ctx).await
+        info!("logout hit");
+        let res = logout(ctx).await;
+        info!("after logout");
+        res
     }
 }

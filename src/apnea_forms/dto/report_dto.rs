@@ -62,8 +62,8 @@ pub enum ReportRetrievalData {
     SessionId(Uuid),
 }
 
-#[derive(OneofObject)]
+#[derive(OneofObject, Clone, PartialEq, Eq, Hash)]
 pub enum ReportsRetrievalData {
+    SessionId(Uuid),
     UserId(Uuid),
-    ReportIds(Vec<Uuid>),
 }

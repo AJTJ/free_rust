@@ -25,7 +25,7 @@ pub enum BigError {
     #[snafu(display("No Cookie present: {}", error.message))]
     AsyncIncorrectCookie { error: AsyncError },
 
-    #[snafu(display("No session_id on Token"))]
+    #[snafu(display("Generic no session id: No session_id on Token"))]
     NoSessionIDOnToken,
 
     // SERDE
@@ -36,7 +36,7 @@ pub enum BigError {
     SerdeSerializeError { source: SerdeError },
 
     // Chrono
-    #[snafu(display("No session_id on Token"))]
+    #[snafu(display("Chrono Session: No session_id on Token"))]
     ChronoSessionError { source: ChronoParseError },
 
     // OTHER ASYNC

@@ -3,6 +3,8 @@ use super::{
         get_apnea_sessions, get_dives, insert_apnea_session, insert_dive, update_apnea_session,
         update_dive,
     },
+    dive_loader_by_session::DiveLoaderBySession,
+    dive_loader_by_user::DiveLoaderByUser,
     dto::{
         apnea_session_dto::{
             ApneaSession, ApneaSessionFilter, ApneaSessionInput, ApneaSessionRetrievalData,
@@ -11,7 +13,10 @@ use super::{
         dive_dto::{Dive, DiveFilter, DiveInput, DiveRetrievalData, DiveUpdate},
     },
 };
-use crate::{apnea_forms::dto::report_dto::ReportDetails, diesel::RunQueryDsl};
+use crate::{
+    apnea_forms::dto::report_dto::ReportDetails, diesel::RunQueryDsl,
+    utility::errors::DieselQuerySnafu,
+};
 use crate::{
     auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
@@ -25,7 +30,7 @@ use crate::{
     },
 };
 use actix_web::web;
-use async_graphql::{types::connection::*, Context, Object};
+use async_graphql::{dataloader::DataLoader, types::connection::*, Context, Object};
 use snafu::ResultExt;
 use tracing::info;
 use uuid::Uuid;
@@ -46,6 +51,7 @@ impl ApneaSessionsQuery {
         query_params: QueryParams,
     ) -> Result<Connection<String, ApneaSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
         let user_id = get_user_id_from_auth(ctx).await?;
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
@@ -80,18 +86,24 @@ impl ApneaSessionsQuery {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = get_user_id_from_auth(ctx).await?;
 
-        web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            get_dives(
-                &mut conn,
-                DiveRetrievalData::User(user_id),
-                dive_input,
-                db_query_dto,
-            )
-        })
-        .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselQueryError { source: e })
+        let dives = ctx
+            .data_unchecked::<DataLoader<DiveLoaderByUser>>()
+            .load_many([DiveRetrievalData::User(user_id)])
+            .await
+            .context(DieselQuerySnafu);
+        dives
+        // web::block(move || {
+        //     let mut conn = pool_ctx.get().unwrap();
+        //     get_dives(
+        //         &mut conn,
+        //         vec![DiveRetrievalData::User(user_id)],
+        //         dive_input,
+        //         db_query_dto,
+        //     )
+        // })
+        // .await
+        // .map_err(|e| BigError::ActixBlockingError { source: e })?
+        // .map_err(|e| BigError::DieselQueryError { source: e })
     }
 }
 

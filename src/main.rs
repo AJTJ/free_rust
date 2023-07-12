@@ -9,10 +9,12 @@ pub mod env_data;
 pub mod graphql_schema;
 pub mod schema;
 pub mod utility;
-use crate::apnea_sessions::apnea_session_loader::ApneaSessionLoader;
-use crate::auth::utility::token_helpers::get_cookie_from_token;
+use crate::apnea_sessions::{
+    apnea_session_loader::ApneaSessionLoader, dive_loader_by_session::DiveLoaderBySession,
+    dive_loader_by_user::DiveLoaderByUser,
+};
+
 use actix_web::{
-    cookie::Cookie,
     guard,
     http::header::{HeaderMap, AUTHORIZATION, COOKIE},
     middleware::{self, Logger},
@@ -64,7 +66,6 @@ async fn index(
     http_req: HttpRequest,
     gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
-    info!("index hit");
     let mut request = gql_req.into_inner();
 
     if let Some(token) = get_token_from_headers(http_req.headers()) {
@@ -108,7 +109,7 @@ async fn main() -> std::io::Result<()> {
     impl Extension for AuthExtension {
         async fn request(&self, ctx: &ExtensionContext<'_>, next: NextRequest<'_>) -> Response {
             let token = ctx.data::<Token>();
-            info!("Auth Middleware experiemnt token: {token:?}");
+            // info!("Auth Middleware experiemnt token: {token:?}");
 
             // let el = ctx.session_data.insert("meme");
 
@@ -140,6 +141,18 @@ async fn main() -> std::io::Result<()> {
             ApneaSessionLoader::new(pooled_database.clone()),
             rt::spawn,
         ))
+        .data(DataLoader::new(
+            DiveLoaderBySession::new(pooled_database.clone()),
+            rt::spawn,
+        ))
+        .data(DataLoader::new(
+            DiveLoaderByUser::new(pooled_database.clone()),
+            rt::spawn,
+        ))
+        // .data(DataLoader::new(
+        //     ReportsLoader::new(pooled_database.clone()),
+        //     rt::spawn,
+        // ))
         .data(pooled_database.clone())
         .data(env_vars)
         .limit_depth(8)

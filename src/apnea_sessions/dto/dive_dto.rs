@@ -50,7 +50,7 @@ pub struct DiveCreation {
 }
 
 // Matches the database object order 1:1
-#[derive(Queryable, SimpleObject)]
+#[derive(Queryable, SimpleObject, Clone)]
 pub struct Dive {
     pub discipline_type: Option<String>,
     pub depth: Option<f64>,
@@ -95,23 +95,7 @@ impl Dive {
     }
 }
 
-#[derive(InputObject)]
-pub struct DiveFilter {
-    pub discipline_type: Option<String>,
-    pub depth: Option<f64>,
-    pub distance: Option<f64>,
-    pub dive_time: Option<NaiveTime>,
-    pub dive_name: Option<String>,
-    pub apnea_session: Option<Uuid>,
-    pub user_id: Option<Uuid>,
-
-    pub id: Option<Uuid>,
-    pub is_active: Option<bool>,
-    pub created_at: Option<DateTime<Utc>>,
-    pub updated_at: Option<DateTime<Utc>>,
-}
-
-// #[derive(OneofObject)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub enum DiveRetrievalData {
     Session(Uuid),
     User(Uuid),
