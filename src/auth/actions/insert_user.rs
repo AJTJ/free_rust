@@ -19,10 +19,10 @@ pub fn insert_user(conn: &mut PgConnection, user_data: &UserInput) -> diesel::Qu
         argon2::hash_encoded(user_data.password.as_bytes(), &salt_gen, &Config::default()).unwrap();
 
     let new_user = UserCreation {
-        username: user_data.username,
+        username: user_data.username.clone(),
         hashed_password: hashed_pw,
         password_salt: salt_gen.to_vec(),
-        email: user_data.email,
+        email: user_data.email.clone(),
         last_login: current_stamp,
         created_at: current_stamp,
         updated_at: current_stamp,
