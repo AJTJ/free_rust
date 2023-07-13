@@ -1,4 +1,4 @@
-use crate::auth::dto::user_dto::{User, UserPasswordUpdate, UserRetrievalData, UserUpdate};
+use crate::auth::dto::user_dto::{User, UserRetrievalData, UserUpdate};
 use crate::auth::utility::auth_data::UniversalIdType;
 use crate::diesel::ExpressionMethods;
 use crate::graphql_schema::DbPool;

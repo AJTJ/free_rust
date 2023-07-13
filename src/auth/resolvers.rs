@@ -56,15 +56,22 @@ impl AuthQuery {
 #[Object]
 impl AuthMutation {
     // Must be UNGUARDED?
-    async fn insert_user(&self, ctx: &Context<'_>, user_data: UserInput) -> Result<User, BigError> {
+    async fn insert_user(
+        &self,
+        ctx: &Context<'_>,
+        user_input: UserInput,
+    ) -> Result<User, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-        web::block(move || {
+        let my_user_input = user_input.clone();
+        let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            insert_user(&mut conn, user_data)
+            insert_user(&mut conn, &my_user_input)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselInsertError { source: e })
+        .map_err(|e| BigError::DieselInsertError { source: e })?;
+
+        login(ctx, user.email, user_input.password).await
     }
 
     // TESTING

@@ -8,7 +8,7 @@ use chrono::Utc;
 use diesel::PgConnection;
 use rand::Rng;
 
-pub fn insert_user(conn: &mut PgConnection, user_data: UserInput) -> diesel::QueryResult<User> {
+pub fn insert_user(conn: &mut PgConnection, user_data: &UserInput) -> diesel::QueryResult<User> {
     use crate::schema::users::dsl::users;
 
     let current_stamp = Utc::now();

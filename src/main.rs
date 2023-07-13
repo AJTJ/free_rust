@@ -9,11 +9,11 @@ pub mod env_data;
 pub mod graphql_schema;
 pub mod schema;
 pub mod utility;
+use crate::apnea_forms::reports_loader::ReportLoader;
 use crate::apnea_sessions::{
     apnea_session_loader::ApneaSessionLoader, dive_loader_by_session::DiveLoaderBySession,
     dive_loader_by_user::DiveLoaderByUser,
 };
-
 use actix_web::{
     guard,
     http::header::{HeaderMap, AUTHORIZATION, COOKIE},
@@ -149,10 +149,10 @@ async fn main() -> std::io::Result<()> {
             DiveLoaderByUser::new(pooled_database.clone()),
             rt::spawn,
         ))
-        // .data(DataLoader::new(
-        //     ReportsLoader::new(pooled_database.clone()),
-        //     rt::spawn,
-        // ))
+        .data(DataLoader::new(
+            ReportLoader::new(pooled_database.clone()),
+            rt::spawn,
+        ))
         .data(pooled_database.clone())
         .data(env_vars)
         .limit_depth(8)

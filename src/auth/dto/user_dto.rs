@@ -47,12 +47,12 @@ pub struct UserCreation {
     pub is_active: bool,
 }
 
-#[derive(AsChangeset, InputObject, Clone)]
-#[diesel(table_name = users)]
-pub struct UserPasswordUpdate {
-    pub hashed_password: String,
-    pub password_salt: Vec<u8>,
-}
+// #[derive(AsChangeset, InputObject, Clone)]
+// #[diesel(table_name = users)]
+// pub struct UserPasswordUpdate {
+//     pub hashed_password: String,
+//     pub password_salt: Vec<u8>,
+// }
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Debug)]
