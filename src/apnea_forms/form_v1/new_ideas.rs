@@ -1,4 +1,4 @@
-use super::enums::{DisciplinesEnum, WildlifeEnumV1};
+use super::enums::DisciplinesEnum;
 use crate::{
     apnea_forms::{
         actions::{
@@ -54,12 +54,12 @@ pub struct SessionNameV1 {
 //     short_description: String,
 // }
 
-#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
-pub struct WildlifeV1 {
-    value: Option<WildlifeEnumV1>,
-    // defaults
-    field_order: Option<i32>,
-}
+// #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
+// pub struct WildlifeV1 {
+//     value: Option<WildlifeEnumV1>,
+//     // defaults
+//     field_order: Option<i32>,
+// }
 
 // #[derive(Serialize, Deserialize, Debug, SimpleObject, Clone)]
 // pub struct WildlifeV1 {
@@ -72,7 +72,7 @@ pub struct WildlifeV1 {
 #[derive(OneofObject, Serialize, Deserialize, Debug, Clone)]
 pub enum RequestFieldsV1 {
     SessionNameV1(SessionNameV1),
-    WildlifeV1(WildlifeV1),
+    // WildlifeV1(WildlifeV1),
 }
 
 pub type RequestFormFieldsV1 = Vec<RequestFieldsV1>;
@@ -80,7 +80,7 @@ pub type RequestFormFieldsV1 = Vec<RequestFieldsV1>;
 #[derive(Union, Serialize, Deserialize, Debug, Clone)]
 pub enum ResponseFieldsV1 {
     SessionNameV1(SessionNameV1),
-    WildlifeV1(WildlifeV1),
+    // WildlifeV1(WildlifeV1),
 }
 
 pub type ResponseFormFieldsV1 = Vec<ResponseFieldsV1>;

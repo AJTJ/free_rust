@@ -79,11 +79,11 @@ struct MaxDepthV1 {
     field_order: Option<i32>,
 }
 
-// CONGESTION
+// EASE OF EQUALIZATION
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
 #[graphql(input_name = "EaseOfEqualizationRequest")]
-struct EaseOfEqualization {
+struct EaseOfEqualizationV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
@@ -145,15 +145,15 @@ struct StaticV1 {
 #[graphql(input_name = "FormV1Request")]
 pub struct FormV1 {
     session_name: Option<SessionNameV1>,
-    // wildlife: Option<WildlifeV1>,
     weather: Option<WeatherV1>,
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
     max_depth: Option<MaxDepthV1>,
-    congestion: Option<EaseOfEqualization>,
+    ease_of_equalization: Option<EaseOfEqualizationV1>,
     visibility: Option<VisibilityV1>,
     general_feeling: Option<GeneralFeelingV1>,
     injury: Option<InjuryV1>,
     water_temp: Option<WaterTempV1>,
+    static_apnea: Option<StaticV1>,
 }
 
 // THIS IS JUST FOR TESTING
