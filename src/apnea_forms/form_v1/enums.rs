@@ -17,25 +17,25 @@ pub enum FieldValueTypes {
 )]
 pub enum FieldNames {
     // FormRelated
-    CompletedFormName,
+    // CompletedFormName,
     // InWater
-    MaxDepth,
-    MaxDepthWithDiscipline,
+    // MaxDepth,
+    // MaxDepthWithDiscipline,
     WarmUp,
-    Injury,
+    // Injury,
     // General
     GeneralFeeling,
     EqualizationEase,
     // Health
     Condition,
-    Congestion,
+    // Congestion,
     // Environment
-    Visibility,
-    CurrentStrength,
-    WindStrength,
-    WaveStrength,
-    Rain,
-    AirTemp,
+    // Visibility,
+    // CurrentStrength,
+    // WindStrength,
+    // WaveStrength,
+    // Rain,
+    // AirTemp,
     WaterTemp,
 }
 #[derive(
@@ -72,4 +72,25 @@ pub enum WildlifeEnumV1 {
     Big,
     Medium,
     Small,
+}
+
+#[derive(
+    Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
+)]
+pub enum InjuryEnumV1 {
+    // Weather-related
+    HeatStroke,
+    SunBurn,
+    Hypothermia,
+    // Pressure-related
+    MaskSqueeze,
+    TracheaSqueeze,
+    LungSqueeze,
+    EarDrumPerforation,
+    MiddleEarSqueeze,
+    SinusSqueeze,
+    // O2
+    LMC,
+    Hypoxia,
+    NitrogenNarcosis,
 }
