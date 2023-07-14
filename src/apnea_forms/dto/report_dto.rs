@@ -11,6 +11,7 @@ use async_graphql::{
 };
 use chrono::{DateTime, Utc};
 use serde_json::Value;
+use tracing::info;
 use uuid::Uuid;
 
 use super::form_dto::Form;
@@ -71,9 +72,14 @@ pub struct Report {
 #[ComplexObject]
 impl Report {
     async fn form(&self, ctx: &Context<'_>) -> Result<Option<Form>, Arc<BigError>> {
-        ctx.data_unchecked::<DataLoader<FormLoader>>()
+        let form_response = ctx
+            .data_unchecked::<DataLoader<FormLoader>>()
             .load_one(self.form_id)
-            .await
+            .await;
+
+        info!("form response: {form_response:?}");
+
+        form_response
     }
 }
 
