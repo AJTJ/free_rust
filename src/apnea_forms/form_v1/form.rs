@@ -154,6 +154,9 @@ pub struct FormV1 {
     injury: Option<InjuryV1>,
     water_temp: Option<WaterTempV1>,
     static_apnea: Option<StaticV1>,
+    // things to solve with enums or web-services:
+    // diet - list of foods
+    // wildlife - list of potential animals seen
 }
 
 // THIS IS JUST FOR TESTING
