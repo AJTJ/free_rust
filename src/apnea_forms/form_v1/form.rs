@@ -1,4 +1,4 @@
-use super::enums::{DisciplinesEnum, InjuryEnumV1, WildlifeEnumV1};
+use super::enums::{DisciplinesEnum, InjuryEnumV1};
 use crate::{
     apnea_forms::{
         actions::{
@@ -30,13 +30,13 @@ struct SessionNameV1 {
 
 // Wildlife
 
-#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
-#[graphql(input_name = "WildlifeV1Request")]
-struct WildlifeV1 {
-    value: Option<WildlifeEnumV1>,
-    // defaults
-    field_order: Option<i32>,
-}
+// #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
+// #[graphql(input_name = "WildlifeV1Request")]
+// struct WildlifeV1 {
+//     value: Option<WildlifeEnumV1>,
+//     // defaults
+//     field_order: Option<i32>,
+// }
 
 // Weather
 
@@ -129,13 +129,23 @@ struct WaterTempV1 {
     field_order: Option<i32>,
 }
 
+// STATIC
+
+#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
+#[graphql(input_name = "StaticV1Request")]
+struct StaticV1 {
+    value: Option<i32>,
+    // defaults
+    field_order: Option<i32>,
+}
+
 // FORMS
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, InputObject, Clone)]
 #[graphql(input_name = "FormV1Request")]
 pub struct FormV1 {
     session_name: Option<SessionNameV1>,
-    wildlife: Option<WildlifeV1>,
+    // wildlife: Option<WildlifeV1>,
     weather: Option<WeatherV1>,
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
     max_depth: Option<MaxDepthV1>,
@@ -146,16 +156,15 @@ pub struct FormV1 {
     water_temp: Option<WaterTempV1>,
 }
 
+// THIS IS JUST FOR TESTING
 #[derive(OneofObject, Serialize, Deserialize, Debug, Clone)]
 enum RequestFieldsV1 {
     SessionNameV1(SessionNameV1),
-    WildlifeV1(WildlifeV1),
 }
 
 #[derive(Union, Serialize, Deserialize, Debug, Clone)]
 enum ResponseFieldV1 {
     SessionNameV1(SessionNameV1),
-    WildlifeV1(WildlifeV1),
 }
 
 pub struct NewFormV1(Vec<ResponseFieldV1>);
