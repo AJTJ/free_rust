@@ -28,7 +28,8 @@ impl FromSql<sql_types::Jsonb, Pg> for FormResponse {
         if bytes[0] != 1 {
             return Err("Unsupported JSONB encoding version".into());
         }
-        serde_json::from_slice(&bytes[1..]).map_err(|_| "Invalid Json".into())
+        serde_json::from_slice(&bytes[1..])
+            .map_err(|_| "Invalid FormResponse Json: bad migration".into())
     }
 }
 
