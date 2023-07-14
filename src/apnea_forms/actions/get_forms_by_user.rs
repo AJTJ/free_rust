@@ -8,7 +8,7 @@ use snafu::prelude::*;
 use snafu::ResultExt;
 use uuid::Uuid;
 
-pub fn get_forms(
+pub fn get_forms_by_user(
     conn: &mut PgConnection,
     input_user_id: Uuid,
     query_params: QueryParams,

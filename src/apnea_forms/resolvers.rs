@@ -1,4 +1,4 @@
-use crate::apnea_forms::actions::get_forms::get_forms;
+use crate::apnea_forms::actions::get_forms_by_user::get_forms_by_user;
 use actix_web::web;
 use async_graphql::{types::connection::*, Context, Object};
 use uuid::Uuid;
@@ -42,7 +42,7 @@ impl ApneaFormsQuery {
 
         let forms = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            get_forms(&mut conn, user_id, query_params)
+            get_forms_by_user(&mut conn, user_id, query_params)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })??;

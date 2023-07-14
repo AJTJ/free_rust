@@ -1,9 +1,19 @@
-use crate::{apnea_forms::helpers::FormResponse, schema::reports};
+use std::sync::Arc;
 
-use async_graphql::{InputObject, OneofObject, SimpleObject};
+use crate::{
+    apnea_forms::{form_loader::FormLoader, helpers::FormResponse},
+    schema::reports,
+    utility::errors::BigError,
+};
+
+use async_graphql::{
+    dataloader::DataLoader, ComplexObject, Context, InputObject, OneofObject, SimpleObject,
+};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 use uuid::Uuid;
+
+use super::form_dto::Form;
 
 #[derive(InputObject)]
 pub struct ReportDetails {
@@ -31,8 +41,10 @@ pub struct ReportCreation {
 
 // This one needs to match 1:1
 #[derive(Queryable, SimpleObject, Clone)]
+#[graphql(complex)]
 pub struct Report {
     pub report_data: FormResponse,
+
     // relationships
     #[graphql(skip)]
     pub form_id: Uuid,
@@ -54,6 +66,15 @@ pub struct Report {
     pub archived_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
+}
+
+#[ComplexObject]
+impl Report {
+    async fn form(&self, ctx: &Context<'_>) -> Result<Option<Form>, Arc<BigError>> {
+        ctx.data_unchecked::<DataLoader<FormLoader>>()
+            .load_one(self.form_id)
+            .await
+    }
 }
 
 #[derive(OneofObject, Clone, PartialEq, Eq, Hash)]

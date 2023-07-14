@@ -3,7 +3,7 @@ use crate::{
     schema::forms,
 };
 
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::{InputObject, OneofObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 use uuid::Uuid;

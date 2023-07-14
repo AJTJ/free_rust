@@ -1,7 +1,8 @@
 pub(crate) mod archive_form;
 pub(crate) mod archive_report;
 pub(crate) mod get_form;
-pub(crate) mod get_forms;
+pub(crate) mod get_forms_by_id;
+pub(crate) mod get_forms_by_user;
 pub(crate) mod get_report;
 pub(crate) mod get_reports;
 pub(crate) mod get_reports_paginated;
