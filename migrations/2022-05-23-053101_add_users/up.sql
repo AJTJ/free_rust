@@ -7,6 +7,8 @@ CREATE TABLE users (
   password_salt bytea NOT NULL,
   email TEXT NOT NULL,
   last_login TIMESTAMPTZ NOT NULL,
+  is_email_verified BOOLEAN NOT NULL,
+  verified_date TIMESTAMPTZ,
   -- default data
   -- id SERIAL PRIMARY KEY,
   id uuid DEFAULT uuid_generate_v4(),

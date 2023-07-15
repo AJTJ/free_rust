@@ -73,6 +73,8 @@ diesel::table! {
         password_salt -> Bytea,
         email -> Text,
         last_login -> Timestamptz,
+        is_email_verified -> Bool,
+        verified_date -> Nullable<Timestamptz>,
         id -> Uuid,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,

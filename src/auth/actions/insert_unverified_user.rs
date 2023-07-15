@@ -8,7 +8,10 @@ use chrono::Utc;
 use diesel::PgConnection;
 use rand::Rng;
 
-pub fn insert_user(conn: &mut PgConnection, user_data: &UserInput) -> diesel::QueryResult<User> {
+pub fn insert_unverified_user(
+    conn: &mut PgConnection,
+    user_data: &UserInput,
+) -> diesel::QueryResult<User> {
     use crate::schema::users::dsl::users;
 
     let current_stamp = Utc::now();
@@ -24,6 +27,9 @@ pub fn insert_user(conn: &mut PgConnection, user_data: &UserInput) -> diesel::Qu
         password_salt: salt_gen.to_vec(),
         email: user_data.email.clone(),
         last_login: current_stamp,
+        is_email_verified: false,
+        verified_date: None,
+
         created_at: current_stamp,
         updated_at: current_stamp,
         is_active: true,

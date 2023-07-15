@@ -11,7 +11,7 @@ use diesel::RunQueryDsl;
 use tracing::info;
 
 use super::{
-    actions::{get_user, insert_user, login, logout},
+    actions::{get_user, insert_unverified_user, login, logout},
     dto::{
         auth_dto::Login,
         user_dto::{User, UserInput, UserRetrievalData},
@@ -65,7 +65,7 @@ impl AuthMutation {
         let my_user_input = user_input.clone();
         let user = web::block(move || {
             let mut conn = pool_ctx.get().unwrap();
-            insert_user(&mut conn, &my_user_input)
+            insert_unverified_user(&mut conn, &my_user_input)
         })
         .await
         .map_err(|e| BigError::ActixBlockingError { source: e })?

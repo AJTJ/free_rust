@@ -59,6 +59,7 @@ pub async fn login(
                         username: None,
                         email: None,
                         is_active: None,
+                        is_email_verified: None,
                     };
 
                     let updated_user = modify_user(ctx, None, Some(user.id), updated_user).await?;
