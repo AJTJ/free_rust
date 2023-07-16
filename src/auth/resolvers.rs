@@ -12,7 +12,8 @@ use tracing::info;
 
 use super::{
     actions::{
-        get_user, get_user_id_from_auth, insert_unverified_user, login, logout, verify_email_code,
+        email_verification_code, get_user, get_user_id_from_auth, insert_unverified_user, login,
+        logout, verify_email_code,
     },
     dto::{
         auth_dto::Login,
@@ -103,7 +104,17 @@ impl AuthMutation {
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn verify_email(
+    async fn email_verification_code(
+        &self,
+        ctx: &Context<'_>,
+        email: String,
+    ) -> Result<bool, BigError> {
+        let user_id = get_user_id_from_auth(ctx).await?;
+        email_verification_code(ctx, &user_id, email).await
+    }
+
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn verify_email_code(
         &self,
         ctx: &Context<'_>,
         email: String,

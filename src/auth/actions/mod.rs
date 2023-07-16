@@ -1,3 +1,4 @@
+mod email_verification_code;
 mod get_user;
 mod get_user_id_from_auth;
 mod get_user_session;
@@ -7,9 +8,9 @@ mod login;
 mod logout;
 mod modify_user;
 mod remove_from_user_session;
-mod send_verification_code;
 mod verify_email_code;
 
+pub use email_verification_code::email_verification_code;
 pub use get_user::get_user;
 pub use get_user_id_from_auth::get_user_id_from_auth;
 pub use get_user_session::get_user_session;
@@ -19,5 +20,4 @@ pub use login::login;
 pub use logout::logout;
 pub use modify_user::modify_user;
 pub use remove_from_user_session::remove_from_user_session;
-pub use send_verification_code::send_verification_code;
 pub use verify_email_code::verify_email_code;

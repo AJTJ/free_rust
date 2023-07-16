@@ -7,7 +7,7 @@ use rand::distributions::{Alphanumeric, DistString};
 use tracing::info;
 use uuid::Uuid;
 
-pub async fn send_verification_code(
+pub async fn email_verification_code(
     ctx: &Context<'_>,
     unverified_user_id: &Uuid,
     unverified_email: String,
