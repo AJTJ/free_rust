@@ -75,6 +75,8 @@ diesel::table! {
         last_login -> Timestamptz,
         is_email_verified -> Bool,
         verified_date -> Nullable<Timestamptz>,
+        verification_code -> Nullable<Text>,
+        verification_code_expiry -> Nullable<Timestamptz>,
         id -> Uuid,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,

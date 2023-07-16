@@ -54,17 +54,19 @@ pub async fn login(
                     ctx.insert_http_header(SET_COOKIE, cookie.to_string());
                     ctx.insert_http_header(AUTHORIZATION, cookie.to_string());
 
-                    let updated_user = UserUpdate {
+                    let last_login_update = UserUpdate {
                         last_login: Some(Utc::now()),
                         username: None,
                         email: None,
                         is_active: None,
                         is_email_verified: None,
+                        verification_code: None,
+                        verification_code_expiry: None,
                     };
 
-                    let updated_user = modify_user(ctx, None, Some(user.id), updated_user).await?;
+                    modify_user(ctx, None, Some(&user.id), last_login_update).await?;
 
-                    Ok(updated_user)
+                    Ok(user)
                 }
                 false => Err(BigError::WrongPassword),
             }

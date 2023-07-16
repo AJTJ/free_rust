@@ -8,7 +8,7 @@ mod logout;
 mod modify_user;
 mod remove_from_user_session;
 mod send_verification_code;
-mod verify_email;
+mod verify_email_code;
 
 pub use get_user::get_user;
 pub use get_user_id_from_auth::get_user_id_from_auth;
@@ -20,4 +20,4 @@ pub use logout::logout;
 pub use modify_user::modify_user;
 pub use remove_from_user_session::remove_from_user_session;
 pub use send_verification_code::send_verification_code;
-pub use verify_email::verify_email;
+pub use verify_email_code::verify_email_code;

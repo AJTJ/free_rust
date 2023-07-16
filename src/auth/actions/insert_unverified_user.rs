@@ -28,7 +28,6 @@ pub fn insert_unverified_user(
         email: user_data.email.clone(),
         last_login: current_stamp,
         is_email_verified: false,
-        verified_date: None,
 
         created_at: current_stamp,
         updated_at: current_stamp,

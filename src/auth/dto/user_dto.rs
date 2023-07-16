@@ -32,6 +32,8 @@ pub struct UserUpdate {
     pub last_login: Option<DateTime<Utc>>,
     pub is_active: Option<bool>,
     pub is_email_verified: Option<bool>,
+    pub verification_code: Option<String>,
+    pub verification_code_expiry: Option<DateTime<Utc>>,
 }
 
 #[derive(Insertable)]
@@ -43,7 +45,6 @@ pub struct UserCreation {
     pub email: String,
     pub last_login: DateTime<Utc>,
     pub is_email_verified: bool,
-    pub verified_date: Option<DateTime<Utc>>,
 
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -68,6 +69,8 @@ pub struct User {
     pub last_login: DateTime<Utc>,
     pub is_email_verified: bool,
     pub verified_date: Option<DateTime<Utc>>,
+    pub verification_code: Option<String>,
+    pub verification_code_expiry: Option<DateTime<Utc>>,
 
     // default data
     pub id: Uuid,

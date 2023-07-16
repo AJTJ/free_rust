@@ -101,6 +101,7 @@ async fn main() -> std::io::Result<()> {
     // REDIS
     let redis_client = Client::open(redis_url).expect("failure starting redis server");
     let redis_pool = r2d2::Pool::new(redis_client).unwrap();
+
     let env_vars = SharedEnvVars { environment };
 
     struct AuthExtension;

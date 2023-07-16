@@ -11,7 +11,9 @@ use diesel::RunQueryDsl;
 use tracing::info;
 
 use super::{
-    actions::{get_user, insert_unverified_user, login, logout},
+    actions::{
+        get_user, get_user_id_from_auth, insert_unverified_user, login, logout, verify_email_code,
+    },
     dto::{
         auth_dto::Login,
         user_dto::{User, UserInput, UserRetrievalData},
@@ -94,10 +96,20 @@ impl AuthMutation {
         login(ctx, login_data.email, login_data.password).await
     }
 
-    // Should be guarded eventually
     // #[graphql(guard = "LoggedInGuard::new()")]
     async fn logout(&self, ctx: &Context<'_>) -> Result<bool, BigError> {
         let res = logout(ctx).await;
         res
+    }
+
+    #[graphql(guard = "LoggedInGuard::new()")]
+    async fn verify_email(
+        &self,
+        ctx: &Context<'_>,
+        email: String,
+        email_code: String,
+    ) -> Result<User, BigError> {
+        let user_id = get_user_id_from_auth(ctx).await?;
+        verify_email_code(ctx, &user_id, &email, &email_code).await
     }
 }
