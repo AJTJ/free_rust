@@ -36,6 +36,14 @@ pub enum InjuryEnumV1 {
     NitrogenNarcosis,
 }
 
+#[derive(
+    Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq, EnumIter,
+)]
+pub enum TemperatureEnum {
+    F,
+    C,
+}
+
 // #[derive(
 //     Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq, EnumIter,
 // )]

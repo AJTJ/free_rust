@@ -108,7 +108,7 @@ impl ApneaSessionsMutation {
         report_details: Option<ReportDetails>,
     ) -> Result<ApneaSession, BigError> {
         let user_id = get_user_id_from_auth(ctx).await?;
-        archive_session(ctx, &archived_session_id, &user_id).await;
+        archive_session(ctx, &archived_session_id, &user_id).await?;
         insert_apnea_session(ctx, apnea_session_input, report_details, &user_id).await
     }
 

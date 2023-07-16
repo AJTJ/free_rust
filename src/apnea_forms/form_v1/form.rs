@@ -1,4 +1,4 @@
-use super::enums::{DisciplinesEnum, InjuryEnumV1};
+use super::enums::{DisciplinesEnum, InjuryEnumV1, TemperatureEnum};
 use crate::{
     apnea_forms::{
         actions::{
@@ -125,6 +125,7 @@ struct InjuryV1 {
 #[graphql(input_name = "WaterTempV1Request")]
 struct WaterTempV1 {
     value: Option<i32>,
+    measurement: Option<TemperatureEnum>,
     // defaults
     field_order: Option<i32>,
 }
