@@ -96,6 +96,8 @@ impl User {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
         let user_id = self.id;
 
+        println!("in user impl apnea sessions");
+
         let my_closure = move |query_params: QueryParams| {
             let query_params = query_params.clone();
             let pool_ctx = pool_ctx.clone();

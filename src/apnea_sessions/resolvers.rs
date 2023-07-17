@@ -26,6 +26,7 @@ use actix_web::web;
 use async_graphql::{dataloader::DataLoader, types::connection::*, Context, Object};
 use snafu::ResultExt;
 use std::sync::Arc;
+use tracing::{debug_span, event, info, instrument, span, Level};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -36,6 +37,7 @@ pub struct ApneaSessionsMutation;
 
 #[Object]
 impl ApneaSessionsQuery {
+    #[instrument(skip_all, name = "apnea_sessions_span", level = "debug")]
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn apnea_sessions(
         &self,
@@ -43,6 +45,7 @@ impl ApneaSessionsQuery {
         query_params: QueryParams,
     ) -> Result<Connection<String, ApneaSession>, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        println!("in ap sessions");
 
         let user_id = get_user_id_from_auth(ctx).await?;
         let my_closure = move |query_params: QueryParams| {
