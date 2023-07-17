@@ -77,8 +77,6 @@ impl Report {
             .load_one(self.form_id)
             .await;
 
-        info!("form response: {form_response:?}");
-
         form_response
     }
 }

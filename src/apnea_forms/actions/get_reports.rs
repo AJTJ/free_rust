@@ -4,12 +4,14 @@ use crate::{
 };
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
+use tracing::{event, Level};
 use uuid::Uuid;
 
 pub fn get_reports(
     conn: &mut PgConnection,
     retrieval_ids: Vec<ReportsRetrievalData>,
 ) -> Result<Option<Vec<Report>>, BigError> {
+    event!(Level::DEBUG, "in get_reports");
     use crate::schema::reports::dsl::{reports, session_id, user_id as forms_user_id};
 
     let mut session_ids: Vec<Uuid> = vec![];

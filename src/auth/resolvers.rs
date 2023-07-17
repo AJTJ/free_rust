@@ -8,7 +8,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::{Context, Object};
 use diesel::RunQueryDsl;
-use tracing::info;
+use tracing::{debug_span, event, span, Level};
 
 use super::{
     actions::{
@@ -31,16 +31,26 @@ pub struct AuthMutation;
 impl AuthQuery {
     #[graphql(guard = "DevelopmentGuard::new()")]
     async fn all_users(&self, ctx: &Context<'_>) -> Result<Vec<User>, BigError> {
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+        let span = debug_span!("all_users");
+        let all_users = span
+            .in_scope(async || {
+                // run some synchronous code inside the span...
 
-        web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            use crate::schema::users::dsl::*;
-            users.load::<User>(&mut conn)
-        })
-        .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselQueryError { source: e })
+                let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+                web::block(move || {
+                    let mut conn = pool_ctx.get().unwrap();
+                    event!(Level::DEBUG, "requested all users");
+                    use crate::schema::users::dsl::*;
+                    users.load::<User>(&mut conn)
+                })
+                .await
+                .map_err(|e| BigError::ActixBlockingError { source: e })?
+                .map_err(|e| BigError::DieselQueryError { source: e })
+            })
+            .await;
+
+        all_users
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
@@ -94,7 +104,9 @@ impl AuthMutation {
     // AUTH
     // Must be UNGUARDED?
     async fn login(&self, ctx: &Context<'_>, login_data: Login) -> Result<User, BigError> {
-        login(ctx, login_data.email, login_data.password).await
+        let span = debug_span!("login_span");
+        span.in_scope(async || login(ctx, login_data.email, login_data.password).await)
+            .await
     }
 
     // #[graphql(guard = "LoggedInGuard::new()")]

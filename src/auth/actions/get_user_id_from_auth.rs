@@ -9,8 +9,6 @@ use super::get_user_session;
 pub async fn get_user_id_from_auth(ctx: &Context<'_>) -> Result<Uuid, BigError> {
     let cookie = get_cookie_from_token(ctx)?;
 
-    info!("the cookie: {cookie:?}");
-
     if let Some(session_id) = cookie.encoded_session_id {
         let user_session = get_user_session(ctx, session_id).await?;
         Ok(user_session.user_id)

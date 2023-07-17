@@ -106,6 +106,7 @@ impl User {
             async move {
                 web::block(move || {
                     let mut conn = pool_ctx.get().unwrap();
+
                     get_apnea_sessions_paginated(
                         &mut conn,
                         ApneaSessionRetrievalData::User(user_id),

@@ -26,8 +26,6 @@ pub async fn email_verification_code(
         verification_code_expiry: Some(Utc::now().checked_add_days(Days::new(1)).unwrap()),
     };
 
-    info!("random string: {random_string}");
-
     modify_user(ctx, None, Some(unverified_user_id), add_code_update).await?;
 
     fn send_email() -> bool {

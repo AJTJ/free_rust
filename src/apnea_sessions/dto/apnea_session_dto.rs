@@ -5,7 +5,7 @@ use crate::{
         helpers::FormRequest,
         reports_loader::ReportLoader,
     },
-    apnea_sessions::actions::get_dives,
+    apnea_sessions::{actions::get_dives, dive_loader_by_session::DiveLoaderBySession},
     graphql_schema::DbPool,
     schema::apnea_sessions,
     utility::errors::BigError,
@@ -15,7 +15,7 @@ use async_graphql::{
     dataloader::DataLoader, ComplexObject, Context, FieldResult, InputObject, SimpleObject,
 };
 use chrono::{DateTime, Utc};
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 use uuid::Uuid;
 
 #[derive(InputObject)]
@@ -73,19 +73,10 @@ impl ApneaSession {
     }
 
     // Note: I don't think this requires pagination just now. As there will only ever be so many dives per session.
-    async fn dives(&self, ctx: &Context<'_>) -> FieldResult<Option<Vec<Dive>>> {
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-        let session_id = self.id;
-
-        let dives = web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            get_dives(&mut conn, vec![DiveRetrievalData::Session(session_id)])
-        })
-        .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })??;
-
-        Ok(dives)
+    async fn dives(&self, ctx: &Context<'_>) -> Result<Option<Vec<Dive>>, Arc<BigError>> {
+        ctx.data_unchecked::<DataLoader<DiveLoaderBySession>>()
+            .load_one(DiveRetrievalData::Session(self.id))
+            .await
     }
 }
 
@@ -93,3 +84,21 @@ pub enum ApneaSessionRetrievalData {
     Sessions(Vec<Uuid>),
     User(Uuid),
 }
+
+// async fn dives(&self, ctx: &Context<'_>) -> FieldResult<Option<Vec<Dive>>> {
+//     ctx.data_unchecked::<DataLoader<DiveLoaderBySession>>()
+//         .load_many(self.id)
+//         .await
+//     // let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+//     // let session_id = self.id;
+
+//     // let dives = web::block(move || {
+//     //     let mut conn = pool_ctx.get().unwrap();
+//     //     get_dives(&mut conn, vec![DiveRetrievalData::Session(session_id)])
+//     // })
+//     // .await
+//     // .map_err(|e| BigError::ActixBlockingError { source: e })??;
+
+//     // Ok(dives)
+// }

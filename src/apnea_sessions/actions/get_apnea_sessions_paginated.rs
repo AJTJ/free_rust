@@ -10,12 +10,14 @@ use async_graphql::connection::{Connection, Edge, EmptyFields};
 use chrono::{DateTime, Utc};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
+use tracing::{event, Level};
 
 pub fn get_apnea_sessions_paginated(
     conn: &mut PgConnection,
     retrieval_method: ApneaSessionRetrievalData,
     query_params: QueryParams,
 ) -> Result<Connection<String, ApneaSession>, BigError> {
+    event!(Level::DEBUG, "in get_apnea_sessions_paginated");
     use crate::schema::apnea_sessions::dsl::{
         apnea_sessions, created_at, id as session_id, user_id,
     };

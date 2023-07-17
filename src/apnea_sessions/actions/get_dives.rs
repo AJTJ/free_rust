@@ -5,12 +5,14 @@ use crate::{
 };
 use diesel::{OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
+use tracing::{event, Level};
 use uuid::Uuid;
 
 pub fn get_dives(
     conn: &mut PgConnection,
     retrieval_ids: Vec<DiveRetrievalData>,
 ) -> Result<Option<Vec<Dive>>, BigError> {
+    event!(Level::DEBUG, "in get_dives");
     use crate::schema::dives::dsl::{dives, session_id, user_id};
 
     let mut session_ids: Vec<Uuid> = vec![];

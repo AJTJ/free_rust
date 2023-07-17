@@ -3,6 +3,7 @@ use actix_web::web;
 use async_graphql::Context;
 use redis::Commands;
 use snafu::ResultExt;
+use tracing::{event, Level};
 
 use crate::{
     auth::utility::auth_data::{RedisPool, SessionData},
@@ -15,6 +16,8 @@ pub async fn insert_into_user_session(
     encoded_session_id: String,
 ) -> Result<bool, BigError> {
     let redis_pool = ctx.data::<RedisPool>().unwrap().clone();
+
+    event!(Level::DEBUG, "inserting into user session");
 
     web::block(move || {
         let mut redis_conn = redis_pool.get().unwrap();
