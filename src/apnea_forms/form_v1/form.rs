@@ -142,7 +142,8 @@ struct StaticV1 {
 
 // FORMS
 
-// Dynamic apnea
+// Dynamic apnea distance
+//
 
 #[derive(Serialize, Deserialize, Debug, SimpleObject, InputObject, Clone)]
 #[graphql(input_name = "FormV1Request")]

@@ -8,7 +8,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::{Context, Object};
 use diesel::RunQueryDsl;
-use tracing::{debug_span, event, span, Level};
+use tracing::{debug_span, event, info, instrument, span, Level};
 
 use super::{
     actions::{
@@ -24,7 +24,7 @@ use super::{
 #[derive(Default)]
 pub struct AuthQuery;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct AuthMutation;
 
 #[Object]
@@ -103,10 +103,12 @@ impl AuthMutation {
 
     // AUTH
     // Must be UNGUARDED?
+    #[instrument(skip_all, name = "login_span", level = "debug")]
     async fn login(&self, ctx: &Context<'_>, login_data: Login) -> Result<User, BigError> {
-        let span = debug_span!("login_span");
-        span.in_scope(async || login(ctx, login_data.email, login_data.password).await)
-            .await
+        println!("HIT A");
+        let thing = login(ctx, login_data.email, login_data.password).await;
+        println!("HIT B");
+        thing
     }
 
     // #[graphql(guard = "LoggedInGuard::new()")]

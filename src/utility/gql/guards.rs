@@ -38,7 +38,7 @@ impl Guard for LoggedInGuard {
                         }
                     }
                 } else {
-                    Err("no session id".into())
+                    Err("Not logged in".into())
                 }
             }
             Err(e) => {

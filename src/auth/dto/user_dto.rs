@@ -15,6 +15,7 @@ use async_graphql::{
     connection::Connection, ComplexObject, Context, InputObject, OneofObject, SimpleObject,
 };
 use chrono::{DateTime, Utc};
+use tracing::{debug_span, event, info, instrument, span, Level};
 use uuid::Uuid;
 
 #[derive(Clone, InputObject)]
@@ -59,6 +60,7 @@ pub struct UserCreation {
 // }
 
 // This one needs to match 1:1
+
 #[derive(Queryable, SimpleObject, Debug)]
 #[graphql(complex)]
 pub struct User {
@@ -82,12 +84,6 @@ pub struct User {
     pub archived_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
     pub archived_by: Option<Uuid>,
-}
-
-#[derive(OneofObject)]
-pub enum UserRetrievalData {
-    Email(String),
-    Id(Uuid),
 }
 
 #[ComplexObject]
@@ -121,4 +117,10 @@ impl User {
         let query_response = gql_query(query_params, &my_closure).await;
         query_response.map_err(|e| BigError::AsyncQueryError { error: e })
     }
+}
+
+#[derive(OneofObject)]
+pub enum UserRetrievalData {
+    Email(String),
+    Id(Uuid),
 }
