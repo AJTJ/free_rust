@@ -2,9 +2,10 @@
 
 diesel::table! {
     apnea_sessions (id) {
-        start_time -> Timestamptz,
-        end_time -> Nullable<Timestamptz>,
-        session_name -> Nullable<Text>,
+        report_data -> Jsonb,
+        form_id -> Uuid,
+        original_form_id -> Nullable<Uuid>,
+        previous_session_id -> Nullable<Uuid>,
         user_id -> Uuid,
         id -> Uuid,
         created_at -> Timestamptz,
@@ -50,23 +51,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    reports (id) {
-        report_data -> Jsonb,
-        form_id -> Uuid,
-        original_form_id -> Nullable<Uuid>,
-        previous_report_id -> Nullable<Uuid>,
-        session_id -> Uuid,
-        user_id -> Uuid,
-        id -> Uuid,
-        created_at -> Timestamptz,
-        updated_at -> Timestamptz,
-        is_active -> Bool,
-        archived_at -> Nullable<Timestamptz>,
-        archived_by -> Nullable<Uuid>,
-    }
-}
-
-diesel::table! {
     users (id) {
         username -> Text,
         hashed_password -> Text,
@@ -90,13 +74,10 @@ diesel::joinable!(apnea_sessions -> users (user_id));
 diesel::joinable!(dives -> apnea_sessions (session_id));
 diesel::joinable!(dives -> users (user_id));
 diesel::joinable!(forms -> users (user_id));
-diesel::joinable!(reports -> apnea_sessions (session_id));
-diesel::joinable!(reports -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     apnea_sessions,
     dives,
     forms,
-    reports,
     users,
 );

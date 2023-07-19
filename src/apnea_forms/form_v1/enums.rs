@@ -15,10 +15,13 @@ pub enum DisciplinesEnum {
     DNF,
 }
 
+// TODO: rename to traumatic event
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
 pub enum InjuryEnumV1 {
+    // Mental events
+    PanicAttack,
     // Weather-related
     HeatStroke,
     SunBurn,

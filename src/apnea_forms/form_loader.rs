@@ -1,9 +1,6 @@
 use super::actions::get_forms_by_id::get_forms_by_id;
 use super::actions::get_forms_by_user::get_forms_by_user;
-use super::actions::get_reports::get_reports;
 use super::dto::form_dto::Form;
-use super::dto::report_dto::ReportsRetrievalData;
-use crate::apnea_forms::dto::report_dto::Report;
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::ActixBlockingSnafu;
 use crate::utility::errors::BigError;

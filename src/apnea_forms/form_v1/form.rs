@@ -1,14 +1,8 @@
 use super::enums::{DisciplinesEnum, InjuryEnumV1, TemperatureEnum};
 use crate::{
     apnea_forms::{
-        actions::{
-            archive_form::archive_form, archive_report::archive_report, insert_form::insert_form,
-            insert_report::insert_report,
-        },
-        dto::{
-            form_dto::{Form, FormDetails},
-            report_dto::{Report, ReportDetails},
-        },
+        actions::{archive_form::archive_form, insert_form::insert_form},
+        dto::form_dto::{Form, FormDetails},
         helpers::FormResponse,
     },
     utility::errors::BigError,
@@ -204,41 +198,41 @@ impl FormV1 {
         Ok(form)
     }
 
-    pub async fn insert_report(
-        &self,
-        ctx: &Context<'_>,
-        session_id: &Uuid,
-        report_details: ReportDetails,
-        user_id: &Uuid,
-    ) -> Result<Option<Report>, BigError> {
-        let report = insert_report(
-            ctx,
-            session_id,
-            report_details,
-            FormResponse::V1(self.clone()),
-            user_id,
-        )
-        .await?;
-        Ok(report)
-    }
+    // pub async fn insert_report(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     session_id: &Uuid,
+    //     report_details: ReportDetails,
+    //     user_id: &Uuid,
+    // ) -> Result<Option<Report>, BigError> {
+    //     let report = insert_report(
+    //         ctx,
+    //         session_id,
+    //         report_details,
+    //         FormResponse::V1(self.clone()),
+    //         user_id,
+    //     )
+    //     .await?;
+    //     Ok(report)
+    // }
 
-    pub async fn modify_report(
-        &self,
-        ctx: &Context<'_>,
-        session_id: &Uuid,
-        previous_report_id: &Uuid,
-        report_details: ReportDetails,
-        user_id: &Uuid,
-    ) -> Result<Option<Report>, BigError> {
-        archive_report(ctx, previous_report_id, user_id).await?;
-        let report = insert_report(
-            ctx,
-            session_id,
-            report_details,
-            FormResponse::V1(self.clone()),
-            user_id,
-        )
-        .await?;
-        Ok(report)
-    }
+    // pub async fn modify_report(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     session_id: &Uuid,
+    //     previous_report_id: &Uuid,
+    //     report_details: ReportDetails,
+    //     user_id: &Uuid,
+    // ) -> Result<Option<Report>, BigError> {
+    //     archive_report(ctx, previous_report_id, user_id).await?;
+    //     let report = insert_report(
+    //         ctx,
+    //         session_id,
+    //         report_details,
+    //         FormResponse::V1(self.clone()),
+    //         user_id,
+    //     )
+    //     .await?;
+    //     Ok(report)
+    // }
 }

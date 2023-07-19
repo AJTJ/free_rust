@@ -13,11 +13,8 @@ use crate::{
 };
 
 use super::{
-    actions::get_reports_paginated::get_reports_paginated,
-    dto::{
-        form_dto::{Form, FormDetails},
-        report_dto::{Report, ReportDetails, ReportsRetrievalData},
-    },
+    // actions::get_reports_paginated::get_reports_paginated,
+    dto::form_dto::{Form, FormDetails},
     form_v1::{form::FormV1, new_ideas::ResponseFormFieldsV1},
     helpers::{FormRequest, FormResponse},
 };
@@ -50,35 +47,35 @@ impl ApneaFormsQuery {
         Ok(forms)
     }
 
-    #[graphql(guard = "LoggedInGuard::new()")]
-    async fn reports(
-        &self,
-        ctx: &Context<'_>,
-        query_params: QueryParams,
-    ) -> Result<Connection<String, Report>, BigError> {
-        let user_id = get_user_id_from_auth(ctx).await?;
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+    // #[graphql(guard = "LoggedInGuard::new()")]
+    // async fn reports(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     query_params: QueryParams,
+    // ) -> Result<Connection<String, Report>, BigError> {
+    //     let user_id = get_user_id_from_auth(ctx).await?;
+    //     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-        let my_closure = move |query_params: QueryParams| {
-            let query_params = query_params.clone();
-            let pool_ctx = pool_ctx.clone();
-            async move {
-                web::block(move || {
-                    let mut conn = pool_ctx.get().unwrap();
-                    get_reports_paginated(
-                        &mut conn,
-                        vec![ReportsRetrievalData::UserId(user_id)],
-                        query_params,
-                    )
-                })
-                .await
-                .map_err(|e| BigError::ActixBlockingError { source: e })?
-            }
-        };
+    //     let my_closure = move |query_params: QueryParams| {
+    //         let query_params = query_params.clone();
+    //         let pool_ctx = pool_ctx.clone();
+    //         async move {
+    //             web::block(move || {
+    //                 let mut conn = pool_ctx.get().unwrap();
+    //                 get_reports_paginated(
+    //                     &mut conn,
+    //                     vec![ReportsRetrievalData::UserId(user_id)],
+    //                     query_params,
+    //                 )
+    //             })
+    //             .await
+    //             .map_err(|e| BigError::ActixBlockingError { source: e })?
+    //         }
+    //     };
 
-        let query_response = gql_query(query_params, &my_closure).await;
-        query_response.map_err(|e| BigError::AsyncQueryError { error: e })
-    }
+    //     let query_response = gql_query(query_params, &my_closure).await;
+    //     query_response.map_err(|e| BigError::AsyncQueryError { error: e })
+    // }
 }
 
 #[Object]
@@ -122,48 +119,48 @@ impl ApneaFormsMutation {
         }
     }
 
-    // add a new one
-    // MODIFY/ARCHIVE WOULD BE VERY SIMILAR
-    #[graphql(guard = "LoggedInGuard::new()")]
-    async fn insert_report(
-        &self,
-        ctx: &Context<'_>,
-        session_id: Uuid,
-        report_details: ReportDetails,
-        report_request: FormRequest,
-    ) -> Result<Option<Report>, BigError> {
-        let user_id = get_user_id_from_auth(ctx).await?;
-        match report_request {
-            FormRequest::V1(v1) => {
-                FormV1::from(v1)
-                    .insert_report(ctx, &session_id, report_details, &user_id)
-                    .await
-            }
-        }
-    }
+    // // add a new one
+    // // MODIFY/ARCHIVE WOULD BE VERY SIMILAR
+    // #[graphql(guard = "LoggedInGuard::new()")]
+    // async fn insert_report(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     session_id: Uuid,
+    //     report_details: ReportDetails,
+    //     report_request: FormRequest,
+    // ) -> Result<Option<Report>, BigError> {
+    //     let user_id = get_user_id_from_auth(ctx).await?;
+    //     match report_request {
+    //         FormRequest::V1(v1) => {
+    //             FormV1::from(v1)
+    //                 .insert_report(ctx, &session_id, report_details, &user_id)
+    //                 .await
+    //         }
+    //     }
+    // }
 
-    #[graphql(guard = "LoggedInGuard::new()")]
-    async fn modify_report(
-        &self,
-        ctx: &Context<'_>,
-        session_id: Uuid,
-        previous_report_id: Uuid,
-        report_details: ReportDetails,
-        report_request: FormRequest,
-    ) -> Result<Option<Report>, BigError> {
-        let user_id = get_user_id_from_auth(ctx).await?;
-        match report_request {
-            FormRequest::V1(v1) => {
-                FormV1::from(v1)
-                    .modify_report(
-                        ctx,
-                        &session_id,
-                        &previous_report_id,
-                        report_details,
-                        &user_id,
-                    )
-                    .await
-            }
-        }
-    }
+    // #[graphql(guard = "LoggedInGuard::new()")]
+    // async fn modify_report(
+    //     &self,
+    //     ctx: &Context<'_>,
+    //     session_id: Uuid,
+    //     previous_report_id: Uuid,
+    //     report_details: ReportDetails,
+    //     report_request: FormRequest,
+    // ) -> Result<Option<Report>, BigError> {
+    //     let user_id = get_user_id_from_auth(ctx).await?;
+    //     match report_request {
+    //         FormRequest::V1(v1) => {
+    //             FormV1::from(v1)
+    //                 .modify_report(
+    //                     ctx,
+    //                     &session_id,
+    //                     &previous_report_id,
+    //                     report_details,
+    //                     &user_id,
+    //                 )
+    //                 .await
+    //         }
+    //     }
+    // }
 }

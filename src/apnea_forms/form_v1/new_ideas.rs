@@ -1,14 +1,8 @@
 use super::enums::DisciplinesEnum;
 use crate::{
     apnea_forms::{
-        actions::{
-            archive_form::archive_form, archive_report::archive_report, insert_form::insert_form,
-            insert_report::insert_report,
-        },
-        dto::{
-            form_dto::{Form, FormDetails},
-            report_dto::{Report, ReportDetails},
-        },
+        actions::{archive_form::archive_form, insert_form::insert_form},
+        dto::form_dto::{Form, FormDetails},
         helpers::FormResponse,
     },
     utility::errors::BigError,

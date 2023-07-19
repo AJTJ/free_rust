@@ -31,12 +31,14 @@ pub fn get_apnea_sessions_paginated(
             .into_boxed(),
     };
 
+    // TODO: This is not the created_at, this has to be the start_time inside the report.
+
     if let Some(after) = &query_params.after {
         query =
             query.filter(created_at.gt(after.parse::<DateTime<Utc>>().context(ChronoParseSnafu)?))
     }
 
-    let desired_count = query_params.first.unwrap_or(10);
+    let desired_count = query_params.first.unwrap_or(100);
     let res: Vec<ApneaSession> = query
         .limit(desired_count as i64)
         .get_results::<ApneaSession>(conn)

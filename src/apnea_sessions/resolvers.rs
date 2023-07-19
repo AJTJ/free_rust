@@ -9,7 +9,7 @@ use super::{
         dive_dto::{Dive, DiveInput, DiveRetrievalData},
     },
 };
-use crate::{apnea_forms::dto::report_dto::ReportDetails, diesel::RunQueryDsl};
+use crate::diesel::RunQueryDsl;
 use crate::{
     auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
@@ -96,23 +96,22 @@ impl ApneaSessionsMutation {
         &self,
         ctx: &Context<'_>,
         apnea_session_input: ApneaSessionInput,
-        report_details: Option<ReportDetails>,
+        // report_details: Option<ReportDetails>,
     ) -> Result<ApneaSession, BigError> {
         let user_id = get_user_id_from_auth(ctx).await?;
-        insert_apnea_session(ctx, apnea_session_input, report_details, &user_id).await
+        insert_apnea_session(ctx, apnea_session_input, &user_id).await
     }
-
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn modify_apnea_session(
         &self,
         ctx: &Context<'_>,
         archived_session_id: Uuid,
         apnea_session_input: ApneaSessionInput,
-        report_details: Option<ReportDetails>,
+        // report_details: Option<ReportDetails>,
     ) -> Result<ApneaSession, BigError> {
         let user_id = get_user_id_from_auth(ctx).await?;
         archive_session(ctx, &archived_session_id, &user_id).await?;
-        insert_apnea_session(ctx, apnea_session_input, report_details, &user_id).await
+        insert_apnea_session(ctx, apnea_session_input, &user_id).await
     }
 
     // for testing

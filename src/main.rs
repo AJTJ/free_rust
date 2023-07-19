@@ -9,7 +9,7 @@ pub mod env_data;
 pub mod graphql_schema;
 pub mod schema;
 pub mod utility;
-use crate::apnea_forms::{form_loader::FormLoader, reports_loader::ReportLoader};
+use crate::apnea_forms::form_loader::FormLoader;
 use crate::apnea_sessions::{
     apnea_session_loader::ApneaSessionLoader, dive_loader_by_session::DiveLoaderBySession,
     dive_loader_by_user::DiveLoaderByUser,
@@ -150,10 +150,10 @@ async fn main() -> std::io::Result<()> {
             DiveLoaderByUser::new(pooled_database.clone()),
             rt::spawn,
         ))
-        .data(DataLoader::new(
-            ReportLoader::new(pooled_database.clone()),
-            rt::spawn,
-        ))
+        // .data(DataLoader::new(
+        //     ReportLoader::new(pooled_database.clone()),
+        //     rt::spawn,
+        // ))
         .data(DataLoader::new(
             FormLoader::new(pooled_database.clone()),
             rt::spawn,
