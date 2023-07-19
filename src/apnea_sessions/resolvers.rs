@@ -101,6 +101,7 @@ impl ApneaSessionsMutation {
         let user_id = get_user_id_from_auth(ctx).await?;
         insert_apnea_session(ctx, apnea_session_input, &user_id).await
     }
+
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn modify_apnea_session(
         &self,
@@ -127,6 +128,7 @@ impl ApneaSessionsMutation {
         .map_err(|e| BigError::ActixBlockingError { source: e })?
         .map_err(|e| BigError::DieselDeleteError { source: e })
     }
+
     // DIVES
     #[graphql(guard = "LoggedInGuard::new()")]
     async fn insert_dive(

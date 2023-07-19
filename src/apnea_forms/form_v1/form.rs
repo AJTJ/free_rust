@@ -7,12 +7,34 @@ use crate::{
     },
     utility::errors::BigError,
 };
-use async_graphql::{Context, InputObject, OneofObject, SimpleObject, Union};
+use async_graphql::{Context, InputObject, Interface, OneofObject, SimpleObject, Union};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use uuid::Uuid;
 
-// Report Name
+// Start Time
+
+#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
+#[graphql(input_name = "StartTimeV1Request")]
+struct StartTimeV1 {
+    time: DateTime<Utc>,
+    // defaults
+    field_order: Option<i32>,
+    is_used: Option<bool>,
+}
+// End Time
+
+#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
+#[graphql(input_name = "EndTimeV1Request")]
+struct EndTimeV1 {
+    time: Option<DateTime<Utc>>,
+    // defaults
+    field_order: Option<i32>,
+    is_used: Option<bool>,
+}
+
+// Session Name
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "SessionNameV1Request")]
@@ -20,17 +42,8 @@ struct SessionNameV1 {
     name: Option<String>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
-
-// Wildlife
-
-// #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
-// #[graphql(input_name = "WildlifeV1Request")]
-// struct WildlifeV1 {
-//     value: Option<WildlifeEnumV1>,
-//     // defaults
-//     field_order: Option<i32>,
-// }
 
 // Weather
 
@@ -45,6 +58,7 @@ struct WeatherV1 {
     is_farenheit: Option<bool>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // Discipline and Max Depth
@@ -61,6 +75,7 @@ struct DisciplineAndMaxDepthV1 {
     discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthV1>>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // MAX DEPTH
@@ -71,6 +86,7 @@ struct MaxDepthV1 {
     max_depth: Option<i32>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // EASE OF EQUALIZATION
@@ -81,6 +97,7 @@ struct EaseOfEqualizationV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // VISIBILITY
@@ -91,6 +108,7 @@ struct VisibilityV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // GENERAL FEELING
@@ -101,6 +119,7 @@ struct GeneralFeelingV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // INJURY
@@ -111,6 +130,7 @@ struct InjuryV1 {
     value: Option<InjuryEnumV1>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // WATER TEMPERATURE
@@ -122,6 +142,7 @@ struct WaterTempV1 {
     measurement: Option<TemperatureEnum>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // STATIC
@@ -132,6 +153,7 @@ struct StaticV1 {
     value: Option<i32>,
     // defaults
     field_order: Option<i32>,
+    is_used: Option<bool>,
 }
 
 // FORMS
@@ -142,6 +164,9 @@ struct StaticV1 {
 #[derive(Serialize, Deserialize, Debug, SimpleObject, InputObject, Clone)]
 #[graphql(input_name = "FormV1Request")]
 pub struct FormV1 {
+    // Only non-optional field so far
+    start_time: StartTimeV1,
+    end_time: Option<EndTimeV1>,
     session_name: Option<SessionNameV1>,
     weather: Option<WeatherV1>,
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
@@ -157,19 +182,29 @@ pub struct FormV1 {
     // wildlife - list of potential animals seen
 }
 
-// THIS IS JUST FOR TESTING
+// EXPERIMENTS
 #[derive(OneofObject, Serialize, Deserialize, Debug, Clone)]
 enum RequestFieldsV1 {
     SessionNameV1(SessionNameV1),
 }
 
+// EXPERIMENTS
 #[derive(Union, Serialize, Deserialize, Debug, Clone)]
 enum ResponseFieldV1 {
     SessionNameV1(SessionNameV1),
 }
 
+// EXPERIMENTS
+#[derive(Interface, Serialize, Deserialize, Debug, Clone)]
+#[graphql(field(name = "field_order", type = "&Option<i32>"))]
+enum ResponseInterfaceV1 {
+    SessionNameV1(SessionNameV1),
+}
+
+// EXPERIMENTS
 pub struct NewFormV1(Vec<ResponseFieldV1>);
 
+// EXPERIMENTS
 impl NewFormV1 {}
 
 // Logic
@@ -236,3 +271,13 @@ impl FormV1 {
     //     Ok(report)
     // }
 }
+
+// Wildlife
+
+// #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
+// #[graphql(input_name = "WildlifeV1Request")]
+// struct WildlifeV1 {
+//     value: Option<WildlifeEnumV1>,
+//     // defaults
+//     field_order: Option<i32>,
+// }

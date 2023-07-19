@@ -1,6 +1,10 @@
 use super::dive_dto::{Dive, DiveRetrievalData};
 use crate::{
-    apnea_forms::helpers::{FormRequest, FormResponse},
+    apnea_forms::{
+        dto::form_dto::Form,
+        form_loader::FormLoader,
+        helpers::{FormRequest, FormResponse},
+    },
     apnea_sessions::{actions::get_dives, dive_loader_by_session::DiveLoaderBySession},
     graphql_schema::DbPool,
     schema::apnea_sessions,
@@ -17,15 +21,11 @@ use uuid::Uuid;
 
 #[derive(InputObject)]
 pub struct ApneaSessionInput {
-    pub session_report: FormRequest,
+    pub report_data: FormRequest,
 
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
     pub previous_session_id: Option<Uuid>,
-
-    pub start_time: DateTime<Utc>,
-    pub end_time: Option<DateTime<Utc>>,
-    pub session_name: Option<String>,
 }
 
 #[derive(Insertable)]
@@ -50,6 +50,8 @@ pub struct ApneaSessionCreation {
 pub struct ApneaSession {
     pub report_data: FormResponse,
 
+    // eventually I need to be able to filter the report by the jsonb data?
+
     // relationships data
     #[graphql(skip)]
     pub form_id: Uuid,
@@ -61,7 +63,6 @@ pub struct ApneaSession {
     pub user_id: Uuid,
 
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -74,11 +75,14 @@ pub struct ApneaSession {
 
 #[ComplexObject]
 impl ApneaSession {
-    // async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, Arc<BigError>> {
-    //     ctx.data_unchecked::<DataLoader<ReportLoader>>()
-    //         .load_one(ReportsRetrievalData::SessionId(self.id))
-    //         .await
-    // }
+    async fn form(&self, ctx: &Context<'_>) -> Result<Option<Form>, Arc<BigError>> {
+        let form_response = ctx
+            .data_unchecked::<DataLoader<FormLoader>>()
+            .load_one(self.form_id)
+            .await;
+
+        form_response
+    }
 
     // Note: I don't think this requires pagination just now. As there will only ever be so many dives per session.
     async fn dives(&self, ctx: &Context<'_>) -> Result<Option<Vec<Dive>>, Arc<BigError>> {
@@ -109,6 +113,16 @@ pub enum ApneaSessionRetrievalData {
 //     // .map_err(|e| BigError::ActixBlockingError { source: e })??;
 
 //     // Ok(dives)
+// }
+
+// pub start_time: DateTime<Utc>,
+// pub end_time: Option<DateTime<Utc>>,
+// pub session_name: Option<String>,
+
+// async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, Arc<BigError>> {
+//     ctx.data_unchecked::<DataLoader<ReportLoader>>()
+//         .load_one(ReportsRetrievalData::SessionId(self.id))
+//         .await
 // }
 
 // pub start_time: DateTime<Utc>,

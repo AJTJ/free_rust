@@ -8,7 +8,7 @@ use crate::{
 };
 use async_graphql::connection::{Connection, Edge, EmptyFields};
 use chrono::{DateTime, Utc};
-use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{dsl::sql, sql_types::Bool, PgConnection, QueryDsl, RunQueryDsl};
 use snafu::ResultExt;
 use tracing::{event, Level};
 
@@ -19,7 +19,7 @@ pub fn get_apnea_sessions_paginated(
 ) -> Result<Connection<String, ApneaSession>, BigError> {
     event!(Level::DEBUG, "in get_apnea_sessions_paginated");
     use crate::schema::apnea_sessions::dsl::{
-        apnea_sessions, created_at, id as session_id, user_id,
+        apnea_sessions, created_at, id as session_id, report_data, user_id,
     };
 
     let mut query = match retrieval_method {
@@ -31,11 +31,17 @@ pub fn get_apnea_sessions_paginated(
             .into_boxed(),
     };
 
-    // TODO: This is not the created_at, this has to be the start_time inside the report.
-
+    // TODO: This is not the created_at, this has to be the start_time inside the report. This NEEDS testing.
     if let Some(after) = &query_params.after {
-        query =
-            query.filter(created_at.gt(after.parse::<DateTime<Utc>>().context(ChronoParseSnafu)?))
+        let after_time = after.parse::<DateTime<Utc>>().context(ChronoParseSnafu)?;
+        // query = query.filter(created_at.gt(after_time));
+
+        // query = query.filter(sql("report_data->>V1->>start_time > {after_time}"));
+
+        query = query.filter(sql::<Bool>(&format!(
+            "report_data->>V1->>start_time > {}",
+            after_time
+        )));
     }
 
     let desired_count = query_params.first.unwrap_or(100);

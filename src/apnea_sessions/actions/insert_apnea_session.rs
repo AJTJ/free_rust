@@ -26,7 +26,7 @@ pub async fn insert_apnea_session(
     let current_stamp = Utc::now();
 
     let new_session = ApneaSessionCreation {
-        report_data: serde_json::to_value(FormResponse::from_input(session_input.session_report))
+        report_data: serde_json::to_value(FormResponse::from_input(session_input.report_data))
             .context(SerdeSerializeSnafu)?,
 
         form_id: session_input.form_id,
