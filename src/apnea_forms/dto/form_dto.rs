@@ -1,9 +1,6 @@
-use crate::{
-    apnea_forms::{form_v1_OLD::new_ideas::ResponseFormFieldsV1, helpers::FormResponse},
-    schema::forms,
-};
+use crate::{apnea_forms::forms_interface::FormResponse, schema::forms};
 
-use async_graphql::{InputObject, OneofObject, SimpleObject};
+use async_graphql::{InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 use uuid::Uuid;

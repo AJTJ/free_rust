@@ -1,5 +1,6 @@
 use crate::apnea_forms::dto::form_dto::{Form, FormCreation, FormDetails};
-use crate::apnea_forms::helpers::FormResponse;
+
+use crate::apnea_forms::forms_interface::FormResponse;
 use crate::auth::actions::get_user_id_from_auth;
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::{BigError, SerdeSerializeSnafu};

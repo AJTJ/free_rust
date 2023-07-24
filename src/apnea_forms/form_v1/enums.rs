@@ -5,7 +5,7 @@ use strum::{Display, EnumIter, EnumString};
 #[derive(
     Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq, EnumIter,
 )]
-pub enum DisciplinesEnumV2 {
+pub enum DisciplinesEnumV1 {
     CWTB,
     CWTMonofin,
     CWTPullingUp,
@@ -21,7 +21,7 @@ pub enum DisciplinesEnumV2 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum InjuryEnumV2 {
+pub enum InjuryEnumV1 {
     // Mental events
     PanicAttack,
     // Weather-related
@@ -49,7 +49,7 @@ pub enum InjuryEnumV2 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum DeepDiveIncidentsEnumV2 {
+pub enum DeepDiveIncidentsEnumV1 {
     BuddyInjury,
     BuoyOrPlatformIssues,
     BoatIssues,
@@ -58,7 +58,7 @@ pub enum DeepDiveIncidentsEnumV2 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum DynamicIncidentsEnumV2 {
+pub enum DynamicIncidentsEnumV1 {
     BuddyInjury,
     EquipmentIssues,
 }
@@ -66,7 +66,7 @@ pub enum DynamicIncidentsEnumV2 {
 #[derive(
     Serialize, Deserialize, Clone, Copy, PartialEq, Debug, EnumString, Display, Enum, Eq, EnumIter,
 )]
-pub enum TemperatureEnumV2 {
+pub enum TemperatureEnumV1 {
     F,
     C,
 }
@@ -74,7 +74,7 @@ pub enum TemperatureEnumV2 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum TurnReasonsEnumV2 {
+pub enum TurnReasonsEnumV1 {
     // Mental
     PanicAttack,
     NotFeelingIt,
@@ -90,7 +90,7 @@ pub enum TurnReasonsEnumV2 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum DeepDiveSensationsV2 {
+pub enum DeepDiveSensationsV1 {
     Burping,
     Hiccups,
     UrgeToCough,
@@ -102,7 +102,7 @@ pub enum DeepDiveSensationsV2 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum StaticStoppingEnumV2 {
+pub enum StaticStoppingEnumV1 {
     UrgeToBreathe,
     Hypoxia,
     BlackOut,

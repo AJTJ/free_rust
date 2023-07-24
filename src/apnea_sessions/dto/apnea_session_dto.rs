@@ -3,25 +3,21 @@ use crate::{
     apnea_forms::{
         dto::form_dto::Form,
         form_loader::FormLoader,
-        helpers::{FormRequest, FormResponse},
+        forms_interface::{ReportRequest, ReportResponse},
     },
-    apnea_sessions::{actions::get_dives, dive_loader_by_session::DiveLoaderBySession},
-    graphql_schema::DbPool,
+    apnea_sessions::dive_loader_by_session::DiveLoaderBySession,
     schema::apnea_sessions,
     utility::errors::BigError,
 };
-use actix_web::web;
-use async_graphql::{
-    dataloader::DataLoader, ComplexObject, Context, FieldResult, InputObject, SimpleObject,
-};
+use async_graphql::{dataloader::DataLoader, ComplexObject, Context, InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(InputObject)]
 pub struct ApneaSessionInput {
-    pub report_data: FormRequest,
+    pub report_data: ReportRequest,
 
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
@@ -31,6 +27,7 @@ pub struct ApneaSessionInput {
 #[derive(Insertable)]
 #[diesel(table_name = apnea_sessions)]
 pub struct ApneaSessionCreation {
+    // TODO: figure out how to make this the type, directly
     pub report_data: Value,
 
     pub form_id: Uuid,
@@ -48,7 +45,7 @@ pub struct ApneaSessionCreation {
 #[derive(Queryable, SimpleObject, Clone, Debug)]
 #[graphql(complex)]
 pub struct ApneaSession {
-    pub report_data: FormResponse,
+    pub report_data: ReportResponse,
 
     // eventually I need to be able to filter the report by the jsonb data?
 
@@ -96,35 +93,3 @@ pub enum ApneaSessionRetrievalData {
     Sessions(Vec<Uuid>),
     User(Uuid),
 }
-
-// async fn dives(&self, ctx: &Context<'_>) -> FieldResult<Option<Vec<Dive>>> {
-//     ctx.data_unchecked::<DataLoader<DiveLoaderBySession>>()
-//         .load_many(self.id)
-//         .await
-//     // let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-//     // let session_id = self.id;
-
-//     // let dives = web::block(move || {
-//     //     let mut conn = pool_ctx.get().unwrap();
-//     //     get_dives(&mut conn, vec![DiveRetrievalData::Session(session_id)])
-//     // })
-//     // .await
-//     // .map_err(|e| BigError::ActixBlockingError { source: e })??;
-
-//     // Ok(dives)
-// }
-
-// pub start_time: DateTime<Utc>,
-// pub end_time: Option<DateTime<Utc>>,
-// pub session_name: Option<String>,
-
-// async fn report(&self, ctx: &Context<'_>) -> Result<Option<Report>, Arc<BigError>> {
-//     ctx.data_unchecked::<DataLoader<ReportLoader>>()
-//         .load_one(ReportsRetrievalData::SessionId(self.id))
-//         .await
-// }
-
-// pub start_time: DateTime<Utc>,
-// pub end_time: Option<DateTime<Utc>>,
-// pub session_name: Option<String>,

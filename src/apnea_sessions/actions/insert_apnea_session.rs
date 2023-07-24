@@ -1,9 +1,5 @@
-// use crate::apnea_forms::actions::insert_report::insert_report;
-// use crate::apnea_forms::dto::report_dto::ReportDetails;
-use crate::apnea_forms::helpers::FormResponse;
-use crate::apnea_sessions::actions::get_apnea_session;
+use crate::apnea_forms::forms_interface::ReportResponse;
 use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
-use crate::auth::actions::get_user_id_from_auth;
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::{BigError, SerdeSerializeSnafu};
 use crate::{apnea_sessions::dto::apnea_session_dto::ApneaSessionInput, diesel::ExpressionMethods};
@@ -17,7 +13,6 @@ use uuid::Uuid;
 pub async fn insert_apnea_session(
     ctx: &Context<'_>,
     session_input: ApneaSessionInput,
-    // report_details: Option<ReportDetails>,
     user_id: &Uuid,
 ) -> Result<ApneaSession, BigError> {
     use crate::schema::apnea_sessions::dsl::apnea_sessions;
@@ -26,7 +21,7 @@ pub async fn insert_apnea_session(
     let current_stamp = Utc::now();
 
     let new_session = ApneaSessionCreation {
-        report_data: serde_json::to_value(FormResponse::from_input(session_input.report_data))
+        report_data: serde_json::to_value(ReportResponse::from_input(session_input.report_data))
             .context(SerdeSerializeSnafu)?,
 
         form_id: session_input.form_id,
