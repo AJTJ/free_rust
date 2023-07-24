@@ -6,7 +6,7 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::form_v1::form::FormV1;
+use super::form_v1_OLD::form::FormV1;
 
 // NOTE: This is only for receiving from the client
 #[derive(OneofObject, Debug)]
