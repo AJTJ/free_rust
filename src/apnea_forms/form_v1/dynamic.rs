@@ -10,7 +10,10 @@ use super::{
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DynamicReportFieldV1Request")]
 pub struct DynamicReportFieldV1 {
-    dynamic_dives: Vec<DynamicReportFieldsV1>,
+    dives: Option<Vec<DynamicReportFieldsV1>>,
+
+    // defaults
+    is_active: Option<bool>,
     field_order: Option<i32>,
 }
 
@@ -24,6 +27,10 @@ pub struct DynamicReportFieldsV1 {
     reason_for_ending: Option<Vec<TurnReasonsEnumV1>>,
     general_feeling: Option<i32>,
     incidents: Option<Vec<DynamicIncidentsEnumV1>>,
+
+    // defaults
+    is_active: Option<bool>,
+    field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
@@ -36,4 +43,8 @@ pub struct DynamicFormV1 {
     level_of_relaxation: Option<FormFieldOptionsV1>,
     activity_of_the_mind: Option<FormFieldOptionsV1>,
     average_heart_rate: Option<FormFieldOptionsV1>,
+
+    // defaults
+    is_active: Option<bool>,
+    field_order: Option<i32>,
 }

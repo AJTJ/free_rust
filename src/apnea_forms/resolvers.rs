@@ -1,6 +1,6 @@
 use crate::apnea_forms::actions::get_forms_by_user::get_forms_by_user;
 use actix_web::web;
-use async_graphql::{types::connection::*, Context, Object};
+use async_graphql::{Context, Object};
 use uuid::Uuid;
 
 use crate::{
@@ -8,13 +8,12 @@ use crate::{
     graphql_schema::DbPool,
     utility::{
         errors::BigError,
-        gql::{graphql_query::gql_query, guards::LoggedInGuard, query_dto::QueryParams},
+        gql::{guards::LoggedInGuard, query_dto::QueryParams},
     },
 };
 
 use super::{
     dto::form_dto::{Form, FormDetails},
-    form_v1::form::FormV1,
     forms_interface::FormRequest,
 };
 
@@ -79,9 +78,3 @@ impl ApneaFormsMutation {
         }
     }
 }
-
-// FormRequest::V1(v1) => {
-//     FormV1::from(v1)
-//         .modify_form(ctx, &previous_form_id, form_details, &user_id)
-//         .await
-// }

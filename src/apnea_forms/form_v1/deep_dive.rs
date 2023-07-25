@@ -11,13 +11,17 @@ use super::{
 };
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
+#[graphql(input_name = "DeepDiveReportFieldV1Request")]
 pub struct DeepDiveReportFieldV1 {
-    dives: Vec<DeepDiveReportFieldsV1>,
+    dives: Option<Vec<DeepDiveReportFieldsV1>>,
+
+    // defaults
+    is_active: Option<bool>,
     field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
-#[graphql(input_name = "DeepDiveReportV1Request")]
+#[graphql(input_name = "DeepDiveReportFieldsV1Request")]
 pub struct DeepDiveReportFieldsV1 {
     discipline: Option<DisciplinesEnumV1>,
     goal_depth: Option<i32>,
@@ -35,6 +39,10 @@ pub struct DeepDiveReportFieldsV1 {
     turn_quality: Option<i32>,
     level_of_hypoxia: Option<i32>,
     level_of_exertion: Option<i32>,
+
+    // defaults
+    is_active: Option<bool>,
+    field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
@@ -55,4 +63,8 @@ pub struct DeepDiveFormV1 {
     turn_quality: Option<FormFieldOptionsV1>,
     level_of_hypoxia: Option<FormFieldOptionsV1>,
     level_of_exertion: Option<FormFieldOptionsV1>,
+
+    // defaults
+    is_active: Option<bool>,
+    field_order: Option<i32>,
 }

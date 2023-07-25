@@ -16,6 +16,20 @@ struct InnerDisciplineMaxDepthV1 {
 #[graphql(input_name = "DisciplineAndMaxDepthV1Request")]
 pub struct DisciplineAndMaxDepthV1 {
     discipline_max_depth: Option<Vec<InnerDisciplineMaxDepthV1>>,
+
     // defaults
+    is_active: Option<bool>,
+    field_order: Option<i32>,
+}
+
+// // MAX DEPTH
+
+#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
+#[graphql(input_name = "MaxDepthV1Request")]
+pub struct MaxDepthV1 {
+    max_depth: Option<i32>,
+
+    // defaults
+    is_active: Option<bool>,
     field_order: Option<i32>,
 }
