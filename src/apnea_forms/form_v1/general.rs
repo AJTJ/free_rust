@@ -31,7 +31,7 @@ pub struct EndTimeV1 {
 // EASE OF EQUALIZATION
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone, Copy)]
-#[graphql(input_name = "EaseOfEqualizationRequest")]
+#[graphql(input_name = "EaseOfEqualizationV1Request")]
 pub struct EaseOfEqualizationV1 {
     value: Option<i32>,
     // defaults

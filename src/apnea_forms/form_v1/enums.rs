@@ -58,7 +58,7 @@ pub enum DeepDiveIncidentsEnumV1 {
 #[derive(
     Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
 )]
-pub enum DynamicIncidentsEnumV1 {
+pub enum DynIncidentsEnumV1 {
     BuddyInjury,
     EquipmentIssues,
 }
