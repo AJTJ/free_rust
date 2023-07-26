@@ -1,8 +1,9 @@
-use super::dive_dto::{Dive, DiveRetrievalData};
+use super::unique_apnea_dto::{UniqueApnea, UniqueApneaRetrievalData};
 use crate::{
     apnea_forms::{
         dto::form_dto::Form,
         form_loader::FormLoader,
+        form_v1::unique_apneas::UniqueApneaActivityRequest,
         forms_interface::{ReportRequest, ReportResponse},
     },
     apnea_sessions::dive_loader_by_session::DiveLoaderBySession,
@@ -18,6 +19,7 @@ use uuid::Uuid;
 #[derive(InputObject)]
 pub struct ApneaSessionInput {
     pub report_data: ReportRequest,
+    pub unique_apnea_activities: Option<Vec<UniqueApneaActivityRequest>>,
 
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
@@ -35,7 +37,6 @@ pub struct ApneaSessionCreation {
     pub previous_session_id: Option<Uuid>,
     pub user_id: Uuid,
 
-    pub id: Uuid,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub is_active: bool,
@@ -46,8 +47,6 @@ pub struct ApneaSessionCreation {
 #[graphql(complex)]
 pub struct ApneaSession {
     pub report_data: ReportResponse,
-
-    // eventually I need to be able to filter the report by the jsonb data?
 
     // relationships data
     #[graphql(skip)]
@@ -81,10 +80,12 @@ impl ApneaSession {
         form_response
     }
 
-    // Note: I don't think this requires pagination just now. As there will only ever be so many dives per session.
-    async fn dives(&self, ctx: &Context<'_>) -> Result<Option<Vec<Dive>>, Arc<BigError>> {
+    async fn unique_apneas(
+        &self,
+        ctx: &Context<'_>,
+    ) -> Result<Option<Vec<UniqueApnea>>, Arc<BigError>> {
         ctx.data_unchecked::<DataLoader<DiveLoaderBySession>>()
-            .load_one(DiveRetrievalData::Session(self.id))
+            .load_one(UniqueApneaRetrievalData::Session(self.id))
             .await
     }
 }

@@ -1,28 +1,30 @@
 use crate::{
-    apnea_sessions::dto::dive_dto::{Dive, DiveCreation, DiveInput},
+    apnea_forms::form_v1::unique_apneas::UniqueApneaActivity,
+    apnea_sessions::dto::unique_apnea_dto::{UniqueApnea, UniqueApneaCreation, UniqueApneaInput},
     auth::actions::get_user_id_from_auth,
     graphql_schema::DbPool,
-    utility::errors::BigError,
+    utility::errors::{BigError, SerdeSerializeSnafu},
 };
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
+use snafu::ResultExt;
 use uuid::Uuid;
 
-pub async fn insert_dive(
+pub async fn insert_unique_apnea(
     ctx: &Context<'_>,
     apnea_session_id: Uuid,
-    dive_data: DiveInput,
-) -> Result<Dive, BigError> {
+    unique_apnea_input: UniqueApneaInput,
+) -> Result<UniqueApnea, BigError> {
     let current_stamp = Utc::now();
     let user_id = get_user_id_from_auth(ctx).await?;
-    let new_dive = DiveCreation {
-        discipline_type: dive_data.discipline_type,
-        depth: dive_data.depth,
-        distance: dive_data.distance,
-        dive_time: dive_data.dive_time,
-        dive_name: dive_data.dive_name,
+    let new_unique_apnea = UniqueApneaCreation {
+        activity_data: serde_json::to_value(UniqueApneaActivity::from_input(
+            unique_apnea_input.activity_data,
+        ))
+        .context(SerdeSerializeSnafu)?,
+
         session_id: apnea_session_id,
         user_id,
         created_at: current_stamp,
@@ -32,13 +34,13 @@ pub async fn insert_dive(
 
     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-    use crate::schema::dives::dsl::dives;
+    use crate::schema::unique_apneas::dsl::unique_apneas;
 
     web::block(move || {
         let mut conn = pool_ctx.get().unwrap();
-        diesel::insert_into(dives)
-            .values(&new_dive)
-            .get_result::<Dive>(&mut conn)
+        diesel::insert_into(unique_apneas)
+            .values(&new_unique_apnea)
+            .get_result::<UniqueApnea>(&mut conn)
     })
     .await
     .map_err(|e| BigError::ActixBlockingError { source: e })?

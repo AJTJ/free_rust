@@ -1,7 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE unique_apneas (
   -- dive specific information
-  activity_type TEXT NOT NULL,
   activity_data jsonb NOT NULL,
   -- relationship data
   session_id uuid NOT NULL REFERENCES apnea_sessions (id),

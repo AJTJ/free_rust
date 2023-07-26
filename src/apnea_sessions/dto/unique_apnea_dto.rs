@@ -1,32 +1,26 @@
 use super::apnea_session_dto::ApneaSession;
 use crate::{
+    apnea_forms::form_v1::unique_apneas::{UniqueApneaActivity, UniqueApneaActivityRequest},
     apnea_sessions::actions::get_apnea_session,
     graphql_schema::DbPool,
-    schema::dives,
+    schema::unique_apneas,
     utility::{errors::BigError, gql::query_dto::QueryParams},
 };
 use actix_web::web;
 use async_graphql::{ComplexObject, Context, InputObject, OneofObject, SimpleObject};
 use chrono::{DateTime, NaiveTime, Utc};
+use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(InputObject)]
-pub struct DiveInput {
-    pub discipline_type: Option<String>,
-    pub depth: Option<f64>,
-    pub distance: Option<f64>,
-    pub dive_time: Option<i64>,
-    pub dive_name: Option<String>,
+pub struct UniqueApneaInput {
+    pub activity_data: UniqueApneaActivityRequest,
 }
 
 #[derive(Insertable)]
-#[diesel(table_name = dives)]
-pub struct DiveCreation {
-    pub discipline_type: Option<String>,
-    pub depth: Option<f64>,
-    pub distance: Option<f64>,
-    pub dive_time: Option<i64>,
-    pub dive_name: Option<String>,
+#[diesel(table_name = unique_apneas)]
+pub struct UniqueApneaCreation {
+    activity_data: Value,
 
     pub session_id: Uuid,
     pub user_id: Uuid,
@@ -38,12 +32,8 @@ pub struct DiveCreation {
 
 // Matches the database object order 1:1
 #[derive(Queryable, SimpleObject, Clone)]
-pub struct Dive {
-    pub discipline_type: Option<String>,
-    pub depth: Option<f64>,
-    pub distance: Option<f64>,
-    pub dive_time: Option<i64>,
-    pub dive_name: Option<String>,
+pub struct UniqueApnea {
+    activity_data: UniqueApneaActivity,
 
     #[graphql(skip)]
     pub session_id: Uuid,
@@ -51,7 +41,6 @@ pub struct Dive {
     pub user_id: Uuid,
 
     // default data
-    #[graphql(derived(into = "ID"))]
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -63,7 +52,7 @@ pub struct Dive {
 }
 
 #[ComplexObject]
-impl Dive {
+impl UniqueApnea {
     async fn apnea_session(
         &self,
         ctx: &Context<'_>,
@@ -83,7 +72,13 @@ impl Dive {
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub enum DiveRetrievalData {
+pub enum UniqueApneaRetrievalData {
     Session(Uuid),
     User(Uuid),
 }
+
+// pub discipline_type: Option<String>,
+//     pub depth: Option<f64>,
+//     pub distance: Option<f64>,
+//     pub dive_time: Option<i64>,
+//     pub dive_name: Option<String>,

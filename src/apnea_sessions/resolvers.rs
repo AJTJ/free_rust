@@ -1,12 +1,12 @@
 use super::{
     actions::{
-        archive_dive, archive_session, get_apnea_sessions_paginated, insert_apnea_session,
-        insert_dive,
+        archive_session, archive_unique_apnea, get_apnea_sessions_paginated, insert_apnea_session,
+        insert_unique_apnea,
     },
     dive_loader_by_user::DiveLoaderByUser,
     dto::{
         apnea_session_dto::{ApneaSession, ApneaSessionInput, ApneaSessionRetrievalData},
-        dive_dto::{Dive, DiveInput, DiveRetrievalData},
+        unique_apnea_dto::{UniqueApnea, UniqueApneaInput, UniqueApneaRetrievalData},
     },
 };
 use crate::diesel::RunQueryDsl;
@@ -74,15 +74,18 @@ impl ApneaSessionsQuery {
         &self,
         ctx: &Context<'_>,
         _query_params: Option<QueryParams>,
-    ) -> Result<Vec<Dive>, Arc<BigError>> {
+    ) -> Result<Vec<UniqueApnea>, Arc<BigError>> {
         let user_id = get_user_id_from_auth(ctx).await?;
 
         let dives_map = ctx
             .data_unchecked::<DataLoader<DiveLoaderByUser>>()
-            .load_many([DiveRetrievalData::User(user_id)])
+            .load_many([UniqueApneaRetrievalData::User(user_id)])
             .await?;
 
-        let dives = dives_map.into_iter().map(|(_, v)| v).collect::<Vec<Dive>>();
+        let dives = dives_map
+            .into_iter()
+            .map(|(_, v)| v)
+            .collect::<Vec<UniqueApnea>>();
 
         Ok(dives)
     }
@@ -135,9 +138,9 @@ impl ApneaSessionsMutation {
         &self,
         ctx: &Context<'_>,
         apnea_session_id: Uuid,
-        dive_input: DiveInput,
-    ) -> Result<Dive, BigError> {
-        insert_dive(ctx, apnea_session_id, dive_input).await
+        dive_input: UniqueApneaInput,
+    ) -> Result<UniqueApnea, BigError> {
+        insert_unique_apnea(ctx, apnea_session_id, dive_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
@@ -146,10 +149,10 @@ impl ApneaSessionsMutation {
         ctx: &Context<'_>,
         archived_dive_id: Uuid,
         apnea_session_id: Uuid,
-        dive_input: DiveInput,
-    ) -> Result<Dive, BigError> {
+        dive_input: UniqueApneaInput,
+    ) -> Result<UniqueApnea, BigError> {
         let user_id = get_user_id_from_auth(ctx).await?;
-        archive_dive(ctx, &archived_dive_id, &user_id).await?;
-        insert_dive(ctx, apnea_session_id, dive_input).await
+        archive_unique_apnea(ctx, &archived_dive_id, &user_id).await?;
+        insert_unique_apnea(ctx, apnea_session_id, dive_input).await
     }
 }

@@ -43,9 +43,9 @@ struct StartTimeV1 {
 #[graphql(input_name = "ReportV1Request")]
 pub struct ReportV1 {
     // INDIVIDUAL
-    deep_dives: Option<DeepDiveReportFieldV1>,
-    dynamic_dives: Option<DynamicReportFieldV1>,
-    static_holds: Option<StaticReportFieldV1>,
+    // deep_dives: Option<DeepDiveReportFieldV1>,
+    // dynamic_dives: Option<DynamicReportFieldV1>,
+    // static_holds: Option<StaticReportFieldV1>,
     // ACTIVITY-BASED
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
     max_depth: Option<MaxDepthV1>,
@@ -71,6 +71,9 @@ pub struct FormFieldOptionsV1 {
     field_order: Option<i32>,
 }
 
+// NOTE: Every report will ALWAYS have a unique form. If the user updates the order or included fields of a report, then we create a new report and a new form in the backend.
+// Therefore, I can assure myself that all `is_active` and `field_order` values ONLY need to exist in the form.
+// Is this true?
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "FormV1Request")]
 pub struct FormV1 {
