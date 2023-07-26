@@ -8,6 +8,7 @@ use async_graphql::Context;
 use chrono::Utc;
 use diesel::RunQueryDsl;
 use snafu::ResultExt;
+use tracing::info;
 use uuid::Uuid;
 
 pub async fn insert_apnea_session(
@@ -69,6 +70,8 @@ pub async fn insert_apnea_session(
     // .await
     // .map_err(|e| BigError::ActixBlockingError { source: e })?
     // .map_err(|e| BigError::DieselInsertError { source: e })?;
+
+    info!("new sesssion: {new_session:?}");
 
     Ok(new_session)
 }
