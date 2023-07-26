@@ -1,11 +1,8 @@
 -- Your SQL goes here
-CREATE TABLE dives (
+CREATE TABLE unique_apneas (
   -- dive specific information
-  discipline_type TEXT,
-  depth FLOAT,
-  distance FLOAT,
-  dive_time BIGINT,
-  dive_name TEXT,
+  activity_type TEXT NOT NULL,
+  activity_data jsonb NOT NULL,
   -- relationship data
   session_id uuid NOT NULL REFERENCES apnea_sessions (id),
   user_id uuid NOT NULL REFERENCES users (id),
