@@ -20,7 +20,7 @@ pub struct UniqueApneaInput {
 #[derive(Insertable)]
 #[diesel(table_name = unique_apneas)]
 pub struct UniqueApneaCreation {
-    activity_data: Value,
+    pub activity_data: Value,
 
     pub session_id: Uuid,
     pub user_id: Uuid,

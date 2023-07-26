@@ -1,10 +1,10 @@
 use crate::apnea_forms::form_v1::unique_apneas::UniqueApneaActivity;
 use crate::apnea_forms::forms_interface::ReportResponse;
+use crate::apnea_sessions::dto::apnea_session_dto::ApneaSessionInput;
 use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
 use crate::apnea_sessions::dto::unique_apnea_dto::{UniqueApnea, UniqueApneaCreation};
 use crate::graphql_schema::DbPool;
 use crate::utility::errors::{BigError, SerdeSerializeSnafu};
-use crate::{apnea_sessions::dto::apnea_session_dto::ApneaSessionInput, diesel::ExpressionMethods};
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
