@@ -33,7 +33,7 @@ pub struct UniqueApneaCreation {
 // Matches the database object order 1:1
 #[derive(Queryable, SimpleObject, Clone)]
 pub struct UniqueApnea {
-    activity_data: UniqueApneaActivity,
+    pub activity_data: UniqueApneaActivity,
 
     #[graphql(skip)]
     pub session_id: Uuid,

@@ -3,8 +3,11 @@ use crate::{
     apnea_forms::{
         dto::form_dto::Form,
         form_loader::FormLoader,
-        form_v1::unique_apneas::UniqueApneaActivityRequest,
-        forms_interface::{ReportRequest, ReportResponse},
+        form_v1::{
+            form::ReportV1,
+            unique_apneas::{UniqueApneaActivity, UniqueApneaActivityRequest},
+        },
+        forms_interface::{ReportRequest, ReportResponse, StoredReport},
     },
     apnea_sessions::dive_loader_by_session::DiveLoaderBySession,
     schema::apnea_sessions,
@@ -16,11 +19,10 @@ use serde_json::Value;
 use std::sync::Arc;
 use uuid::Uuid;
 
-#[derive(InputObject)]
+#[derive(InputObject, Clone)]
 pub struct ApneaSessionInput {
     pub report_data: ReportRequest,
-    pub unique_apnea_activities: Option<Vec<UniqueApneaActivityRequest>>,
-
+    // pub unique_apnea_activities: Option<Vec<UniqueApneaActivityRequest>>,
     pub form_id: Uuid,
     pub original_form_id: Option<Uuid>,
     pub previous_session_id: Option<Uuid>,
@@ -46,7 +48,8 @@ pub struct ApneaSessionCreation {
 #[derive(Queryable, SimpleObject, Clone, Debug)]
 #[graphql(complex)]
 pub struct ApneaSession {
-    pub report_data: ReportResponse,
+    #[graphql(skip)]
+    pub report_data: StoredReport,
 
     // relationships data
     #[graphql(skip)]
@@ -78,6 +81,43 @@ impl ApneaSession {
             .await;
 
         form_response
+    }
+
+    // The question here is:
+    // As I gather all the unique_apneas, how do I store the order of the unique apneas?
+    // It seems like the stored_report might want to store the information of WHERE the unique apneas are ordered
+    // But it's starting to seem like perhaps this is UN-normalized behavior
+    // I might want to forego the `isActive` and `field_order` information on report fields, entirely
+    // since a report is ALWAYS associated with a form.
+    // I think re-thinking the normalization of my forms might help what I'm doing
+    // I don't think there's anything necessarily wrong with what I'm doing, but I do think it it is entirely an optimization
+    // And I will probably rethink "optimizing" any further
+    async fn report(&self, ctx: &Context<'_>) -> Result<ReportResponse, BigError> {
+        let unique_apneas = ctx
+            .data_unchecked::<DataLoader<DiveLoaderBySession>>()
+            .load_one(UniqueApneaRetrievalData::Session(self.id))
+            .await?;
+
+        match self.report_data {
+            StoredReport::V1(report) => {
+                let report: ReportV1 = report.into();
+                if let Some(apneas) = unique_apneas {
+                    for apnea in apneas.iter() {
+                        match apnea.activity_data {
+                            UniqueApneaActivity::DeepDiveV1(deep) => {
+                                // report
+                                // .deep_dives.get_or_insert({})
+                                // .and_then(|d| d.dives.and_then(|d| Some(d.push(deep))));
+                            }
+                            UniqueApneaActivity::DynDiveV1(dynamic) => todo!(),
+                            UniqueApneaActivity::StaticHoldsV1(sta) => todo!(),
+                        }
+                    }
+                };
+            }
+        };
+
+        unimplemented!()
     }
 
     async fn unique_apneas(

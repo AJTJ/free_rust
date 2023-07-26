@@ -20,11 +20,6 @@ pub enum UniqueApneaActivityRequest {
     StaticHoldsV1(StaticReportFieldsV1),
 }
 
-// #[derive(Serialize, Deserialize, InputObject, Clone)]
-// pub struct UniqueApneaActivitiesRequest {
-//     pub activities: Vec<UniqueApneaActivityRequest>,
-// }
-
 // RESPONSE
 
 #[derive(Union, Serialize, Deserialize, Clone, FromSqlRow)]
@@ -33,11 +28,6 @@ pub enum UniqueApneaActivity {
     DynDiveV1(DynamicReportFieldsV1),
     StaticHoldsV1(StaticReportFieldsV1),
 }
-
-// #[derive(Serialize, Deserialize, SimpleObject, Clone)]
-// pub struct UniqueApneaActivities {
-//     pub activities: Vec<UniqueApneaActivity>,
-// }
 
 impl FromSql<sql_types::Jsonb, Pg> for UniqueApneaActivity {
     fn from_sql(value: PgValue<'_>) -> diesel::deserialize::Result<Self> {

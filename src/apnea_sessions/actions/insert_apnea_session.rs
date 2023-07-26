@@ -1,5 +1,5 @@
 use crate::apnea_forms::form_v1::unique_apneas::UniqueApneaActivity;
-use crate::apnea_forms::forms_interface::ReportResponse;
+use crate::apnea_forms::forms_interface::{ReportRequest, StoredReport};
 use crate::apnea_sessions::dto::apnea_session_dto::ApneaSessionInput;
 use crate::apnea_sessions::dto::apnea_session_dto::{ApneaSession, ApneaSessionCreation};
 use crate::apnea_sessions::dto::unique_apnea_dto::{UniqueApnea, UniqueApneaCreation};
@@ -20,12 +20,13 @@ pub async fn insert_apnea_session(
 ) -> Result<ApneaSession, BigError> {
     use crate::schema::apnea_sessions::dsl::apnea_sessions;
 
-    let uuid = Uuid::new_v4();
     let current_stamp = Utc::now();
 
     let new_session = ApneaSessionCreation {
-        report_data: serde_json::to_value(ReportResponse::from_input(session_input.report_data))
-            .context(SerdeSerializeSnafu)?,
+        report_data: serde_json::to_value(StoredReport::from_input(
+            session_input.report_data.clone(),
+        ))
+        .context(SerdeSerializeSnafu)?,
 
         form_id: session_input.form_id,
         original_form_id: session_input.original_form_id,
@@ -50,36 +51,42 @@ pub async fn insert_apnea_session(
     .map_err(|e| BigError::ActixBlockingError { source: e })?
     .map_err(|e| BigError::DieselInsertError { source: e })?;
 
-    if let Some(input_activities) = session_input.unique_apnea_activities {
-        use crate::schema::unique_apneas::dsl::unique_apneas;
-        let mut all_input_unique_apneas: Vec<UniqueApneaCreation> = vec![];
+    match session_input.report_data {
+        ReportRequest::V1(report) => {
+            let mut all_input_unique_apneas: Vec<UniqueApneaCreation> = vec![];
+            if let Some(dives) = report.deep_dives.and_then(|x| x.dives) {
+                for dive in dives.iter() {
+                    all_input_unique_apneas.push(UniqueApneaCreation {
+                        activity_data: serde_json::to_value(UniqueApneaActivity::DeepDiveV1(
+                            dive.clone(),
+                        ))
+                        .context(SerdeSerializeSnafu)?,
+                        session_id: new_session.id,
+                        user_id: user_id.clone(),
 
-        for act in input_activities.iter() {
-            all_input_unique_apneas.push(UniqueApneaCreation {
-                activity_data: serde_json::to_value(UniqueApneaActivity::from_input(act.clone()))
-                    .context(SerdeSerializeSnafu)?,
-                session_id: new_session.id,
-                user_id: user_id.clone(),
+                        created_at: current_stamp,
+                        updated_at: current_stamp,
+                        is_active: true,
+                    })
+                }
+            }
 
-                created_at: current_stamp,
-                updated_at: current_stamp,
-                is_active: true,
+            use crate::schema::unique_apneas::dsl::unique_apneas;
+
+            let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+            let all_dive_inputs = web::block(move || {
+                let mut conn = pool_ctx.get().unwrap();
+                let response = diesel::insert_into(unique_apneas)
+                    .values(&all_input_unique_apneas)
+                    .get_results::<UniqueApnea>(&mut conn);
+                response
             })
+            .await
+            .map_err(|e| BigError::ActixBlockingError { source: e })?
+            .map_err(|e| BigError::DieselInsertError { source: e })?;
         }
-
-        let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
-
-        let all_dive_inputs = web::block(move || {
-            let mut conn = pool_ctx.get().unwrap();
-            let response = diesel::insert_into(unique_apneas)
-                .values(&all_input_unique_apneas)
-                .get_results::<UniqueApnea>(&mut conn);
-            response
-        })
-        .await
-        .map_err(|e| BigError::ActixBlockingError { source: e })?
-        .map_err(|e| BigError::DieselInsertError { source: e })?;
-    };
+    }
 
     info!("new sesssion: {new_session:?}");
 
@@ -107,3 +114,34 @@ pub async fn insert_apnea_session(
 // .await
 // .map_err(|e| BigError::ActixBlockingError { source: e })?
 // .map_err(|e| BigError::DieselInsertError { source: e })?;
+
+// if let Some(input_activities) = session_input.unique_apnea_activities {
+//     use crate::schema::unique_apneas::dsl::unique_apneas;
+//     let mut all_input_unique_apneas: Vec<UniqueApneaCreation> = vec![];
+
+//     for act in input_activities.iter() {
+//         all_input_unique_apneas.push(UniqueApneaCreation {
+//             activity_data: serde_json::to_value(UniqueApneaActivity::from_input(act.clone()))
+//                 .context(SerdeSerializeSnafu)?,
+//             session_id: new_session.id,
+//             user_id: user_id.clone(),
+
+//             created_at: current_stamp,
+//             updated_at: current_stamp,
+//             is_active: true,
+//         })
+//     }
+
+//     let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
+
+//     let all_dive_inputs = web::block(move || {
+//         let mut conn = pool_ctx.get().unwrap();
+//         let response = diesel::insert_into(unique_apneas)
+//             .values(&all_input_unique_apneas)
+//             .get_results::<UniqueApnea>(&mut conn);
+//         response
+//     })
+//     .await
+//     .map_err(|e| BigError::ActixBlockingError { source: e })?
+//     .map_err(|e| BigError::DieselInsertError { source: e })?;
+// };

@@ -39,13 +39,19 @@ struct StartTimeV1 {
 
 // REPORT
 
+// This will be the report that is received and sent to the client
+// But it is NOT how it is stored in the database.
+// It makes sense to provide a single report and a single form for the client. Let's make the client code easy!
+// It provides a lot of simplicity if they are the same thing
+// WHERE I store the report data is entirely a matter of database efficiency,
+// ... and has NOTHING to do with the client
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "ReportV1Request")]
 pub struct ReportV1 {
     // INDIVIDUAL
-    // deep_dives: Option<DeepDiveReportFieldV1>,
-    // dynamic_dives: Option<DynamicReportFieldV1>,
-    // static_holds: Option<StaticReportFieldV1>,
+    pub deep_dives: Option<DeepDiveReportFieldV1>,
+    pub dynamic_dives: Option<DynamicReportFieldV1>,
+    pub static_holds: Option<StaticReportFieldV1>,
     // ACTIVITY-BASED
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
     max_depth: Option<MaxDepthV1>,
@@ -60,6 +66,66 @@ pub struct ReportV1 {
     water_temp: Option<WaterTempV1>,
     location: Option<LocationV1>,
     // REPORT SPECIFIC
+}
+
+impl From<StoredReportV1> for ReportV1 {
+    fn from(value: StoredReportV1) -> Self {
+        ReportV1 {
+            deep_dives: None,
+            dynamic_dives: None,
+            static_holds: None,
+            discipline_and_max_depth: value.discipline_and_max_depth,
+            max_depth: value.max_depth,
+            start_time: value.start_time,
+            session_name: value.session_name,
+            end_time: value.end_time,
+            ease_of_equalization: value.ease_of_equalization,
+            visibility: value.visibility,
+            general_feeling: value.general_feeling,
+            injury: value.injury,
+            water_temp: value.water_temp,
+            location: value.location,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, SimpleObject)]
+pub struct StoredReportV1 {
+    // INDIVIDUAL
+
+    // ACTIVITY-BASED
+    discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
+    max_depth: Option<MaxDepthV1>,
+    // GENERAL
+    start_time: StartTimeV1,
+    session_name: Option<SessionNameV1>,
+    end_time: Option<EndTimeV1>,
+    ease_of_equalization: Option<EaseOfEqualizationV1>,
+    visibility: Option<VisibilityV1>,
+    general_feeling: Option<GeneralFeelingV1>,
+    injury: Option<InjuryV1>,
+    water_temp: Option<WaterTempV1>,
+    location: Option<LocationV1>,
+    // REPORT SPECIFIC
+}
+
+// This is for NOT putting in the unique apneas
+impl From<ReportV1> for StoredReportV1 {
+    fn from(value: ReportV1) -> Self {
+        StoredReportV1 {
+            discipline_and_max_depth: value.discipline_and_max_depth,
+            max_depth: value.max_depth,
+            start_time: value.start_time,
+            session_name: value.session_name,
+            end_time: value.end_time,
+            ease_of_equalization: value.ease_of_equalization,
+            visibility: value.visibility,
+            general_feeling: value.general_feeling,
+            injury: value.injury,
+            water_temp: value.water_temp,
+            location: value.location,
+        }
+    }
 }
 
 // FORM

@@ -96,7 +96,7 @@ pub struct DynamicReportFieldsV1 {
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DynamicReportFieldV1Request")]
 pub struct DynamicReportFieldV1 {
-    dives: Option<Vec<DynamicReportFieldsV1>>,
+    pub dives: Option<Vec<DynamicReportFieldsV1>>,
 
     // defaults
     is_active: Option<bool>,

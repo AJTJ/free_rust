@@ -208,7 +208,7 @@ pub struct DeepDiveReportFieldsV1 {
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DeepDiveReportFieldV1Request")]
 pub struct DeepDiveReportFieldV1 {
-    dives: Option<Vec<DeepDiveReportFieldsV1>>,
+    pub dives: Option<Vec<DeepDiveReportFieldsV1>>,
 
     // defaults
     is_active: Option<bool>,

@@ -79,7 +79,7 @@ pub struct StaticHeartRateV1 {
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "StaticReportFieldV1Request")]
 pub struct StaticReportFieldV1 {
-    static_holds: Option<Vec<StaticReportFieldsV1>>,
+    pub static_holds: Option<Vec<StaticReportFieldsV1>>,
 
     // defaults
     is_active: Option<bool>,
