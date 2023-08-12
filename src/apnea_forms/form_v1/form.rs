@@ -1,13 +1,13 @@
 use super::{
     activity_modules::{DisciplineAndMaxDepthV1, MaxDepthV1},
-    deep_dive::{DeepDiveFormV1, DeepDiveReportFieldV1, DeepDiveReportFieldsV1},
-    dynamic::{DynamicFormV1, DynamicReportFieldV1},
+    deep_dive::{DeepDiveFormV1, DeepDiveReportFieldsV1},
+    dynamic::{DynamicFormV1, DynamicReportFieldsV1},
     enums::{InjuryEnumV1, TemperatureEnumV1},
     general::{
         EaseOfEqualizationV1, EndTimeV1, GeneralFeelingV1, InjuryV1, LocationV1, SessionNameV1,
         VisibilityV1, WaterTempV1,
     },
-    static_activity::{StaticFormV1, StaticReportFieldV1},
+    static_activity::{StaticFormV1, StaticReportFieldsV1},
 };
 use crate::{
     apnea_forms::{
@@ -31,10 +31,9 @@ use uuid::Uuid;
 #[graphql(input_name = "StartTimeV1Request")]
 struct StartTimeV1 {
     time: DateTime<Utc>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // REPORT
@@ -49,9 +48,9 @@ struct StartTimeV1 {
 #[graphql(input_name = "ReportV1Request")]
 pub struct ReportV1 {
     // INDIVIDUAL
-    pub deep_dives: Option<DeepDiveReportFieldV1>,
-    pub dynamic_dives: Option<DynamicReportFieldV1>,
-    pub static_holds: Option<StaticReportFieldV1>,
+    pub deep_dives: Option<Vec<DeepDiveReportFieldsV1>>,
+    pub dynamic_dives: Option<Vec<DynamicReportFieldsV1>>,
+    pub static_holds: Option<Vec<StaticReportFieldsV1>>,
     // ACTIVITY-BASED
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
     max_depth: Option<MaxDepthV1>,
@@ -92,6 +91,7 @@ impl From<StoredReportV1> for ReportV1 {
 #[derive(Serialize, Deserialize, Debug, Clone, SimpleObject)]
 pub struct StoredReportV1 {
     // INDIVIDUAL
+    // NO LONGER STORED ON THE REPORT OBJECT
 
     // ACTIVITY-BASED
     discipline_and_max_depth: Option<DisciplineAndMaxDepthV1>,
@@ -106,13 +106,12 @@ pub struct StoredReportV1 {
     injury: Option<InjuryV1>,
     water_temp: Option<WaterTempV1>,
     location: Option<LocationV1>,
-    // REPORT SPECIFIC
 }
 
-// This is for NOT putting in the unique apneas
 impl From<ReportV1> for StoredReportV1 {
     fn from(value: ReportV1) -> Self {
         StoredReportV1 {
+            // NOTE: The UNIQUE APNEAS ARE NOT INCLUDED HERE
             discipline_and_max_depth: value.discipline_and_max_depth,
             max_depth: value.max_depth,
             start_time: value.start_time,
@@ -144,9 +143,9 @@ pub struct FormFieldOptionsV1 {
 #[graphql(input_name = "FormV1Request")]
 pub struct FormV1 {
     // INDIVIDUAL
-    deep_dives: Option<DeepDiveFormV1>,
-    dynamic_dives: Option<DynamicFormV1>,
-    static_holds: Option<StaticFormV1>,
+    deep_dives: DeepDiveFormV1,
+    dynamic_dives: DynamicFormV1,
+    static_holds: StaticFormV1,
     // ACTIVITY-BASED
     // Deep Diving
     discipline_and_max_depth: Option<FormFieldOptionsV1>,

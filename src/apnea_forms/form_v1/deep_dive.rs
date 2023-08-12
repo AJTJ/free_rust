@@ -16,10 +16,9 @@ use super::{
 #[graphql(input_name = "DeepDisciplineV1Request")]
 pub struct DeepDisciplineV1 {
     discipline: Option<DisciplinesEnumV1>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Goal Depth
@@ -28,10 +27,9 @@ pub struct DeepDisciplineV1 {
 #[graphql(input_name = "DeepGoalDepthV1Request")]
 pub struct DeepGoalDepthV1 {
     depth: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Achieved Depth
@@ -40,10 +38,9 @@ pub struct DeepGoalDepthV1 {
 #[graphql(input_name = "DeepAchievedDepthV1Request")]
 pub struct DeepAchievedDepthV1 {
     depth: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Dive Time
@@ -52,10 +49,9 @@ pub struct DeepAchievedDepthV1 {
 #[graphql(input_name = "DeepDiveTimeV1Request")]
 pub struct DeepDiveTimeV1 {
     time: Option<NaiveTime>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Early Turn Depth
@@ -64,10 +60,9 @@ pub struct DeepDiveTimeV1 {
 #[graphql(input_name = "DeepEarlyTurnDepthV1Request")]
 pub struct DeepEarlyTurnDepthV1 {
     time: Option<NaiveTime>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Reason For Turning
@@ -76,10 +71,9 @@ pub struct DeepEarlyTurnDepthV1 {
 #[graphql(input_name = "DeepTurnReasonsV1Request")]
 pub struct DeepTurnReasonsV1 {
     reasons: Option<Vec<TurnReasonsEnumV1>>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // General Feeling
@@ -87,10 +81,9 @@ pub struct DeepTurnReasonsV1 {
 #[graphql(input_name = "DeepGeneralFeelingV1Request")]
 pub struct DeepGeneralFeelingV1 {
     value: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Sensations
@@ -98,10 +91,9 @@ pub struct DeepGeneralFeelingV1 {
 #[graphql(input_name = "DeepSensationsV1Request")]
 pub struct DeepSensationsV1 {
     sensations: Option<Vec<DeepDiveSensationsV1>>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Mental Calm
@@ -109,10 +101,9 @@ pub struct DeepSensationsV1 {
 #[graphql(input_name = "MentalCalmV1Request")]
 pub struct MentalCalmV1 {
     value: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Injuries
@@ -120,10 +111,9 @@ pub struct MentalCalmV1 {
 #[graphql(input_name = "DeepInjuriesV1Request")]
 pub struct DeepInjuriesV1 {
     injuries: Option<Vec<InjuryEnumV1>>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Incidents
@@ -131,10 +121,9 @@ pub struct DeepInjuriesV1 {
 #[graphql(input_name = "DeepIncidentsV1Request")]
 pub struct DeepIncidentsV1 {
     incidents: Option<Vec<DeepDiveIncidentsEnumV1>>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Mouth Fill Charge Depths
@@ -142,10 +131,9 @@ pub struct DeepIncidentsV1 {
 #[graphql(input_name = "MouthFillChargeDepthsV1Request")]
 pub struct MouthFillChargeDepthsV1 {
     depths: Option<Vec<i32>>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Turn Quality
@@ -153,10 +141,9 @@ pub struct MouthFillChargeDepthsV1 {
 #[graphql(input_name = "DeepTurnQualityV1Request")]
 pub struct DeepTurnQualityV1 {
     value: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Hypoxia
@@ -164,10 +151,9 @@ pub struct DeepTurnQualityV1 {
 #[graphql(input_name = "DeepHypoxiaV1Request")]
 pub struct DeepHypoxiaV1 {
     value: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // Exertion
@@ -175,10 +161,9 @@ pub struct DeepHypoxiaV1 {
 #[graphql(input_name = "DeepExertionV1Request")]
 pub struct DeepExertionV1 {
     value: Option<i32>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
@@ -199,21 +184,19 @@ pub struct DeepDiveReportFieldsV1 {
     turn_quality: Option<DeepTurnQualityV1>,
     level_of_hypoxia: Option<DeepHypoxiaV1>,
     level_of_exertion: Option<DeepExertionV1>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
-#[graphql(input_name = "DeepDiveReportFieldV1Request")]
-pub struct DeepDiveReportFieldV1 {
-    pub dives: Option<Vec<DeepDiveReportFieldsV1>>,
-
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
-}
+// #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
+// #[graphql(input_name = "DeepDiveReportFieldV1Request")]
+// pub struct DeepDiveReportFieldV1 {
+//     pub dives: Option<Vec<DeepDiveReportFieldsV1>>,
+//     // // defaults
+//     // is_active: Option<bool>,
+//     // field_order: Option<i32>,
+// }
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DeepDiveFormV1Request")]
@@ -233,7 +216,6 @@ pub struct DeepDiveFormV1 {
     turn_quality: Option<FormFieldOptionsV1>,
     level_of_hypoxia: Option<FormFieldOptionsV1>,
     level_of_exertion: Option<FormFieldOptionsV1>,
-
     // defaults
     is_active: Option<bool>,
     field_order: Option<i32>,

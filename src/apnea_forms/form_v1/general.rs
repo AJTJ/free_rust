@@ -12,9 +12,9 @@ use uuid::Uuid;
 #[graphql(input_name = "SessionNameV1Request")]
 pub struct SessionNameV1 {
     name: Option<String>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // End Time
@@ -23,9 +23,9 @@ pub struct SessionNameV1 {
 #[graphql(input_name = "EndTimeV1Request")]
 pub struct EndTimeV1 {
     time: Option<DateTime<Utc>>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // EASE OF EQUALIZATION
@@ -34,9 +34,9 @@ pub struct EndTimeV1 {
 #[graphql(input_name = "EaseOfEqualizationV1Request")]
 pub struct EaseOfEqualizationV1 {
     value: Option<i32>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // VISIBILITY
@@ -45,9 +45,9 @@ pub struct EaseOfEqualizationV1 {
 #[graphql(input_name = "VisibilityV1Request")]
 pub struct VisibilityV1 {
     value: Option<i32>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // GENERAL FEELING
@@ -56,9 +56,9 @@ pub struct VisibilityV1 {
 #[graphql(input_name = "GeneralFeelingV1Request")]
 pub struct GeneralFeelingV1 {
     value: Option<i32>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // INJURY
@@ -67,9 +67,9 @@ pub struct GeneralFeelingV1 {
 #[graphql(input_name = "InjuryV1Request")]
 pub struct InjuryV1 {
     value: Option<InjuryEnumV1>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 
 // WATER TEMPERATURE
@@ -79,9 +79,9 @@ pub struct InjuryV1 {
 pub struct WaterTempV1 {
     value: Option<i32>,
     measurement: Option<TemperatureEnumV1>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }
 // LOCATION
 
@@ -97,7 +97,7 @@ struct CoordinatesV1 {
 pub struct LocationV1 {
     coordinates: Option<CoordinatesV1>,
     shared_location_id: Option<Uuid>,
-    // defaults
-    is_active: Option<bool>,
-    field_order: Option<i32>,
+    // // defaults
+    // is_active: Option<bool>,
+    // field_order: Option<i32>,
 }

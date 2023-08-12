@@ -11,11 +11,12 @@ use crate::{
     },
     apnea_sessions::dive_loader_by_session::DiveLoaderBySession,
     schema::apnea_sessions,
-    utility::errors::BigError,
+    utility::errors::{BigError, DieselQuerySnafu},
 };
 use async_graphql::{dataloader::DataLoader, ComplexObject, Context, InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
+use snafu::ResultExt;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -56,6 +57,8 @@ pub struct ApneaSession {
     pub form_id: Uuid,
     #[graphql(skip)]
     pub original_form_id: Option<Uuid>,
+
+    // NOTE: what purpose does previous_session_id serve?
     #[graphql(skip)]
     pub previous_session_id: Option<Uuid>,
     #[graphql(skip)]
@@ -74,6 +77,7 @@ pub struct ApneaSession {
 
 #[ComplexObject]
 impl ApneaSession {
+    // TODO: This returns the form, but we will want to handle "original_form"
     async fn form(&self, ctx: &Context<'_>) -> Result<Option<Form>, Arc<BigError>> {
         let form_response = ctx
             .data_unchecked::<DataLoader<FormLoader>>()
@@ -92,32 +96,39 @@ impl ApneaSession {
     // I think re-thinking the normalization of my forms might help what I'm doing
     // I don't think there's anything necessarily wrong with what I'm doing, but I do think it it is entirely an optimization
     // And I will probably rethink "optimizing" any further
-    async fn report(&self, ctx: &Context<'_>) -> Result<ReportResponse, BigError> {
+    async fn report(&self, ctx: &Context<'_>) -> Result<ReportResponse, Arc<BigError>> {
         let unique_apneas = ctx
             .data_unchecked::<DataLoader<DiveLoaderBySession>>()
             .load_one(UniqueApneaRetrievalData::Session(self.id))
             .await?;
 
-        match self.report_data {
+        // TODO Does this require data loaders for the unique apneas?
+        let report = match &self.report_data {
             StoredReport::V1(report) => {
-                let report: ReportV1 = report.into();
+                let mut report: ReportV1 = report.clone().into();
                 if let Some(apneas) = unique_apneas {
                     for apnea in apneas.iter() {
-                        match apnea.activity_data {
-                            UniqueApneaActivity::DeepDiveV1(deep) => {
-                                // report
-                                // .deep_dives.get_or_insert({})
-                                // .and_then(|d| d.dives.and_then(|d| Some(d.push(deep))));
-                            }
-                            UniqueApneaActivity::DynDiveV1(dynamic) => todo!(),
-                            UniqueApneaActivity::StaticHoldsV1(sta) => todo!(),
+                        match &apnea.activity_data {
+                            UniqueApneaActivity::DeepDiveV1(deep) => report
+                                .deep_dives
+                                .get_or_insert(vec![deep.clone()])
+                                .push(deep.clone()),
+                            UniqueApneaActivity::DynDiveV1(dynamic) => report
+                                .dynamic_dives
+                                .get_or_insert(vec![dynamic.clone()])
+                                .push(dynamic.clone()),
+                            UniqueApneaActivity::StaticHoldsV1(sta) => report
+                                .static_holds
+                                .get_or_insert(vec![sta.clone()])
+                                .push(sta.clone()),
                         }
                     }
                 };
+                ReportResponse::V1(report)
             }
         };
 
-        unimplemented!()
+        Ok(report)
     }
 
     async fn unique_apneas(
