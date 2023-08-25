@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     deep_dive::DeepDiveReportFieldsV1, dynamic::DynamicReportFieldsV1,
-    static_activity::StaticReportFieldsV1,
+    static_hold::StaticReportFieldsV1,
 };
 
 // REQUEST

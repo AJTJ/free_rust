@@ -3,20 +3,16 @@ use crate::{
     apnea_forms::{
         dto::form_dto::Form,
         form_loader::FormLoader,
-        form_v1::{
-            form::ReportV1,
-            unique_apneas::{UniqueApneaActivity, UniqueApneaActivityRequest},
-        },
+        form_v1::{report::ReportV1, unique_apneas::UniqueApneaActivity},
         forms_interface::{ReportRequest, ReportResponse, StoredReport},
     },
     apnea_sessions::dive_loader_by_session::DiveLoaderBySession,
     schema::apnea_sessions,
-    utility::errors::{BigError, DieselQuerySnafu},
+    utility::errors::BigError,
 };
 use async_graphql::{dataloader::DataLoader, ComplexObject, Context, InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
-use snafu::ResultExt;
 use std::sync::Arc;
 use uuid::Uuid;
 

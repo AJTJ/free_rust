@@ -10,6 +10,7 @@ use super::{
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DynDisciplineV1Request")]
 pub struct DynDisciplineV1 {
+    // TODO Create dynamic discipline list
     discipline: Option<DisciplinesEnumV1>,
     // // defaults
     // is_active: Option<bool>,
@@ -79,7 +80,9 @@ pub struct DynamicReportFieldsV1 {
     dive_time: Option<DynDiveTimeV1>,
     reasons_for_ending: Option<DynEndReasonsV1>,
     general_feeling: Option<DynGeneralFeelingV1>,
+    // TODO: Update incidents
     incidents: Option<DynIncidentsV1>,
+    // TODO: Add exhale quantity
     // // defaults
     // is_active: Option<bool>,
     // field_order: Option<i32>,
@@ -97,13 +100,13 @@ pub struct DynamicReportFieldsV1 {
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DynamicFormV1Request")]
 pub struct DynamicFormV1 {
-    time_goal: Option<FormFieldOptionsV1>,
-    time_achieved: Option<FormFieldOptionsV1>,
-    reason_for_stopping: Option<FormFieldOptionsV1>,
-    level_of_hypoxia: Option<FormFieldOptionsV1>,
-    level_of_relaxation: Option<FormFieldOptionsV1>,
-    activity_of_the_mind: Option<FormFieldOptionsV1>,
-    average_heart_rate: Option<FormFieldOptionsV1>,
+    discipline: Option<FormFieldOptionsV1>,
+    goal_distance: Option<FormFieldOptionsV1>,
+    achieved_distance: Option<FormFieldOptionsV1>,
+    dive_time: Option<FormFieldOptionsV1>,
+    reasons_for_ending: Option<FormFieldOptionsV1>,
+    general_feeling: Option<FormFieldOptionsV1>,
+    incidents: Option<FormFieldOptionsV1>,
     // defaults
     is_active: Option<bool>,
     field_order: Option<i32>,

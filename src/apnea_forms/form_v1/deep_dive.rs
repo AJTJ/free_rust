@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     enums::{
-        DeepDiveIncidentsEnumV1, DeepDiveSensationsV1, DisciplinesEnumV1, InjuryEnumV1,
+        DeepDiveIncidentsEnumV1, DeepDiveSensationsV1, DisciplinesEnumV1, PersonalIncidentEnumV1,
         TurnReasonsEnumV1,
     },
     form::FormFieldOptionsV1,
@@ -59,7 +59,7 @@ pub struct DeepDiveTimeV1 {
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DeepEarlyTurnDepthV1Request")]
 pub struct DeepEarlyTurnDepthV1 {
-    time: Option<NaiveTime>,
+    depth: Option<i32>,
     // // defaults
     // is_active: Option<bool>,
     // field_order: Option<i32>,
@@ -109,8 +109,8 @@ pub struct MentalCalmV1 {
 // Injuries
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "DeepInjuriesV1Request")]
-pub struct DeepInjuriesV1 {
-    injuries: Option<Vec<InjuryEnumV1>>,
+pub struct DeepPersonalIncidentsV1 {
+    incidents: Option<Vec<PersonalIncidentEnumV1>>,
     // // defaults
     // is_active: Option<bool>,
     // field_order: Option<i32>,
@@ -174,16 +174,17 @@ pub struct DeepDiveReportFieldsV1 {
     achieved_depth: Option<DeepAchievedDepthV1>,
     dive_time: Option<DeepDiveTimeV1>,
     early_turn_depth: Option<DeepEarlyTurnDepthV1>,
-    reason_for_turning: Option<DeepTurnReasonsV1>,
+    reasons_for_turning: Option<DeepTurnReasonsV1>,
     general_feeling: Option<DeepGeneralFeelingV1>,
     sensations: Option<DeepSensationsV1>,
     mental_calm: Option<MentalCalmV1>,
-    injuries: Option<DeepInjuriesV1>,
+    personal_incidents: Option<DeepPersonalIncidentsV1>,
     other_incidents: Option<DeepIncidentsV1>,
     mouth_fill_charge_depths: Option<MouthFillChargeDepthsV1>,
     turn_quality: Option<DeepTurnQualityV1>,
     level_of_hypoxia: Option<DeepHypoxiaV1>,
     level_of_exertion: Option<DeepExertionV1>,
+    // TODO Add exhale quanity
     // // defaults
     // is_active: Option<bool>,
     // field_order: Option<i32>,
@@ -208,10 +209,10 @@ pub struct DeepDiveFormV1 {
     early_turn_depth: Option<FormFieldOptionsV1>,
     reason_for_turning: Option<FormFieldOptionsV1>,
     general_feeling: Option<FormFieldOptionsV1>,
-    specific_sensations: Option<FormFieldOptionsV1>,
-    thoughts: Option<FormFieldOptionsV1>,
-    incidents: Option<FormFieldOptionsV1>,
-    mouth_fill_depth: Option<FormFieldOptionsV1>,
+    sensations: Option<FormFieldOptionsV1>,
+    mental_calm: Option<FormFieldOptionsV1>,
+    personal_incidents: Option<FormFieldOptionsV1>,
+    other_incidents: Option<FormFieldOptionsV1>,
     mouth_fill_charge_depths: Option<FormFieldOptionsV1>,
     turn_quality: Option<FormFieldOptionsV1>,
     level_of_hypoxia: Option<FormFieldOptionsV1>,

@@ -88,6 +88,7 @@ pub struct StaticReportFieldsV1 {
     level_of_relaxation: Option<StaticRelaxationV1>,
     activity_of_the_mind: Option<StaticMindV1>,
     average_heart_rate: Option<StaticHeartRateV1>,
+    // TODO: add exhale
     // // defaults
     // is_active: Option<bool>,
     // field_order: Option<i32>,

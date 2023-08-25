@@ -6,7 +6,10 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::form_v1::form::{FormV1, ReportV1, StoredReportV1};
+use super::form_v1::{
+    form::FormV1,
+    report::{ReportV1, StoredReportV1},
+};
 
 // FORM
 
