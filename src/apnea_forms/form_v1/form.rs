@@ -1,4 +1,7 @@
-use super::{deep_dive::DeepDiveFormV1, dynamic::DynamicFormV1, static_hold::StaticFormV1};
+use super::{
+    deep_dive::DeepDiveFormV1, dynamic::DynamicFormV1, enums::FormGroupTypes,
+    static_hold::StaticFormV1,
+};
 use crate::{
     apnea_forms::{
         actions::{archive_form::archive_form, insert_form::insert_form},
@@ -15,6 +18,7 @@ use uuid::Uuid;
 #[graphql(input_name = "FormFieldOptionsV1Request")]
 pub struct FormFieldOptionsV1 {
     is_active: Option<bool>,
+    group: FormGroupTypes,
     field_order: Option<i32>,
 }
 
@@ -68,7 +72,7 @@ pub struct FormV1 {
     tiredness_before: Option<FormFieldOptionsV1>,
     tiredness_after: Option<FormFieldOptionsV1>,
     comfort_in_gear: Option<FormFieldOptionsV1>,
-    stomach_status: Option<FormFieldOptionsV1>,
+    stomach_issues: Option<FormFieldOptionsV1>,
 
     // ENVIRONMENT
     current: Option<FormFieldOptionsV1>,

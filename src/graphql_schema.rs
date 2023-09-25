@@ -6,11 +6,14 @@ use async_graphql::{EmptySubscription, Schema};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 
-pub type DiveQLSchema = Schema<Query, Mutation, EmptySubscription>;
-
 #[derive(MergedObject, Default)]
 pub struct Query(ApneaFormsQuery, ApneaSessionsQuery, AuthQuery);
+
 #[derive(MergedObject, Default)]
 pub struct Mutation(ApneaFormsMutation, ApneaSessionsMutation, AuthMutation);
 
+// DbPool type
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
+
+// My GQL Schema type
+pub type DiveQLSchema = Schema<Query, Mutation, EmptySubscription>;

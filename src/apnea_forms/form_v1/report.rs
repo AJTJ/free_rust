@@ -5,7 +5,7 @@ use super::{
     dynamic::DynamicReportFieldsV1,
     fun_dive_general::FunDiveVolumeV1,
     gear_general::{FinsV1, MaskV1, NoseClipV1, WeightWornV1, WetsuitV1},
-    general::{EndTimeV1, LocationV1, PersonalIncidentV1, SessionNameV1, StartTimeV1},
+    general::{LocationV1, PersonalIncidentV1, SessionNameV1, StartTimeV1},
     general_environment::{
         AirTempV1, AlgaeV1, CurrentV1, EnvironmentEventV1, PollenV1, RainV1, VisibilityV1,
         WaterFeatureV1, WaterTempV1, WavesV1, WildlifeV1, WindV1,
@@ -52,7 +52,6 @@ pub struct ReportV1 {
     // GENERAL
     // SESSION INFO
     start_time: StartTimeV1,
-    // end_time: Option<EndTimeV1>,
     session_name: Option<SessionNameV1>,
     location: Option<LocationV1>,
 
@@ -75,7 +74,7 @@ pub struct ReportV1 {
     tiredness_after: Option<TirednessAfterV1>,
     comfort_in_gear: Option<ComfortInGearV1>,
     // TODO This is actually stomach issues
-    stomach_status: Option<StomachStatusV1>,
+    stomach_issues: Option<StomachStatusV1>,
 
     // ENVIRONMENT
     current: Option<CurrentV1>,
@@ -122,7 +121,6 @@ impl From<StoredReportV1> for ReportV1 {
             // GENERAL
             // SESSION INFO
             start_time: value.start_time,
-            // // end_time: value.end_time,
             session_name: value.session_name,
             location: value.location,
 
@@ -145,7 +143,7 @@ impl From<StoredReportV1> for ReportV1 {
             tiredness_before: value.tiredness_before,
             tiredness_after: value.tiredness_after,
             comfort_in_gear: value.comfort_in_gear,
-            stomach_status: value.stomach_status,
+            stomach_issues: value.stomach_issues,
 
             // ENVIRONMENT
             current: value.current,
@@ -192,7 +190,6 @@ pub struct StoredReportV1 {
     // GENERAL
     // SESSION INFO
     start_time: StartTimeV1,
-    // end_time: Option<EndTimeV1>,
     session_name: Option<SessionNameV1>,
     location: Option<LocationV1>,
 
@@ -214,7 +211,7 @@ pub struct StoredReportV1 {
     tiredness_before: Option<TirednessBeforeV1>,
     tiredness_after: Option<TirednessAfterV1>,
     comfort_in_gear: Option<ComfortInGearV1>,
-    stomach_status: Option<StomachStatusV1>,
+    stomach_issues: Option<StomachStatusV1>,
 
     // ENVIRONMENT
     current: Option<CurrentV1>,
@@ -258,7 +255,6 @@ impl From<ReportV1> for StoredReportV1 {
             // GENERAL
             // SESSION INFO
             start_time: value.start_time,
-            // // end_time: value.end_time,
             session_name: value.session_name,
             location: value.location,
 
@@ -280,7 +276,7 @@ impl From<ReportV1> for StoredReportV1 {
             tiredness_before: value.tiredness_before,
             tiredness_after: value.tiredness_after,
             comfort_in_gear: value.comfort_in_gear,
-            stomach_status: value.stomach_status,
+            stomach_issues: value.stomach_issues,
 
             // ENVIRONMENT
             current: value.current,

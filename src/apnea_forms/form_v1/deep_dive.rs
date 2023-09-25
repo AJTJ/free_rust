@@ -207,7 +207,7 @@ pub struct DeepDiveFormV1 {
     achieved_depth: Option<FormFieldOptionsV1>,
     dive_time: Option<FormFieldOptionsV1>,
     early_turn_depth: Option<FormFieldOptionsV1>,
-    reason_for_turning: Option<FormFieldOptionsV1>,
+    reasons_for_turning: Option<FormFieldOptionsV1>,
     general_feeling: Option<FormFieldOptionsV1>,
     sensations: Option<FormFieldOptionsV1>,
     mental_calm: Option<FormFieldOptionsV1>,

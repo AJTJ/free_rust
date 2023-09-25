@@ -1,6 +1,14 @@
 
 ## CURRENT
 - Code -> Free Source
+- Update db to use GeoJSON for map locations
+- Build out a diver profile, if a separate diver profile is needed or useful
+  - This might be best left for when "sharing" is implemented.
+- Update form things, as needed.
+  - Separation of concerns is really helping, so continue to improve file structure
+  - Can I build some test that would check that everything is logically in order?
+  - Add "FORM FIELDS UPDATE" to mark all the areas that need updating when form fields are updated
+- 
 
 
 

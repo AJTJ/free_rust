@@ -20,9 +20,6 @@ use super::{
 #[derive(Default)]
 pub struct ApneaFormsQuery;
 
-#[derive(Default)]
-pub struct ApneaFormsMutation;
-
 #[Object]
 impl ApneaFormsQuery {
     #[graphql(guard = "LoggedInGuard::new()")]
@@ -45,6 +42,9 @@ impl ApneaFormsQuery {
         Ok(forms)
     }
 }
+
+#[derive(Default)]
+pub struct ApneaFormsMutation;
 
 #[Object]
 impl ApneaFormsMutation {

@@ -1,2 +1,2 @@
-pub mod auth_dto;
-pub mod user_dto;
+pub(crate) mod auth_dto;
+pub(crate) mod user_dto;

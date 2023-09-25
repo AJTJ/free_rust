@@ -1,7 +1,8 @@
 use super::{
     actions::{
-        archive_session, archive_unique_apnea, get_apnea_sessions_paginated, insert_apnea_session,
-        insert_unique_apnea,
+        archive_session, archive_unique_apnea as imported_archive_unique_apnea,
+        get_apnea_sessions_paginated, insert_apnea_session,
+        insert_unique_apnea as imported_insert_unique_apnea,
     },
     dive_loader_by_user::DiveLoaderByUser,
     dto::{
@@ -134,17 +135,17 @@ impl ApneaSessionsMutation {
 
     // DIVES
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn insert_dive(
+    async fn insert_unique_apnea(
         &self,
         ctx: &Context<'_>,
         apnea_session_id: Uuid,
         dive_input: UniqueApneaInput,
     ) -> Result<UniqueApnea, BigError> {
-        insert_unique_apnea(ctx, apnea_session_id, dive_input).await
+        imported_insert_unique_apnea(ctx, apnea_session_id, dive_input).await
     }
 
     #[graphql(guard = "LoggedInGuard::new()")]
-    async fn modify_dive(
+    async fn modify_unique_apnea(
         &self,
         ctx: &Context<'_>,
         archived_dive_id: Uuid,
@@ -152,7 +153,7 @@ impl ApneaSessionsMutation {
         dive_input: UniqueApneaInput,
     ) -> Result<UniqueApnea, BigError> {
         let user_id = get_user_id_from_auth(ctx).await?;
-        archive_unique_apnea(ctx, &archived_dive_id, &user_id).await?;
-        insert_unique_apnea(ctx, apnea_session_id, dive_input).await
+        imported_archive_unique_apnea(ctx, &archived_dive_id, &user_id).await?;
+        imported_insert_unique_apnea(ctx, apnea_session_id, dive_input).await
     }
 }

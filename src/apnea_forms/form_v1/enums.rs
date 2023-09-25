@@ -201,3 +201,27 @@ pub enum DepthSafetySetupEnumV1 {
     DriftBuoy,
     NoLine,
 }
+
+#[derive(
+    Enum, Serialize, Deserialize, PartialEq, Clone, Copy, Debug, EnumString, Display, Eq, EnumIter,
+)]
+pub enum FormGroupTypes {
+    // Individual apneas
+    Dynamic,
+    DeepDive,
+    Static,
+
+    // Activity General
+    DynamicGeneral,
+    DepthGeneral,
+    StaticGeneral,
+    FunGeneral,
+
+    // Other General
+    SessionInfo,
+    PreSession,
+    Gear,
+    MentalPhysical,
+    Environment,
+    Incidents,
+}

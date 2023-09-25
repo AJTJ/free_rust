@@ -1,3 +1,5 @@
+// NOTE: Reports are now simply stored on the Session
+
 use crate::{apnea_forms::forms_interface::FormResponse, schema::forms};
 
 use async_graphql::{InputObject, SimpleObject};

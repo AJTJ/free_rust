@@ -30,14 +30,14 @@ pub struct StartTimeV1 {
 
 // End Time
 
-#[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
-#[graphql(input_name = "EndTimeV1Request")]
-pub struct EndTimeV1 {
-    time: Option<DateTime<Utc>>,
-    // // defaults
-    // is_active: Option<bool>,
-    // field_order: Option<i32>,
-}
+// #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
+// #[graphql(input_name = "EndTimeV1Request")]
+// pub struct EndTimeV1 {
+//     time: Option<DateTime<Utc>>,
+//     // // defaults
+//     // is_active: Option<bool>,
+//     // field_order: Option<i32>,
+// }
 
 // INJURY
 

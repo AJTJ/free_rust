@@ -1,3 +1,8 @@
+pub use super::form_loader::FormLoader;
+use super::form_v1::{
+    form::FormV1,
+    report::{ReportV1, StoredReportV1},
+};
 use async_graphql::{OneofObject, Union};
 use diesel::{
     deserialize::{FromSql, FromSqlRow},
@@ -5,13 +10,6 @@ use diesel::{
     sql_types,
 };
 use serde::{Deserialize, Serialize};
-
-use super::form_v1::{
-    form::FormV1,
-    report::{ReportV1, StoredReportV1},
-};
-
-// FORM
 
 // NOTE: This is only for receiving from the client
 #[derive(OneofObject, Debug)]

@@ -1,2 +1,2 @@
-pub mod apnea_session_dto;
-pub mod unique_apnea_dto;
+pub(crate) mod apnea_session_dto;
+pub(crate) mod unique_apnea_dto;
