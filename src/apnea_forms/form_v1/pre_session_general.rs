@@ -1,7 +1,6 @@
 use async_graphql::{InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use super::enums::{MealQualitiesEnumV1, StomachStatusEnumV1};
 

@@ -1,8 +1,7 @@
+use super::{enums::StaticStoppingEnumV1, form::FormFieldOptionsV1};
 use async_graphql::{InputObject, SimpleObject};
 use chrono::NaiveTime;
 use serde::{Deserialize, Serialize};
-
-use super::{enums::StaticStoppingEnumV1, form::FormFieldOptionsV1};
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "StaticTimeGoalV1Request")]

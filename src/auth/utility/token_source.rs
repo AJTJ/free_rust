@@ -1,8 +1,8 @@
-use async_graphql::{Context, Data, EmptyMutation, Object, Result, Schema, Subscription};
+use async_graphql::{Context, Object, Result, Subscription};
 use futures_util::Stream;
-use serde::Deserialize;
+// use serde::Deserialize;
 
-pub type TokenSchema = Schema<QueryRoot, EmptyMutation, SubscriptionRoot>;
+// pub type TokenSchema = Schema<QueryRoot, EmptyMutation, SubscriptionRoot>;
 
 #[derive(Debug)]
 pub struct Token(pub String);
@@ -30,19 +30,19 @@ impl SubscriptionRoot {
 
 // For more details see:
 // https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit
-pub async fn on_connection_init(value: serde_json::Value) -> Result<Data> {
-    #[derive(Deserialize)]
-    struct Payload {
-        token: String,
-    }
+// pub async fn on_connection_init(value: serde_json::Value) -> Result<Data> {
+//     #[derive(Deserialize)]
+//     pub struct Payload {
+//         token: String,
+//     }
 
-    // Coerce the connection params into our `Payload` struct so we can
-    // validate the token exists in the headers.
-    if let Ok(payload) = serde_json::from_value::<Payload>(value) {
-        let mut data = Data::default();
-        data.insert(Token(payload.token));
-        Ok(data)
-    } else {
-        Err("Token is required".into())
-    }
-}
+//     // Coerce the connection params into our `Payload` struct so we can
+//     // validate the token exists in the headers.
+//     if let Ok(payload) = serde_json::from_value::<Payload>(value) {
+//         let mut data = Data::default();
+//         data.insert(Token(payload.token));
+//         Ok(data)
+//     } else {
+//         Err("Token is required".into())
+//     }
+// }

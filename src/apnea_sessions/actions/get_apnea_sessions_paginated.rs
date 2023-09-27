@@ -19,7 +19,7 @@ pub fn get_apnea_sessions_paginated(
 ) -> Result<Connection<String, ApneaSession>, BigError> {
     event!(Level::DEBUG, "in get_apnea_sessions_paginated");
     use crate::schema::apnea_sessions::dsl::{
-        apnea_sessions, created_at, id as session_id, report_data, user_id,
+        apnea_sessions, /* created_at, */ id as session_id, /* report_data, */ user_id,
     };
 
     let mut query = match retrieval_method {

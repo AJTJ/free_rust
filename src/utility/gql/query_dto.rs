@@ -1,5 +1,4 @@
 use async_graphql::InputObject;
-use uuid::Uuid;
 
 #[derive(InputObject, Clone)]
 pub struct QueryParams {

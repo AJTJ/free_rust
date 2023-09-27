@@ -1,6 +1,7 @@
 use crate::{
-    apnea_sessions::dto::apnea_session_dto::ApneaSession, diesel::ExpressionMethods,
-    utility::gql::query_dto::QueryParams,
+    apnea_sessions::dto::apnea_session_dto::ApneaSession,
+    diesel::ExpressionMethods,
+    // utility::gql::query_dto::QueryParams,
 };
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use uuid::Uuid;

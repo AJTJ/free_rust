@@ -10,8 +10,8 @@ use super::token_source::Token;
 
 // COOKIE THINGS
 pub const TOKEN_NAME: &str = "free_rust_token";
-pub const CUSTOM_HEADER: &str = "Custom-Header";
-pub const AUTHORIZATION_HEADER: &str = "Authorization";
+// pub const CUSTOM_HEADER: &str = "Custom-Header";
+// pub const AUTHORIZATION_HEADER: &str = "Authorization";
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CookieStruct {

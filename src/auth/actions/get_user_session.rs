@@ -1,7 +1,7 @@
 // use actix_session::Session;
 use actix_web::web;
 use async_graphql::Context;
-use redis::{Commands, RedisError};
+use redis::Commands;
 use snafu::ResultExt;
 
 use crate::{

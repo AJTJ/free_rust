@@ -27,7 +27,7 @@ use actix_web::web;
 use async_graphql::{dataloader::DataLoader, types::connection::*, Context, Object};
 use snafu::ResultExt;
 use std::sync::Arc;
-use tracing::{debug_span, event, info, instrument, span, Level};
+use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Default)]

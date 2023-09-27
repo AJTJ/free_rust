@@ -31,7 +31,7 @@ pub struct SessionKeyValue {
     value: SessionData,
 }
 
-pub type RedisSetType = (String, SessionData, bool);
+// pub type RedisSetType = (String, SessionData, bool);
 
 impl ToRedisArgs for SessionKeyValue {
     fn write_redis_args<W>(&self, out: &mut W)

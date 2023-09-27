@@ -25,7 +25,7 @@ impl Guard for LoggedInGuard {
 
                 if let Some(session_id) = c.encoded_session_id {
                     match get_user_session(ctx, session_id).await {
-                        Ok(s) => {
+                        Ok(_s) => {
                             // let el = ctx.data().insert();
                             // info!("The session data in guard: {s:?}");
                             // TODO Need to check that the token hasn't expired
@@ -81,7 +81,7 @@ impl NoAllow {
 
 #[async_trait]
 impl Guard for NoAllow {
-    async fn check(&self, ctx: &Context<'_>) -> Result<()> {
+    async fn check(&self, _ctx: &Context<'_>) -> Result<()> {
         Err("".into())
     }
 }

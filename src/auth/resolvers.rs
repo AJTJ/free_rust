@@ -8,7 +8,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::{Context, Object};
 use diesel::RunQueryDsl;
-use tracing::{debug_span, event, info, instrument, span, Level};
+use tracing::{debug_span, event, instrument, Level};
 
 use super::{
     actions::{

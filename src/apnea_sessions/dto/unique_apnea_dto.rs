@@ -7,8 +7,8 @@ use crate::{
     utility::{errors::BigError, gql::query_dto::QueryParams},
 };
 use actix_web::web;
-use async_graphql::{ComplexObject, Context, InputObject, OneofObject, SimpleObject};
-use chrono::{DateTime, NaiveTime, Utc};
+use async_graphql::{ComplexObject, Context, InputObject, /* OneofObject,  */ SimpleObject};
+use chrono::{DateTime, /* NaiveTime, */ Utc};
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -56,7 +56,7 @@ impl UniqueApnea {
     async fn apnea_session(
         &self,
         ctx: &Context<'_>,
-        query_params: Option<QueryParams>,
+        _query_params: Option<QueryParams>,
     ) -> Result<ApneaSession, BigError> {
         let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 

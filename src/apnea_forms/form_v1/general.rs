@@ -1,4 +1,4 @@
-use super::enums::{PersonalIncidentEnumV1, TemperatureEnumV1};
+use super::enums::PersonalIncidentEnumV1;
 use async_graphql::{InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

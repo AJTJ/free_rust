@@ -5,7 +5,7 @@ use crate::{
 use actix_web::web;
 use async_graphql::Context;
 use chrono::Utc;
-use diesel::{OptionalExtension, QueryDsl, RunQueryDsl};
+use diesel::{OptionalExtension, /* QueryDsl, */ RunQueryDsl};
 use uuid::Uuid;
 
 pub async fn archive_unique_apnea(

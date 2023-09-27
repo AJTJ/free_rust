@@ -32,7 +32,7 @@ use async_graphql::{
     EmptySubscription, Response, Schema,
 };
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use auth::utility::{auth_data::RedisPool, token_source::Token};
+use auth::utility::token_source::Token;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use env_data::SharedEnvVars;
@@ -109,7 +109,7 @@ async fn main() -> std::io::Result<()> {
     #[async_trait::async_trait]
     impl Extension for AuthExtension {
         async fn request(&self, ctx: &ExtensionContext<'_>, next: NextRequest<'_>) -> Response {
-            let token = ctx.data::<Token>();
+            // let token = ctx.data::<Token>();
             // info!("Auth Middleware experiemnt token: {token:?}");
 
             // let el = ctx.session_data.insert("meme");

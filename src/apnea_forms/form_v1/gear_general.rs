@@ -1,12 +1,6 @@
+use super::enums::{FinsTypeEnumV1, WetSuitSizeTypeEnumV1};
 use async_graphql::{InputObject, SimpleObject};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-use super::enums::{
-    FinsTypeEnumV1, MealQualitiesEnumV1, StomachStatusEnumV1, WeightMeasurementEnumV1,
-    WetSuitSizeTypeEnumV1,
-};
 
 #[derive(Serialize, Deserialize, Debug, InputObject, SimpleObject, Clone)]
 #[graphql(input_name = "WeightWornV1Request")]

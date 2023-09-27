@@ -109,7 +109,7 @@ pub async fn insert_apnea_session(
 
             let pool_ctx = ctx.data_unchecked::<DbPool>().clone();
 
-            let all_dive_inputs = web::block(move || {
+            let _all_dive_inputs = web::block(move || {
                 let mut conn = pool_ctx.get().unwrap();
                 let response = diesel::insert_into(unique_apneas)
                     .values(&all_input_unique_apneas)

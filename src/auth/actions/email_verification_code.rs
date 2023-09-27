@@ -1,16 +1,16 @@
 use crate::auth::actions::modify_user;
+use crate::auth::dto::user_dto::UserUpdate;
 use crate::utility::errors::BigError;
-use crate::{auth::dto::user_dto::UserUpdate, graphql_schema::DbPool};
 use async_graphql::Context;
 use chrono::{Days, Utc};
 use rand::distributions::{Alphanumeric, DistString};
-use tracing::info;
+// use tracing::info;
 use uuid::Uuid;
 
 pub async fn email_verification_code(
     ctx: &Context<'_>,
     unverified_user_id: &Uuid,
-    unverified_email: String,
+    _unverified_email: String,
 ) -> Result<bool, BigError> {
     // check sendgrid.com
 
